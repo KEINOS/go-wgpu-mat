@@ -93,6 +93,51 @@ func runBinaryElementwise(
 	return nil
 }
 
+func validateUnaryShape(input, out *Matrix) error {
+	if out.Rows != input.Rows || out.Cols != input.Cols {
+		return newError("dimension mismatch")
+	}
+
+	return nil
+}
+
+func runUnaryElementwise(
+	input, out *Matrix,
+	operation func(float32) float32,
+) error {
+	err := validateMatrixInitialized("input", input)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateUnaryShape(input, out)
+	if err != nil {
+		return err
+	}
+
+	inputData, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read input")
+	}
+
+	result := make([]float32, len(inputData))
+	for i := range result {
+		result[i] = operation(inputData[i])
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
+}
+
 // MatMul computes out = a x b.
 //nolint:revive // keep explicit API name for consistency with roadmap/docs.
 func MatMul(left, right, out *Matrix) error {
@@ -140,5 +185,12 @@ func MatMul(left, right, out *Matrix) error {
 func Add(left, right, out *Matrix) error {
 	return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
 		return a + b
+	})
+}
+
+// Scale computes out = input * scalar.
+func Scale(input *Matrix, scalar float32, out *Matrix) error {
+	return runUnaryElementwise(input, out, func(value float32) float32 {
+		return value * scalar
 	})
 }

@@ -111,6 +111,33 @@ func ExampleAdd() {
 	// [6 8 10 12]
 }
 
+func ExampleScale() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	sourceMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	must(err)
+
+	defer sourceMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	must(err)
+
+	defer out.Release()
+
+	must(sourceMatrix.Write([]float32{1, -2, 3, -4}))
+	must(mat.Scale(sourceMatrix, 0.5, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Println(data)
+	// Output:
+	// [0.5 -1 1.5 -2]
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)

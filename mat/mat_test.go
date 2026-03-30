@@ -260,3 +260,56 @@ func TestAdd_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestScale_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	sourceMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer sourceMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, sourceMatrix.Write([]float32{1, -2, 3, -4}))
+	require.NoError(t, mat.Scale(sourceMatrix, 0.5, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	want := []float32{0.5, -1, 1.5, -2}
+	for i := range want {
+		assert.InDelta(t, want[i], got[i], 1e-6)
+	}
+}
+
+func TestScale_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	sourceMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer sourceMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 1, 4)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.Scale(sourceMatrix, 2, out)
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "mat: dimension mismatch")
+}

@@ -199,7 +199,7 @@ is green before the next one begins.
 - [x] Step 4 — Pipeline cache (internal, unexported)
 - [x] Step 5 — `MatMul`
 - [x] Step 6 — `Add`
-- [ ] Step 7 — `Scale`
+- [x] Step 7 — `Scale`
 - [ ] Step 8 — `Transp`
 - [ ] Step 9 — `ReduceSum`, `ReduceMax`
 - [ ] Step 10 — `Softmax`
