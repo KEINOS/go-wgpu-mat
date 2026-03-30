@@ -11,6 +11,19 @@ import (
 	"github.com/gogpu/wgpu"
 )
 
+// ============================================================================
+//  Constants/Magic Numbers
+// ============================================================================
+
+const (
+	bytesPerFloat32Int = 4
+	bytesPerFloat32U64 = uint64(4)
+)
+
+// ============================================================================
+//  Type: Matrix
+// ============================================================================
+
 // Matrix represents a 2D float32 array stored on the GPU.
 //
 // Data is stored in row-major order: element (r, c) is at
@@ -30,34 +43,9 @@ type Matrix struct {
 	deps     matrixDeps
 }
 
-type matrixDeps struct {
-	createBuffer func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error)
-	writeBuffer  func(*Context, *wgpu.Buffer, []byte) error
-	readBuffer   func(*Context, *wgpu.Buffer, []byte) error
-}
-
-func defaultMatrixDeps() matrixDeps {
-	deps := new(matrixDeps)
-	deps.createBuffer = func(
-		ctx *Context,
-		desc *wgpu.BufferDescriptor,
-	) (*wgpu.Buffer, error) {
-		return ctx.device.CreateBuffer(desc)
-	}
-	deps.writeBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
-		return ctx.device.Queue().WriteBuffer(buf, 0, data)
-	}
-	deps.readBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
-		return ctx.device.Queue().ReadBuffer(buf, 0, data)
-	}
-
-	return *deps
-}
-
-const (
-	bytesPerFloat32Int = 4
-	bytesPerFloat32U64 = uint64(4)
-)
+// ----------------------------------------------------------------------------
+//  Constructors
+// ----------------------------------------------------------------------------
 
 // NewMatrix allocates a GPU buffer for a rows x cols float32 matrix.
 // The initial buffer contents are undefined; call Write to upload
@@ -113,6 +101,10 @@ func newMatrix(
 
 	return matrix, nil
 }
+
+// ----------------------------------------------------------------------------
+//  Methods
+// ----------------------------------------------------------------------------
 
 // Write uploads data to the GPU buffer.
 // data must have exactly m.Rows*m.Cols elements.
@@ -179,4 +171,36 @@ func (m *Matrix) Release() {
 	if m.buf != nil {
 		m.buf.Release()
 	}
+}
+
+// ============================================================================
+//  Type: matrixDeps
+// ============================================================================
+
+type matrixDeps struct {
+	createBuffer func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error)
+	writeBuffer  func(*Context, *wgpu.Buffer, []byte) error
+	readBuffer   func(*Context, *wgpu.Buffer, []byte) error
+}
+
+// ============================================================================
+//  Functions
+// ============================================================================
+
+func defaultMatrixDeps() matrixDeps {
+	deps := new(matrixDeps)
+	deps.createBuffer = func(
+		ctx *Context,
+		desc *wgpu.BufferDescriptor,
+	) (*wgpu.Buffer, error) {
+		return ctx.device.CreateBuffer(desc)
+	}
+	deps.writeBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
+		return ctx.device.Queue().WriteBuffer(buf, 0, data)
+	}
+	deps.readBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
+		return ctx.device.Queue().ReadBuffer(buf, 0, data)
+	}
+
+	return *deps
 }
