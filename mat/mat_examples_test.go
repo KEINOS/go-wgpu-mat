@@ -138,6 +138,33 @@ func ExampleScale() {
 	// [0.5 -1 1.5 -2]
 }
 
+func ExampleTransp() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	must(err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 3, 2)
+	must(err)
+
+	defer out.Release()
+
+	must(inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
+	must(mat.Transp(inputMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Println(data)
+	// Output:
+	// [1 4 2 5 3 6]
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)

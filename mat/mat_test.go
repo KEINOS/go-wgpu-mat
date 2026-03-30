@@ -313,3 +313,56 @@ func TestScale_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestTransp_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 3, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
+	require.NoError(t, mat.Transp(inputMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	want := []float32{1, 4, 2, 5, 3, 6}
+	for i := range want {
+		assert.InDelta(t, want[i], got[i], 1e-6)
+	}
+}
+
+func TestTransp_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.Transp(inputMatrix, out)
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "mat: dimension mismatch")
+}

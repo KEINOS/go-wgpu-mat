@@ -138,6 +138,14 @@ func runUnaryElementwise(
 	return nil
 }
 
+func validateTransposeShape(input, out *Matrix) error {
+	if out.Rows != input.Cols || out.Cols != input.Rows {
+		return newError("dimension mismatch")
+	}
+
+	return nil
+}
+
 // MatMul computes out = a x b.
 //nolint:revive // keep explicit API name for consistency with roadmap/docs.
 func MatMul(left, right, out *Matrix) error {
@@ -193,4 +201,41 @@ func Scale(input *Matrix, scalar float32, out *Matrix) error {
 	return runUnaryElementwise(input, out, func(value float32) float32 {
 		return value * scalar
 	})
+}
+
+// Transp computes out = input^T.
+func Transp(input, out *Matrix) error {
+	err := validateMatrixInitialized("input", input)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateTransposeShape(input, out)
+	if err != nil {
+		return err
+	}
+
+	inputData, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read input")
+	}
+
+	result := make([]float32, out.Rows*out.Cols)
+	for row := range input.Rows {
+		for col := range input.Cols {
+			result[col*out.Cols+row] = inputData[row*input.Cols+col]
+		}
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
 }
