@@ -25,6 +25,31 @@ type Matrix struct {
 	buf      *wgpu.Buffer
 	ctx      *Context
 	released atomic.Uint32
+	deps     matrixDeps
+}
+
+type matrixDeps struct {
+	createBuffer func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error)
+	writeBuffer  func(*Context, *wgpu.Buffer, []byte) error
+	readBuffer   func(*Context, *wgpu.Buffer, []byte) error
+}
+
+func defaultMatrixDeps() matrixDeps {
+	deps := new(matrixDeps)
+	deps.createBuffer = func(
+		ctx *Context,
+		desc *wgpu.BufferDescriptor,
+	) (*wgpu.Buffer, error) {
+		return ctx.device.CreateBuffer(desc)
+	}
+	deps.writeBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
+		return ctx.device.Queue().WriteBuffer(buf, 0, data)
+	}
+	deps.readBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
+		return ctx.device.Queue().ReadBuffer(buf, 0, data)
+	}
+
+	return *deps
 }
 
 const (
@@ -36,6 +61,18 @@ const (
 // The initial buffer contents are undefined; call Write to upload
 // data before performing calculations.
 func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error) {
+	return newMatrix(ctx, rows, cols, defaultMatrixDeps())
+}
+
+func newMatrix(
+	ctx *Context,
+	rows, cols int,
+	deps matrixDeps,
+) (*Matrix, error) {
+	if ctx == nil || ctx.device == nil {
+		return nil, newError("context is nil")
+	}
+
 	if rows <= 0 || cols <= 0 {
 		return nil, newError("matrix dimensions must be positive")
 	}
@@ -60,7 +97,7 @@ func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error) {
 		wgpu.BufferUsageCopyDst |
 		wgpu.BufferUsageCopySrc
 
-	buf, err := ctx.device.CreateBuffer(bufferDescriptor)
+	buf, err := deps.createBuffer(ctx, bufferDescriptor)
 	if err != nil {
 		return nil, wrapError(err, "failed to create buffer")
 	}
@@ -70,6 +107,7 @@ func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error) {
 	matrix.Cols = cols
 	matrix.buf = buf
 	matrix.ctx = ctx
+	matrix.deps = deps
 
 	return matrix, nil
 }
@@ -77,6 +115,10 @@ func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error) {
 // Write uploads data to the GPU buffer.
 // data must have exactly m.Rows*m.Cols elements.
 func (m *Matrix) Write(data []float32) error {
+	if m == nil || m.ctx == nil || m.buf == nil {
+		return newError("matrix is not initialized")
+	}
+
 	want := m.Rows * m.Cols
 	if len(data) != want {
 		return newError(
@@ -91,7 +133,7 @@ func (m *Matrix) Write(data []float32) error {
 		)
 	}
 
-	err := m.ctx.device.Queue().WriteBuffer(m.buf, 0, raw)
+	err := m.deps.writeBuffer(m.ctx, m.buf, raw)
 	if err != nil {
 		return wrapError(err, "failed to write buffer")
 	}
@@ -102,11 +144,15 @@ func (m *Matrix) Write(data []float32) error {
 // Read downloads the matrix data from the GPU and returns it as a
 // flat float32 slice in row-major order (length = m.Rows*m.Cols).
 func (m *Matrix) Read() ([]float32, error) {
+	if m == nil || m.ctx == nil || m.buf == nil {
+		return nil, newError("matrix is not initialized")
+	}
+
 	elementCount := m.Rows * m.Cols
 
 	raw := make([]byte, elementCount*bytesPerFloat32Int)
 
-	err := m.ctx.device.Queue().ReadBuffer(m.buf, 0, raw)
+	err := m.deps.readBuffer(m.ctx, m.buf, raw)
 	if err != nil {
 		return nil, wrapError(err, "failed to read buffer")
 	}
@@ -128,5 +174,7 @@ func (m *Matrix) Release() {
 		return
 	}
 
-	m.buf.Release()
+	if m.buf != nil {
+		m.buf.Release()
+	}
 }
