@@ -1,0 +1,13 @@
+{
+  "go.env": {
+    "CGO_ENABLED": "0"
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "go.lintOnSave": "package",
+  "go.vetOnSave": "package"
+}

@@ -149,6 +149,20 @@ func RMSNorm(a, out *Matrix) error        // row-wise
 - `Device.Queue()` is safe to call from multiple goroutines.
   Do not write to the same GPU buffer from two goroutines at once.
 
+## Development
+
+### VS Code Setup
+
+The repository includes a `.vscode/` configuration directory that
+automatically sets up the Go environment:
+
+- **`settings.json`**: Sets `CGO_ENABLED=0` globally, enables
+  format-on-save, and configures linting
+- **`launch.json`**: Provides debug configurations for running tests
+
+Simply open the folder in VS Code — no additional configuration needed.
+Pre-configured test runners are available via the Debug menu.
+
 ## Testing
 
 `CGO_ENABLED=0` is required (enforced via `//go:build !cgo` on all

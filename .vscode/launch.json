@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Test (current file)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${fileDirname}",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "args": ["-race", "-coverprofile=${workspaceFolder}/coverage.out"]
+    },
+    {
+      "name": "Test (all packages)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "./...",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "args": ["-race", "-cover"]
+    }
+  ]
+}
