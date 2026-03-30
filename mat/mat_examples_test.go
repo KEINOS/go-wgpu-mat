@@ -74,3 +74,53 @@ func ExampleNewMatrix() {
 	// Type: *mat.Matrix
 	// Matrix: 2x3
 }
+
+func ExampleMatMul() {
+	ctx, err := mat.NewContext()
+	if err != nil {
+		panic(err)
+	}
+	defer ctx.Release()
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
+	defer leftMatrix.Release()
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
+	defer rightMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
+	defer out.Release()
+
+	err = leftMatrix.Write([]float32{1, 2, 3, 4})
+	if err != nil {
+		panic(err)
+	}
+
+	err = rightMatrix.Write([]float32{5, 6, 7, 8})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.MatMul(leftMatrix, rightMatrix, out)
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := out.Read()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(data)
+	// Output:
+	// [19 22 43 50]
+}
