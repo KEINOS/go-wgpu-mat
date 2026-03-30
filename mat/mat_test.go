@@ -1,20 +1,12 @@
 package mat_test
 
-// Tests for Context (Step 2) and Matrix (Step 3).
-// All tests FAIL until those steps are implemented.
-
 import (
 	"testing"
 
-	mat "github.com/KEINOS/go-wgpu-mat"
+	"github.com/KEINOS/go-wgpu-mat/mat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	// Use the software backend so tests run without a GPU.
-	_ "github.com/gogpu/wgpu/hal/software"
 )
-
-// Context (Step 2)
 
 // TestNewContext_smoke verifies NewContext returns a non-nil
 // context and Release does not panic.
@@ -24,26 +16,21 @@ func TestNewContext_smoke(t *testing.T) {
 	ctx, err := mat.NewContext()
 	require.NoError(t, err, "NewContext should succeed")
 	require.NotNil(t, ctx)
-	ctx.Release() // must not panic
+	require.NotPanics(t, func() { ctx.Release() })
 }
 
-// Matrix (Step 3-a / 3-b)
+func TestNewContext_modes(t *testing.T) {
+	t.Parallel()
 
-// ExampleNewMatrix documents the basic allocation pattern.
-func ExampleNewMatrix() {
-	ctx, err := mat.NewContext()
-	if err != nil {
-		panic(err)
-	}
-	defer ctx.Release()
+	ctxCPU, err := mat.NewContext(mat.UseCPU)
+	require.NoError(t, err)
+	require.NotNil(t, ctxCPU)
+	require.NotPanics(t, func() { ctxCPU.Release() })
 
-	m, err := mat.NewMatrix(ctx, 2, 3)
-	if err != nil {
-		panic(err)
-	}
-	defer m.Release()
-
-	// Output:
+	ctxGPU, err := mat.NewContext(mat.UseGPU)
+	require.NoError(t, err)
+	require.NotNil(t, ctxGPU)
+	require.NotPanics(t, func() { ctxGPU.Release() })
 }
 
 // TestNewMatrix_dimensions verifies Rows and Cols are correct.
@@ -63,8 +50,6 @@ func TestNewMatrix_dimensions(t *testing.T) {
 	assert.Equal(t, 3, matrix.Rows, "Rows mismatch")
 	assert.Equal(t, 4, matrix.Cols, "Cols mismatch")
 }
-
-// Matrix.Write / Matrix.Read (Step 3-c / 3-d)
 
 // TestMatrix_Write_Read_roundtrip writes a known pattern and
 // reads it back, expecting byte-exact equality.
@@ -95,8 +80,6 @@ func TestMatrix_Write_Read_roundtrip(t *testing.T) {
 	}
 }
 
-// Matrix.Release (Step 3-e / 3-f)
-
 // TestMatrix_Release_idempotent verifies that calling Release
 // twice does not panic.
 func TestMatrix_Release_idempotent(t *testing.T) {
@@ -110,7 +93,7 @@ func TestMatrix_Release_idempotent(t *testing.T) {
 	m, err := mat.NewMatrix(ctx, 1, 1)
 	require.NoError(t, err)
 
-	assert.NotPanics(t, func() {
+	require.NotPanics(t, func() {
 		m.Release()
 		m.Release() // second call must be a no-op
 	})
@@ -123,7 +106,7 @@ func TestContext_Release_nil(t *testing.T) {
 
 	var ctx *mat.Context
 
-	assert.NotPanics(t, func() { ctx.Release() })
+	require.NotPanics(t, func() { ctx.Release() })
 }
 
 // TestMatrix_Write_length_mismatch verifies that Write returns an

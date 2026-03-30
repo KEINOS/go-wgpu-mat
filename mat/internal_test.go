@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gogpu/wgpu"
-	_ "github.com/gogpu/wgpu/hal/software"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -62,7 +61,7 @@ func TestNewContextCreateInstanceError(t *testing.T) {
 		return nil, io.EOF
 	}
 
-	ctx, err := newContext(*deps)
+	ctx, err := newContext(*deps, UseGPU)
 
 	assert.Nil(t, ctx)
 	require.Error(t, err)
@@ -81,7 +80,7 @@ func TestNewContextRequestAdapterError(t *testing.T) {
 		return nil, io.EOF
 	}
 
-	ctx, err := newContext(*deps)
+	ctx, err := newContext(*deps, UseGPU)
 
 	assert.Nil(t, ctx)
 	require.Error(t, err)
@@ -100,7 +99,7 @@ func TestNewContextRequestDeviceError(t *testing.T) {
 		return nil, io.EOF
 	}
 
-	ctx, err := newContext(*deps)
+	ctx, err := newContext(*deps, UseGPU)
 
 	assert.Nil(t, ctx)
 	require.Error(t, err)
@@ -113,7 +112,7 @@ func TestNewContextSuccessWithInjectedDeps(t *testing.T) {
 	deps := new(contextDeps)
 	*deps = newTestContextDeps()
 
-	ctx, err := newContext(*deps)
+	ctx, err := newContext(*deps, UseGPU)
 
 	require.NoError(t, err)
 	require.NotNil(t, ctx)
@@ -127,7 +126,7 @@ func TestContextReleaseWithNilFields(t *testing.T) {
 
 	ctx := new(Context)
 
-	assert.NotPanics(t, func() { ctx.Release() })
+	require.NotPanics(t, func() { ctx.Release() })
 }
 
 func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
@@ -135,7 +134,7 @@ func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
 
 	deps := defaultContextDeps()
 
-	assert.NotPanics(t, func() {
+	require.NotPanics(t, func() {
 		deps.releaseInstance(nil)
 		deps.releaseAdapter(nil)
 	})
@@ -150,13 +149,72 @@ func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
 	ctx.device.Release()
 	ctx.device = nil
 
-	assert.NotPanics(t, func() {
+	require.NotPanics(t, func() {
 		deps.releaseAdapter(ctx.adapter)
 		deps.releaseInstance(ctx.instance)
 	})
 
 	ctx.adapter = nil
 	ctx.instance = nil
+}
+
+func TestResolveContextMode(t *testing.T) {
+	t.Parallel()
+
+	mode, err := resolveContextMode(nil)
+	require.NoError(t, err)
+	assert.Equal(t, UseGPU, mode)
+
+	mode, err = resolveContextMode([]ContextMode{UseCPU})
+	require.NoError(t, err)
+	assert.Equal(t, UseCPU, mode)
+
+	_, err = resolveContextMode([]ContextMode{UseGPU, UseCPU})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "only one context mode")
+
+	_, err = resolveContextMode([]ContextMode{ContextMode(99)})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "invalid context mode")
+}
+
+func TestAdapterOptionsForMode(t *testing.T) {
+	t.Parallel()
+
+	options, err := adapterOptionsForMode(UseGPU)
+	require.NoError(t, err)
+	assert.Equal(t, wgpu.PowerPreferenceHighPerformance, options.PowerPreference)
+	assert.False(t, options.ForceFallbackAdapter)
+
+	options, err = adapterOptionsForMode(UseCPU)
+	require.NoError(t, err)
+	assert.Equal(t, wgpu.PowerPreferenceLowPower, options.PowerPreference)
+	assert.True(t, options.ForceFallbackAdapter)
+
+	_, err = adapterOptionsForMode(ContextMode(77))
+	require.Error(t, err)
+	require.ErrorContains(t, err, "invalid context mode")
+}
+
+func TestNewContext_invalidModes(t *testing.T) {
+	t.Parallel()
+
+	_, err := NewContext(UseCPU, UseGPU)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "only one context mode")
+
+	_, err = NewContext(ContextMode(99))
+	require.Error(t, err)
+	require.ErrorContains(t, err, "invalid context mode")
+}
+
+func TestNewContext_internalInvalidMode(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := newContext(newTestContextDeps(), ContextMode(88))
+	assert.Nil(t, ctx)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "invalid context mode")
 }
 
 func TestNewMatrixContextNil(t *testing.T) {
@@ -432,7 +490,7 @@ func TestMatrixReleaseNilBuffer(t *testing.T) {
 
 	matrix := new(Matrix)
 
-	assert.NotPanics(t, func() { matrix.Release() })
+	require.NotPanics(t, func() { matrix.Release() })
 
-	assert.NotPanics(t, func() { matrix.Release() })
+	require.NotPanics(t, func() { matrix.Release() })
 }

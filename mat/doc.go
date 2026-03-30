@@ -8,8 +8,13 @@
 //
 // CGO_ENABLED=0 go build ./...
 //
-// Import a backend before calling NewContext:
+// Import path:
 //
-// import _ "github.com/gogpu/wgpu/hal/allbackends" // Vulkan/Metal/DX12
-// import _ "github.com/gogpu/wgpu/hal/software"    // CPU fallback
+// github.com/KEINOS/go-wgpu-mat/mat
+//
+// Backends are registered internally. Select execution mode with
+// NewContext:
+//
+// ctx, _ := mat.NewContext(mat.UseGPU) // high-performance adapter
+// ctx, _ := mat.NewContext(mat.UseCPU) // software/fallback adapter
 package mat

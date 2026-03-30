@@ -30,7 +30,7 @@ Out of scope:
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
     A["Go slice\n[]float32"]
     A -->|"Matrix.Write()"| B["GPU Buffer (input)"]
     B --> C["WGSL Compute Shader"]
@@ -44,18 +44,11 @@ Requires Go 1.25+. No C compiler needed —
 `gogpu/wgpu` is Pure Go.
 
 ```sh
-go get github.com/KEINOS/go-wgpu-mat
+go get github.com/KEINOS/go-wgpu-mat/mat
 ```
 
-Register a GPU backend (or the software fallback for CI/testing):
-
-```go
-// Platform-native backends (Vulkan / Metal / DX12):
-import _ "github.com/gogpu/wgpu/hal/allbackends"
-
-// CPU software fallback (no GPU required):
-import _ "github.com/gogpu/wgpu/hal/software"
-```
+Backend packages are registered internally by `mat`, so user code
+does not need blank imports.
 
 Build (CGo must be disabled — required by `gogpu/wgpu`):
 
@@ -71,12 +64,12 @@ package main
 import (
     "fmt"
 
-    mat "github.com/KEINOS/go-wgpu-mat"
-    _ "github.com/gogpu/wgpu/hal/allbackends"
+  mat "github.com/KEINOS/go-wgpu-mat/mat"
 )
 
 func main() {
-    ctx, err := mat.NewContext()
+  // UseGPU (default) or UseCPU
+  ctx, err := mat.NewContext(mat.UseGPU)
     if err != nil {
         panic(err)
     }
@@ -111,7 +104,13 @@ func main() {
 // Context manages the WGPU instance, adapter, and device.
 type Context struct{ ... }
 
-func NewContext() (*Context, error)
+type ContextMode uint8
+const (
+  UseGPU ContextMode = iota
+  UseCPU
+)
+
+func NewContext(modes ...ContextMode) (*Context, error)
 func (c *Context) Release()
 
 // Matrix is a 2D float32 array stored on the GPU.
