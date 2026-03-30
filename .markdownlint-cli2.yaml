@@ -1,0 +1,5 @@
+# Disabled built-in rules
+config:
+  no-inline-html: false
+  line-length: false
+  table-column-style: false
