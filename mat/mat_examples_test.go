@@ -76,51 +76,69 @@ func ExampleNewMatrix() {
 }
 
 func ExampleMatMul() {
-	ctx, err := mat.NewContext()
-	if err != nil {
-		panic(err)
-	}
+	ctx, leftMatrix, rightMatrix, out := mustCreate2x2ExampleMatrices()
 	defer ctx.Release()
-
-	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
-	if err != nil {
-		panic(err)
-	}
 	defer leftMatrix.Release()
-
-	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
-	if err != nil {
-		panic(err)
-	}
 	defer rightMatrix.Release()
-
-	out, err := mat.NewMatrix(ctx, 2, 2)
-	if err != nil {
-		panic(err)
-	}
 	defer out.Release()
 
-	err = leftMatrix.Write([]float32{1, 2, 3, 4})
-	if err != nil {
-		panic(err)
-	}
-
-	err = rightMatrix.Write([]float32{5, 6, 7, 8})
-	if err != nil {
-		panic(err)
-	}
-
-	err = mat.MatMul(leftMatrix, rightMatrix, out)
-	if err != nil {
-		panic(err)
-	}
+	mustWrite2x2Inputs(leftMatrix, rightMatrix)
+	must(mat.MatMul(leftMatrix, rightMatrix, out))
 
 	data, err := out.Read()
-	if err != nil {
-		panic(err)
-	}
+	must(err)
 
 	fmt.Println(data)
 	// Output:
 	// [19 22 43 50]
+}
+
+func ExampleAdd() {
+	ctx, leftMatrix, rightMatrix, out := mustCreate2x2ExampleMatrices()
+	defer ctx.Release()
+	defer leftMatrix.Release()
+	defer rightMatrix.Release()
+	defer out.Release()
+
+	mustWrite2x2Inputs(leftMatrix, rightMatrix)
+	must(mat.Add(leftMatrix, rightMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Println(data)
+	// Output:
+	// [6 8 10 12]
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func mustCreate2x2ExampleMatrices() (
+	*mat.Context,
+	*mat.Matrix,
+	*mat.Matrix,
+	*mat.Matrix,
+) {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	must(err)
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	must(err)
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	must(err)
+
+	return ctx, leftMatrix, rightMatrix, out
+}
+
+func mustWrite2x2Inputs(leftMatrix, rightMatrix *mat.Matrix) {
+	must(leftMatrix.Write([]float32{1, 2, 3, 4}))
+	must(rightMatrix.Write([]float32{5, 6, 7, 8}))
 }

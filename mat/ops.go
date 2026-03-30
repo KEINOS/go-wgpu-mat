@@ -34,6 +34,65 @@ func matMulCPU(aData, bData []float32, rows, shared, cols int) []float32 {
 	return result
 }
 
+func validateSameShape(left, right, out *Matrix) error {
+	if left.Rows != right.Rows || left.Cols != right.Cols {
+		return newError("dimension mismatch")
+	}
+
+	if out.Rows != left.Rows || out.Cols != left.Cols {
+		return newError("dimension mismatch")
+	}
+
+	return nil
+}
+
+func runBinaryElementwise(
+	left, right, out *Matrix,
+	operation func(float32, float32) float32,
+) error {
+	err := validateMatrixInitialized("left", left)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("right", right)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateSameShape(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	leftData, err := left.Read()
+	if err != nil {
+		return wrapError(err, "failed to read left")
+	}
+
+	rightData, err := right.Read()
+	if err != nil {
+		return wrapError(err, "failed to read right")
+	}
+
+	result := make([]float32, len(leftData))
+	for i := range result {
+		result[i] = operation(leftData[i], rightData[i])
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
+}
+
 // MatMul computes out = a x b.
 //nolint:revive // keep explicit API name for consistency with roadmap/docs.
 func MatMul(left, right, out *Matrix) error {
@@ -75,4 +134,11 @@ func MatMul(left, right, out *Matrix) error {
 	}
 
 	return nil
+}
+
+// Add computes out = left + right.
+func Add(left, right, out *Matrix) error {
+	return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
+		return a + b
+	})
 }

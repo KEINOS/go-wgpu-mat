@@ -195,3 +195,68 @@ func TestMatMul_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestAdd_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer leftMatrix.Release()
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer rightMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, leftMatrix.Write([]float32{1, 2, 3, 4}))
+	require.NoError(t, rightMatrix.Write([]float32{10, 20, 30, 40}))
+
+	require.NoError(t, mat.Add(leftMatrix, rightMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	want := []float32{11, 22, 33, 44}
+	for i := range want {
+		assert.InDelta(t, want[i], got[i], 1e-6)
+	}
+}
+
+func TestAdd_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer leftMatrix.Release()
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer rightMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.Add(leftMatrix, rightMatrix, out)
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "mat: dimension mismatch")
+}

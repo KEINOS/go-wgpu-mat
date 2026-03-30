@@ -198,7 +198,7 @@ is green before the next one begins.
 - [x] Step 3 — `Matrix`: `NewMatrix`, `Write`, `Read`, `Release`
 - [x] Step 4 — Pipeline cache (internal, unexported)
 - [x] Step 5 — `MatMul`
-- [ ] Step 6 — `Add`
+- [x] Step 6 — `Add`
 - [ ] Step 7 — `Scale`
 - [ ] Step 8 — `Transp`
 - [ ] Step 9 — `ReduceSum`, `ReduceMax`
