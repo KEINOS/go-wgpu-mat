@@ -1,0 +1,11 @@
+version: "2"
+linters:
+  default: all
+  settings:
+    varnamelen:
+      ignore-names:
+          - pt
+  disable:
+    - wsl
+    - testpackage
+    - depguard
