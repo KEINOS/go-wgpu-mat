@@ -15,6 +15,7 @@ type Context struct {
 	instance *wgpu.Instance
 	adapter  *wgpu.Adapter
 	device   *wgpu.Device
+	pipes    *pipelineCache
 }
 
 // ContextMode specifies which adapter type NewContext should prefer.
@@ -116,6 +117,7 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		instance: inst,
 		adapter:  adapter,
 		device:   dev,
+		pipes:    newPipelineCache(defaultReleaseComputePipeline),
 	}, nil
 }
 
@@ -165,6 +167,11 @@ func (c *Context) Release() {
 		return
 	}
 
+	if c.pipes != nil {
+		c.pipes.releaseAll()
+		c.pipes = nil
+	}
+
 	if c.device != nil {
 		c.device.Release()
 	}
@@ -176,4 +183,19 @@ func (c *Context) Release() {
 	if c.instance != nil {
 		c.instance.Release()
 	}
+}
+
+func (c *Context) getOrCreatePipeline(
+	key string,
+	factory func() (*wgpu.ComputePipeline, error),
+) (*wgpu.ComputePipeline, error) {
+	if c == nil {
+		return nil, newError("context is nil")
+	}
+
+	if c.pipes == nil {
+		return nil, newError("pipeline cache is not initialized")
+	}
+
+	return c.pipes.getOrCreate(key, factory)
 }

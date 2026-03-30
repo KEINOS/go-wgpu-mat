@@ -196,7 +196,7 @@ is green before the next one begins.
 - [x] Step 1 — Repository skeleton & README
 - [x] Step 2 — GPU context helper (`NewContext`)
 - [x] Step 3 — `Matrix`: `NewMatrix`, `Write`, `Read`, `Release`
-- [ ] Step 4 — Pipeline cache (internal, unexported)
+- [x] Step 4 — Pipeline cache (internal, unexported)
 - [ ] Step 5 — `MatMul`
 - [ ] Step 6 — `Add`
 - [ ] Step 7 — `Scale`
