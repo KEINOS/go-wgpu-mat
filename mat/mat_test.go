@@ -453,3 +453,64 @@ func TestReduce_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestSoftmax_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, inputMatrix.Write([]float32{1, 2, 3, 1000, 1000, 1000}))
+	require.NoError(t, mat.Softmax(inputMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	firstRowSum := got[0] + got[1] + got[2]
+	secondRowSum := got[3] + got[4] + got[5]
+
+	assert.InDelta(t, 1.0, firstRowSum, 1e-4)
+	assert.InDelta(t, 1.0, secondRowSum, 1e-4)
+
+	assert.Greater(t, got[2], got[1])
+	assert.Greater(t, got[1], got[0])
+
+	assert.InDelta(t, 1.0/3.0, got[3], 1e-4)
+	assert.InDelta(t, 1.0/3.0, got[4], 1e-4)
+	assert.InDelta(t, 1.0/3.0, got[5], 1e-4)
+}
+
+func TestSoftmax_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 3, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.Softmax(inputMatrix, out)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "mat: dimension mismatch")
+}

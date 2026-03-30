@@ -219,6 +219,33 @@ func ExampleReduceMax() {
 	// [-1 4]
 }
 
+func ExampleSoftmax() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 1, 3)
+	must(err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 1, 3)
+	must(err)
+
+	defer out.Release()
+
+	must(inputMatrix.Write([]float32{1, 2, 3}))
+	must(mat.Softmax(inputMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Printf("%.4f %.4f %.4f\n", data[0], data[1], data[2])
+	// Output:
+	// 0.0900 0.2447 0.6652
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)

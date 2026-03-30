@@ -156,6 +156,28 @@ func validateRowReductionShape(input, out *Matrix) error {
 	return nil
 }
 
+func applySoftmaxRow(inputData, outputData []float32, offset, cols int) {
+	maxValue := inputData[offset]
+	for col := 1; col < cols; col++ {
+		value := inputData[offset+col]
+		if value > maxValue {
+			maxValue = value
+		}
+	}
+
+	sumExp := float32(0)
+
+	for col := range cols {
+		expValue := float32(math.Exp(float64(inputData[offset+col] - maxValue)))
+		outputData[offset+col] = expValue
+		sumExp += expValue
+	}
+
+	for col := range cols {
+		outputData[offset+col] /= sumExp
+	}
+}
+
 func runRowReduction(
 	input, out *Matrix,
 	initialValue float32,
@@ -311,4 +333,41 @@ func ReduceMax(input, out *Matrix) error {
 
 			return accumulator
 		})
+}
+
+// Softmax computes row-wise softmax for input and stores it in out.
+func Softmax(input, out *Matrix) error {
+	err := validateMatrixInitialized("input", input)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateUnaryShape(input, out)
+	if err != nil {
+		return err
+	}
+
+	inputData, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read input")
+	}
+
+	result := make([]float32, len(inputData))
+
+	for row := range input.Rows {
+		rowOffset := row * input.Cols
+		applySoftmaxRow(inputData, result, rowOffset, input.Cols)
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
 }
