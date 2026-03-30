@@ -10,31 +10,44 @@ import (
 
 // Example of basic usage in the README.md. This test ensures that the example
 // code compiles and runs without errors.
+//
+//nolint:varnamelen // example
 func Example() {
+	panicOnErr := func(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	// UseGPU (default) or UseCPU
 	ctx, err := mat.NewContext(mat.UseGPU)
-	if err != nil {
-		panic(err)
-	}
+	panicOnErr(err)
+
 	defer ctx.Release()
 
 	// 2×2 matrices stored on the GPU
-	a, _ := mat.NewMatrix(ctx, 2, 2)
-	b, _ := mat.NewMatrix(ctx, 2, 2)
-	c, _ := mat.NewMatrix(ctx, 2, 2)
+	a, err := mat.NewMatrix(ctx, 2, 2)
+	panicOnErr(err)
+
+	b, err := mat.NewMatrix(ctx, 2, 2)
+	panicOnErr(err)
+
+	c, err := mat.NewMatrix(ctx, 2, 2)
+	panicOnErr(err)
+
 	defer a.Release()
 	defer b.Release()
 	defer c.Release()
 
 	// Upload data (row-major order)
-	a.Write([]float32{1, 2, 3, 4}) // [[1,2],[3,4]]
-	b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
+	err = a.Write([]float32{1, 2, 3, 4}) // [[1,2],[3,4]]
+	panicOnErr(err)
+	err = b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
+	panicOnErr(err)
 
 	// Read result back to CPU
 	data, err := c.Read()
-	if err != nil {
-		panic(err)
-	}
+	panicOnErr(err)
 
 	fmt.Println(data)
 	// Output:
