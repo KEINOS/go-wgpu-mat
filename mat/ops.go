@@ -2,6 +2,8 @@
 
 package mat
 
+import "math"
+
 func validateMatrixInitialized(name string, m *Matrix) error {
 	if m == nil || m.ctx == nil || m.buf == nil {
 		return newError("%s is not initialized", name)
@@ -146,7 +148,59 @@ func validateTransposeShape(input, out *Matrix) error {
 	return nil
 }
 
+func validateRowReductionShape(input, out *Matrix) error {
+	if out.Rows != input.Rows || out.Cols != 1 {
+		return newError("dimension mismatch")
+	}
+
+	return nil
+}
+
+func runRowReduction(
+	input, out *Matrix,
+	initialValue float32,
+	combine func(float32, float32) float32,
+) error {
+	err := validateMatrixInitialized("input", input)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateRowReductionShape(input, out)
+	if err != nil {
+		return err
+	}
+
+	inputData, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read input")
+	}
+
+	result := make([]float32, out.Rows)
+	for row := range input.Rows {
+		acc := initialValue
+		for col := range input.Cols {
+			acc = combine(acc, inputData[row*input.Cols+col])
+		}
+
+		result[row] = acc
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
+}
+
 // MatMul computes out = a x b.
+//
 //nolint:revive // keep explicit API name for consistency with roadmap/docs.
 func MatMul(left, right, out *Matrix) error {
 	err := validateMatrixInitialized("left", left)
@@ -238,4 +292,23 @@ func Transp(input, out *Matrix) error {
 	}
 
 	return nil
+}
+
+// ReduceSum computes row-wise sum and stores the result in out.
+func ReduceSum(input, out *Matrix) error {
+	return runRowReduction(input, out, 0, func(accumulator, value float32) float32 {
+		return accumulator + value
+	})
+}
+
+// ReduceMax computes row-wise max and stores the result in out.
+func ReduceMax(input, out *Matrix) error {
+	return runRowReduction(input, out, -float32(math.MaxFloat32),
+		func(accumulator, value float32) float32 {
+			if value > accumulator {
+				return value
+			}
+
+			return accumulator
+		})
 }

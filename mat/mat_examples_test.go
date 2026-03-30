@@ -165,6 +165,60 @@ func ExampleTransp() {
 	// [1 4 2 5 3 6]
 }
 
+func ExampleReduceSum() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	must(err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 1)
+	must(err)
+
+	defer out.Release()
+
+	must(inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
+	must(mat.ReduceSum(inputMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Println(data)
+	// Output:
+	// [6 15]
+}
+
+func ExampleReduceMax() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	must(err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 1)
+	must(err)
+
+	defer out.Release()
+
+	must(inputMatrix.Write([]float32{-1, -3, -2, 4, 0, 1}))
+	must(mat.ReduceMax(inputMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Println(data)
+	// Output:
+	// [-1 4]
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)

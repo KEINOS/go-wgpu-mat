@@ -366,3 +366,90 @@ func TestTransp_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestReduceSum_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 1)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
+	require.NoError(t, mat.ReduceSum(inputMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	want := []float32{6, 15}
+	for i := range want {
+		assert.InDelta(t, want[i], got[i], 1e-6)
+	}
+}
+
+func TestReduceMax_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 1)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, inputMatrix.Write([]float32{-1, -3, -2, 4, 0, 1}))
+	require.NoError(t, mat.ReduceMax(inputMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	want := []float32{-1, 4}
+	for i := range want {
+		assert.InDelta(t, want[i], got[i], 1e-6)
+	}
+}
+
+func TestReduce_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.ReduceSum(inputMatrix, out)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "mat: dimension mismatch")
+
+	err = mat.ReduceMax(inputMatrix, out)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "mat: dimension mismatch")
+}
