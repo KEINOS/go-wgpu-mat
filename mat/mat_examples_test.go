@@ -1,3 +1,5 @@
+//go:build !cgo
+
 package mat_test
 
 import "github.com/KEINOS/go-wgpu-mat/mat"

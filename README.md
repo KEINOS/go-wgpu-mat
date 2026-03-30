@@ -151,12 +151,21 @@ func RMSNorm(a, out *Matrix) error        // row-wise
 
 ## Testing
 
-```sh
-# Requires a GPU or the software backend (see Installation)
-go test ./...
+`CGO_ENABLED=0` is required (enforced via `//go:build !cgo` on all
+source files). Use the Makefile targets for convenience:
 
-# With coverage
-go test -coverprofile=cov.out ./...
+```sh
+make test   # CGO_ENABLED=0 go test -cover -race ./...
+make lint   # CGO_ENABLED=0 golangci-lint run --fix
+```
+
+Or run manually:
+
+```sh
+CGO_ENABLED=0 go test -cover -race ./...
+
+# With HTML coverage report
+CGO_ENABLED=0 go test -coverprofile=cov.out ./...
 go tool cover -html=cov.out
 ```
 

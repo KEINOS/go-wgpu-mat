@@ -1,3 +1,5 @@
+//go:build !cgo
+
 // Package mat provides GPU-accelerated 2D matrix operations for Go.
 //
 // It uses WebGPU (via github.com/gogpu/wgpu) to execute compute
