@@ -4,6 +4,8 @@ package mat
 
 import "math"
 
+const rmsNormEpsilon float32 = 1e-5
+
 func validateMatrixInitialized(name string, m *Matrix) error {
 	if m == nil || m.ctx == nil || m.buf == nil {
 		return newError("%s is not initialized", name)
@@ -175,6 +177,22 @@ func applySoftmaxRow(inputData, outputData []float32, offset, cols int) {
 
 	for col := range cols {
 		outputData[offset+col] /= sumExp
+	}
+}
+
+func applyRMSNormRow(inputData, outputData []float32, offset, cols int) {
+	sumSquares := float32(0)
+
+	for col := range cols {
+		value := inputData[offset+col]
+		sumSquares += value * value
+	}
+
+	meanSquare := sumSquares / float32(cols)
+	denominator := float32(math.Sqrt(float64(meanSquare + rmsNormEpsilon)))
+
+	for col := range cols {
+		outputData[offset+col] = inputData[offset+col] / denominator
 	}
 }
 
@@ -362,6 +380,43 @@ func Softmax(input, out *Matrix) error {
 	for row := range input.Rows {
 		rowOffset := row * input.Cols
 		applySoftmaxRow(inputData, result, rowOffset, input.Cols)
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
+}
+
+// RMSNorm computes row-wise root-mean-square normalization.
+func RMSNorm(input, out *Matrix) error {
+	err := validateMatrixInitialized("input", input)
+	if err != nil {
+		return err
+	}
+
+	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateUnaryShape(input, out)
+	if err != nil {
+		return err
+	}
+
+	inputData, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read input")
+	}
+
+	result := make([]float32, len(inputData))
+
+	for row := range input.Rows {
+		rowOffset := row * input.Cols
+		applyRMSNormRow(inputData, result, rowOffset, input.Cols)
 	}
 
 	err = out.Write(result)

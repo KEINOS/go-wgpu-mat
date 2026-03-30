@@ -246,6 +246,33 @@ func ExampleSoftmax() {
 	// 0.0900 0.2447 0.6652
 }
 
+func ExampleRMSNorm() {
+	ctx, err := mat.NewContext()
+	must(err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 1, 2)
+	must(err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 1, 2)
+	must(err)
+
+	defer out.Release()
+
+	must(inputMatrix.Write([]float32{3, 4}))
+	must(mat.RMSNorm(inputMatrix, out))
+
+	data, err := out.Read()
+	must(err)
+
+	fmt.Printf("%.4f %.4f\n", data[0], data[1])
+	// Output:
+	// 0.8485 1.1314
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)

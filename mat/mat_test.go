@@ -514,3 +514,56 @@ func TestSoftmax_dimensionMismatch(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorContains(t, err, "mat: dimension mismatch")
 }
+
+func TestRMSNorm_success(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	require.NoError(t, inputMatrix.Write([]float32{3, 4, 0, 0}))
+	require.NoError(t, mat.RMSNorm(inputMatrix, out))
+
+	got, err := out.Read()
+	require.NoError(t, err)
+
+	assert.InDelta(t, 0.8485, got[0], 1e-4)
+	assert.InDelta(t, 1.1314, got[1], 1e-4)
+	assert.InDelta(t, 0, got[2], 1e-6)
+	assert.InDelta(t, 0, got[3], 1e-6)
+}
+
+func TestRMSNorm_dimensionMismatch(t *testing.T) {
+	t.Parallel()
+
+	ctx, err := mat.NewContext()
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	inputMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	require.NoError(t, err)
+
+	defer inputMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 1, 4)
+	require.NoError(t, err)
+
+	defer out.Release()
+
+	err = mat.RMSNorm(inputMatrix, out)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "mat: dimension mismatch")
+}

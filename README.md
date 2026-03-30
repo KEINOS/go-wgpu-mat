@@ -203,7 +203,7 @@ is green before the next one begins.
 - [x] Step 8 — `Transp`
 - [x] Step 9 — `ReduceSum`, `ReduceMax`
 - [x] Step 10 — `Softmax`
-- [ ] Step 11 — `RMSNorm`
+- [x] Step 11 — `RMSNorm`
 - [ ] Step 12 — Benchmarks & CI
 
 ## References
