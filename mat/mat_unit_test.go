@@ -13,6 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// ============================================================================
+//  Internal/Private function tests
+//  (for public API tests, see mat_examples_test.go)
+// ============================================================================
+
 func newTestContextDeps() contextDeps {
 	deps := new(contextDeps)
 	deps.createInstance = func(*wgpu.InstanceDescriptor) (*wgpu.Instance, error) {
