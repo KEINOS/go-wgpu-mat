@@ -1,5 +1,6 @@
 # Disabled built-in rules
 config:
+  first-line-heading: false
   no-inline-html: false
   line-length: false
   table-column-style: false
