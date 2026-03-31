@@ -171,6 +171,8 @@ source files). Use the Makefile targets for convenience:
 ```sh
 make test   # CGO_ENABLED=0 go test -cover -race ./...
 make lint   # CGO_ENABLED=0 golangci-lint run --fix
+make bench  # CGO_ENABLED=0 go test -run=^$ -bench=. -benchmem ./mat/...
+make fuzz   # runs both fuzzers in ./mat for 10s each
 ```
 
 Or run manually:
@@ -204,7 +206,7 @@ is green before the next one begins.
 - [x] Step 9 — `ReduceSum`, `ReduceMax`
 - [x] Step 10 — `Softmax`
 - [x] Step 11 — `RMSNorm`
-- [ ] Step 12 — Benchmarks & CI
+- [ ] Step 12 — Benchmarks (done), CI (pending)
 
 ## References
 
