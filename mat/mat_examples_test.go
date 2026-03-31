@@ -79,36 +79,102 @@ func ExampleNewMatrix() {
 	// Matrix: 2x3
 }
 
+//nolint:dupl // allow dup for clarity in examples
 func ExampleMatMul() {
-	ctx, leftMatrix, rightMatrix, out := mustCreate2x2ExampleMatrices()
+	ctx, err := mat.NewContext()
+	if err != nil {
+		panic(err)
+	}
 	defer ctx.Release()
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer leftMatrix.Release()
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer rightMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer out.Release()
 
-	mustWrite2x2Inputs(leftMatrix, rightMatrix)
-	must(mat.MatMul(leftMatrix, rightMatrix, out))
+	err = leftMatrix.Write([]float32{1, 2, 3, 4})
+	if err != nil {
+		panic(err)
+	}
+
+	err = rightMatrix.Write([]float32{5, 6, 7, 8})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.MatMul(leftMatrix, rightMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
 	// [19 22 43 50]
 }
 
+//nolint:dupl // allow dup for clarity in examples
 func ExampleAdd() {
-	ctx, leftMatrix, rightMatrix, out := mustCreate2x2ExampleMatrices()
+	ctx, err := mat.NewContext()
+	if err != nil {
+		panic(err)
+	}
 	defer ctx.Release()
+
+	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer leftMatrix.Release()
+
+	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer rightMatrix.Release()
+
+	out, err := mat.NewMatrix(ctx, 2, 2)
+	if err != nil {
+		panic(err)
+	}
 	defer out.Release()
 
-	mustWrite2x2Inputs(leftMatrix, rightMatrix)
-	must(mat.Add(leftMatrix, rightMatrix, out))
+	err = leftMatrix.Write([]float32{1, 2, 3, 4})
+	if err != nil {
+		panic(err)
+	}
+
+	err = rightMatrix.Write([]float32{5, 6, 7, 8})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.Add(leftMatrix, rightMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
@@ -117,25 +183,40 @@ func ExampleAdd() {
 
 func ExampleScale() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	sourceMatrix, err := mat.NewMatrix(ctx, 2, 2)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer sourceMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 2, 2)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(sourceMatrix.Write([]float32{1, -2, 3, -4}))
-	must(mat.Scale(sourceMatrix, 0.5, out))
+	err = sourceMatrix.Write([]float32{1, -2, 3, -4})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.Scale(sourceMatrix, 0.5, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
@@ -144,25 +225,40 @@ func ExampleScale() {
 
 func ExampleTransp() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer inputMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 3, 2)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
-	must(mat.Transp(inputMatrix, out))
+	err = inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.Transp(inputMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
@@ -171,25 +267,40 @@ func ExampleTransp() {
 
 func ExampleReduceSum() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer inputMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 2, 1)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6}))
-	must(mat.ReduceSum(inputMatrix, out))
+	err = inputMatrix.Write([]float32{1, 2, 3, 4, 5, 6})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.ReduceSum(inputMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
@@ -198,25 +309,40 @@ func ExampleReduceSum() {
 
 func ExampleReduceMax() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	inputMatrix, err := mat.NewMatrix(ctx, 2, 3)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer inputMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 2, 1)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(inputMatrix.Write([]float32{-1, -3, -2, 4, 0, 1}))
-	must(mat.ReduceMax(inputMatrix, out))
+	err = inputMatrix.Write([]float32{-1, -3, -2, 4, 0, 1})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.ReduceMax(inputMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(data)
 	// Output:
@@ -225,25 +351,40 @@ func ExampleReduceMax() {
 
 func ExampleSoftmax() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	inputMatrix, err := mat.NewMatrix(ctx, 1, 3)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer inputMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 1, 3)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(inputMatrix.Write([]float32{1, 2, 3}))
-	must(mat.Softmax(inputMatrix, out))
+	err = inputMatrix.Write([]float32{1, 2, 3})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.Softmax(inputMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("%.4f %.4f %.4f\n", data[0], data[1], data[2])
 	// Output:
@@ -252,59 +393,42 @@ func ExampleSoftmax() {
 
 func ExampleRMSNorm() {
 	ctx, err := mat.NewContext()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer ctx.Release()
 
 	inputMatrix, err := mat.NewMatrix(ctx, 1, 2)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer inputMatrix.Release()
 
 	out, err := mat.NewMatrix(ctx, 1, 2)
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	defer out.Release()
 
-	must(inputMatrix.Write([]float32{3, 4}))
-	must(mat.RMSNorm(inputMatrix, out))
+	err = inputMatrix.Write([]float32{3, 4})
+	if err != nil {
+		panic(err)
+	}
+
+	err = mat.RMSNorm(inputMatrix, out)
+	if err != nil {
+		panic(err)
+	}
 
 	data, err := out.Read()
-	must(err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("%.4f %.4f\n", data[0], data[1])
 	// Output:
 	// 0.8485 1.1314
-}
-
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func mustCreate2x2ExampleMatrices() (
-	*mat.Context,
-	*mat.Matrix,
-	*mat.Matrix,
-	*mat.Matrix,
-) {
-	ctx, err := mat.NewContext()
-	must(err)
-
-	leftMatrix, err := mat.NewMatrix(ctx, 2, 2)
-	must(err)
-
-	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
-	must(err)
-
-	out, err := mat.NewMatrix(ctx, 2, 2)
-	must(err)
-
-	return ctx, leftMatrix, rightMatrix, out
-}
-
-func mustWrite2x2Inputs(leftMatrix, rightMatrix *mat.Matrix) {
-	must(leftMatrix.Write([]float32{1, 2, 3, 4}))
-	must(rightMatrix.Write([]float32{5, 6, 7, 8}))
 }

@@ -5,7 +5,7 @@ package mat
 import (
 	"fmt"
 
-	"github.com/KEINOS/go-wgpu-mat/internal/backends"
+	"github.com/KEINOS/go-wgpu-mat/mat/internal/backends"
 	"github.com/gogpu/wgpu"
 )
 
