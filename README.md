@@ -190,24 +190,6 @@ GPU results are compared to a CPU reference. Tolerances:
 - Most operations: `|gpu − cpu| < 1e-5`
 - `Softmax`: `|gpu − cpu| < 1e-4`
 
-## Roadmap
-
-Implementation follows a strict TDD cadence — each step
-is green before the next one begins.
-
-- [x] Step 1 — Repository skeleton & README
-- [x] Step 2 — GPU context helper (`NewContext`)
-- [x] Step 3 — `Matrix`: `NewMatrix`, `Write`, `Read`, `Release`
-- [x] Step 4 — Pipeline cache (internal, unexported)
-- [x] Step 5 — `MatMul`
-- [x] Step 6 — `Add`
-- [x] Step 7 — `Scale`
-- [x] Step 8 — `Transp`
-- [x] Step 9 — `ReduceSum`, `ReduceMax`
-- [x] Step 10 — `Softmax`
-- [x] Step 11 — `RMSNorm`
-- [ ] Step 12 — Benchmarks (done), CI (pending)
-
 ## References
 
 - [gogpu/wgpu](https://github.com/gogpu/wgpu) — Pure Go WebGPU
@@ -215,6 +197,7 @@ is green before the next one begins.
 - [go-microgpt](https://github.com/KEINOS/go-microgpt) — target
   application
 
----
+## License
 
-**License:** MIT
+- MIT
+- Copyright (c) 2026 KEINOS and go-wgpu-mat contributors
