@@ -62,9 +62,9 @@ CGO_ENABLED=0 go build ./...
 package main
 
 import (
-    "fmt"
+  "fmt"
 
-  mat "github.com/KEINOS/go-wgpu-mat/mat"
+  "github.com/KEINOS/go-wgpu-mat/mat"
 )
 
 func main() {

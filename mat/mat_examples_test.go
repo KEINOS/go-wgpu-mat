@@ -45,13 +45,17 @@ func Example() {
 	err = b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
 	panicOnErr(err)
 
+	// Compute C = A × B on the GPU
+	err = mat.MatMul(a, b, c)
+	panicOnErr(err)
+
 	// Read result back to CPU
 	data, err := c.Read()
 	panicOnErr(err)
 
 	fmt.Println(data)
 	// Output:
-	// [0 0 0 0]
+	// [19 22 43 50]
 }
 
 // Example of creating a new matrix for a compute context.
