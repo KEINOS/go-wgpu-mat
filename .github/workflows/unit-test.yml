@@ -1,0 +1,33 @@
+name: unit test
+
+on:
+  push:
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          check-latest: true
+
+      - name: Run make test
+        run: make test
+
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@v23
+        with:
+          globs: '**/*.md'
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
