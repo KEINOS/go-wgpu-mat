@@ -1,12 +1,22 @@
 //go:build !cgo
 
+// Package pipelinecache provides an internal cache for compute pipelines.
 package pipelinecache
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/gogpu/wgpu"
+)
+
+var (
+	errPipelineCacheNil      = errors.New("pipeline cache is nil")
+	errPipelineKeyEmpty      = errors.New("pipeline key is empty")
+	errPipelineFactoryNil    = errors.New("pipeline factory is nil")
+	errPipelineFactoryNilOut = errors.New("pipeline factory returned nil pipeline")
+	errCreatePipeline        = errors.New("failed to create pipeline")
 )
 
 // Cache stores compute pipelines keyed by an operation identifier.
@@ -48,15 +58,15 @@ func (c *Cache) GetOrCreate(
 	factory func() (*wgpu.ComputePipeline, error),
 ) (*wgpu.ComputePipeline, error) {
 	if c == nil {
-		return nil, fmt.Errorf("pipeline cache is nil")
+		return nil, errPipelineCacheNil
 	}
 
 	if key == "" {
-		return nil, fmt.Errorf("pipeline key is empty")
+		return nil, errPipelineKeyEmpty
 	}
 
 	if factory == nil {
-		return nil, fmt.Errorf("pipeline factory is nil")
+		return nil, errPipelineFactoryNil
 	}
 
 	c.mu.Lock()
@@ -68,11 +78,11 @@ func (c *Cache) GetOrCreate(
 
 	pipeline, err := factory()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create pipeline %q: %w", key, err)
+		return nil, fmt.Errorf("%w %q: %w", errCreatePipeline, key, err)
 	}
 
 	if pipeline == nil {
-		return nil, fmt.Errorf("pipeline factory returned nil pipeline")
+		return nil, errPipelineFactoryNilOut
 	}
 
 	c.pipelines[key] = pipeline

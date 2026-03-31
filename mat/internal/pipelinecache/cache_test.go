@@ -3,7 +3,7 @@
 package pipelinecache
 
 import (
-	"errors"
+	"io"
 	"testing"
 
 	"github.com/gogpu/wgpu"
@@ -56,14 +56,17 @@ func TestCacheGetOrCreateValidation(t *testing.T) {
 	require.ErrorContains(t, err, "pipeline factory is nil")
 
 	_, err = cache.GetOrCreate("matmul:f32", func() (*wgpu.ComputePipeline, error) {
-		return nil, errors.New("boom")
+		return nil, io.EOF
 	})
 	require.ErrorContains(t, err, "failed to create pipeline")
 
-	_, err = cache.GetOrCreate("matmul:f32", func() (*wgpu.ComputePipeline, error) {
-		return nil, nil
-	})
+	_, err = cache.GetOrCreate("matmul:f32", nilPipelineFactory)
 	require.ErrorContains(t, err, "pipeline factory returned nil pipeline")
+}
+
+//nolint:nilnil // Intentional for validation coverage: factory can return nil,nil.
+func nilPipelineFactory() (*wgpu.ComputePipeline, error) {
+	return nil, nil
 }
 
 func TestCacheReleaseAllReleasesAndClears(t *testing.T) {

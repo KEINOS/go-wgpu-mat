@@ -38,7 +38,7 @@ func (c *pipelineCache) getOrCreate(
 
 	pipeline, err := c.inner.GetOrCreate(key, factory)
 	if err != nil {
-		return nil, err
+		return nil, wrapError(err, "failed to get or create pipeline")
 	}
 
 	return pipeline, nil
