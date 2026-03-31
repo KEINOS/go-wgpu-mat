@@ -194,7 +194,7 @@ func (c *Context) getOrCreatePipeline(
 	}
 
 	if c.pipes == nil {
-		return nil, newError("pipeline cache is not initialized")
+		c.pipes = newPipelineCache(defaultReleaseComputePipeline)
 	}
 
 	return c.pipes.getOrCreate(key, factory)

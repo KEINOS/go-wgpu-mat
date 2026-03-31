@@ -145,11 +145,25 @@ func TestContextGetOrCreatePipelineValidation(t *testing.T) {
 	require.ErrorContains(t, err, "context is nil")
 
 	ctx = new(Context)
+	ctx.pipes = new(pipelineCache)
 	_, err = ctx.getOrCreatePipeline("matmul:f32", func() (*wgpu.ComputePipeline, error) {
 		return new(wgpu.ComputePipeline), nil
 	})
 	require.Error(t, err)
-	require.ErrorContains(t, err, "pipeline cache is not initialized")
+	require.ErrorContains(t, err, "pipeline cache is nil")
+}
+
+func TestContextGetOrCreatePipelineLazyInit(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+
+	pipeline, err := ctx.getOrCreatePipeline("matmul:f32", func() (*wgpu.ComputePipeline, error) {
+		return new(wgpu.ComputePipeline), nil
+	})
+	require.NoError(t, err)
+	require.NotNil(t, pipeline)
+	require.NotNil(t, ctx.pipes)
 }
 
 func TestContextReleaseReleasesPipelineCache(t *testing.T) {
