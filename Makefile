@@ -7,7 +7,7 @@ prep-test-lock:
 	rm -rf $(LOCKDIR)
 
 test: prep-test-lock
-	CGO_ENABLED=0 go test -cover -race ./...
+	CGO_ENABLED=0 go test -cover ./...
 
 lint:
 	@echo "* Running markdownlint..."
