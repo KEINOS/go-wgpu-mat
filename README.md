@@ -68,33 +68,50 @@ import (
 )
 
 func main() {
+  // Helper function to handle error
+  panicOnErr := func(err error) {
+    if err != nil {
+      panic(err)
+    }
+  }
+
   // UseGPU (default) or UseCPU
   ctx, err := mat.NewContext(mat.UseGPU)
-    if err != nil {
-        panic(err)
-    }
-    defer ctx.Release()
+  panicOnErr(err)
 
-    // 2×2 matrices stored on the GPU
-    a, _ := mat.NewMatrix(ctx, 2, 2)
-    b, _ := mat.NewMatrix(ctx, 2, 2)
-    c, _ := mat.NewMatrix(ctx, 2, 2)
-    defer a.Release()
-    defer b.Release()
-    defer c.Release()
+  defer ctx.Release()
 
-    // Upload data (row-major order)
-    a.Write([]float32{1, 2, 3, 4}) // [[1,2],[3,4]]
-    b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
+  // 2×2 matrices stored on the GPU
+  a, err := mat.NewMatrix(ctx, 2, 2)
+  panicOnErr(err)
 
-    // Compute C = A × B on the GPU
-    if err := mat.MatMul(a, b, c); err != nil {
-        panic(err)
-    }
+  b, err := mat.NewMatrix(ctx, 2, 2)
+  panicOnErr(err)
 
-    // Read result back to CPU
-    data, _ := c.Read()
-    fmt.Println(data) // [19 22 43 50]
+  c, err := mat.NewMatrix(ctx, 2, 2)
+  panicOnErr(err)
+
+  defer a.Release()
+  defer b.Release()
+  defer c.Release()
+
+  // Upload data (row-major order)
+  err = a.Write([]float32{1, 2, 3, 4}) // [[1,2],[3,4]]
+  panicOnErr(err)
+  err = b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
+  panicOnErr(err)
+
+  // Compute C = A × B on the GPU
+  err = mat.MatMul(a, b, c)
+  panicOnErr(err)
+
+  // Read result back to CPU
+  data, err := c.Read()
+  panicOnErr(err)
+
+  fmt.Println(data)
+  // Output:
+  // [19 22 43 50]
 }
 ```
 
