@@ -1,8 +1,7 @@
-//go:build !cgo
-
 package mat
 
 import (
+	"context"
 	"encoding/binary"
 	"math"
 	"math/bits"
@@ -183,6 +182,21 @@ type matrixDeps struct {
 	readBuffer   func(*Context, *wgpu.Buffer, []byte) error
 }
 
+type readBufferDeps struct {
+	createStaging        func(*Context, uint64) (*wgpu.Buffer, error)
+	releaseBuffer        func(*wgpu.Buffer)
+	createEncoder        func(*Context) (*wgpu.CommandEncoder, error)
+	copyBuffer           func(*wgpu.CommandEncoder, *wgpu.Buffer, *wgpu.Buffer, uint64)
+	finishEncoder        func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error)
+	releaseCommandBuffer func(*wgpu.CommandBuffer)
+	submit               func(*Context, *wgpu.CommandBuffer) error
+	mapBuffer            func(*wgpu.Buffer, uint64) error
+	mappedRange          func(*wgpu.Buffer, uint64) (*wgpu.MappedRange, error)
+	mappedBytes          func(*wgpu.MappedRange) []byte
+	releaseMappedRange   func(*wgpu.MappedRange)
+	unmapBuffer          func(*wgpu.Buffer) error
+}
+
 // ============================================================================
 //  Functions
 // ============================================================================
@@ -199,8 +213,119 @@ func defaultMatrixDeps() matrixDeps {
 		return ctx.device.Queue().WriteBuffer(buf, 0, data)
 	}
 	deps.readBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
-		return ctx.device.Queue().ReadBuffer(buf, 0, data)
+		return readBuffer(ctx, buf, data, defaultReadBufferDeps())
 	}
 
 	return *deps
+}
+
+func defaultReadBufferDeps() readBufferDeps {
+	deps := new(readBufferDeps)
+	deps.createStaging = func(ctx *Context, size uint64) (*wgpu.Buffer, error) {
+		desc := new(wgpu.BufferDescriptor)
+		desc.Label = "go-wgpu-mat-readback"
+		desc.Size = size
+		desc.Usage = wgpu.BufferUsageCopyDst | wgpu.BufferUsageMapRead
+
+		return ctx.device.CreateBuffer(desc)
+	}
+	deps.releaseBuffer = func(buf *wgpu.Buffer) { buf.Release() }
+	deps.createEncoder = func(ctx *Context) (*wgpu.CommandEncoder, error) {
+		return ctx.device.CreateCommandEncoder(nil)
+	}
+	deps.copyBuffer = func(
+		encoder *wgpu.CommandEncoder,
+		src, dst *wgpu.Buffer,
+		size uint64,
+	) {
+		encoder.CopyBufferToBuffer(src, 0, dst, 0, size)
+	}
+	deps.finishEncoder = func(
+		encoder *wgpu.CommandEncoder,
+	) (*wgpu.CommandBuffer, error) {
+		return encoder.Finish()
+	}
+	deps.releaseCommandBuffer = func(cmd *wgpu.CommandBuffer) { cmd.Release() }
+	deps.submit = func(ctx *Context, cmd *wgpu.CommandBuffer) error {
+		_, err := ctx.device.Queue().Submit(cmd)
+
+		return wrapError(err, "submit command buffer")
+	}
+	deps.mapBuffer = func(buf *wgpu.Buffer, size uint64) error {
+		return buf.Map(context.Background(), wgpu.MapModeRead, 0, size)
+	}
+	deps.mappedRange = func(
+		buf *wgpu.Buffer,
+		size uint64,
+	) (*wgpu.MappedRange, error) {
+		return buf.MappedRange(0, size)
+	}
+	deps.mappedBytes = func(mapped *wgpu.MappedRange) []byte { return mapped.Bytes() }
+	deps.releaseMappedRange = func(mapped *wgpu.MappedRange) { mapped.Release() }
+	deps.unmapBuffer = func(buf *wgpu.Buffer) error { return buf.Unmap() }
+
+	return *deps
+}
+
+func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps) error {
+	size := uint64(len(data))
+
+	staging, err := deps.createStaging(ctx, size)
+	if err != nil {
+		return wrapError(err, "create readback buffer")
+	}
+	defer deps.releaseBuffer(staging)
+
+	encoder, err := deps.createEncoder(ctx)
+	if err != nil {
+		return wrapError(err, "create readback encoder")
+	}
+
+	deps.copyBuffer(encoder, src, staging, size)
+
+	commandBuffer, err := deps.finishEncoder(encoder)
+	if err != nil {
+		return wrapError(err, "finish readback encoder")
+	}
+
+	err = deps.submit(ctx, commandBuffer)
+	if err != nil {
+		deps.releaseCommandBuffer(commandBuffer)
+
+		return wrapError(err, "submit readback")
+	}
+
+	err = deps.mapBuffer(staging, size)
+	if err != nil {
+		return wrapError(err, "map readback buffer")
+	}
+
+	mapped, err := deps.mappedRange(staging, size)
+	if err != nil {
+		_ = deps.unmapBuffer(staging)
+
+		return wrapError(err, "get mapped readback range")
+	}
+
+	mappedData := deps.mappedBytes(mapped)
+	if len(mappedData) != len(data) {
+		deps.releaseMappedRange(mapped)
+		_ = deps.unmapBuffer(staging)
+
+		return newError(
+			"mapped readback size mismatch: got %d bytes, want %d",
+			len(mappedData),
+			len(data),
+		)
+	}
+
+	copy(data, mappedData)
+	deps.releaseMappedRange(mapped)
+
+	err = deps.unmapBuffer(staging)
+	if err != nil {
+		return wrapError(err, "unmap readback buffer")
+	}
+
+	return nil
 }

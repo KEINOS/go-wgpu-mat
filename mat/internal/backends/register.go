@@ -1,5 +1,3 @@
-//go:build !cgo
-
 // Package backends registers WGPU backends for mat context creation.
 package backends
 

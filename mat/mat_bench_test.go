@@ -1,5 +1,3 @@
-//go:build !cgo
-
 package mat_test
 
 import (

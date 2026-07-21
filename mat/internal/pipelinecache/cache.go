@@ -1,5 +1,3 @@
-//go:build !cgo
-
 // Package pipelinecache provides an internal cache for compute pipelines.
 package pipelinecache
 

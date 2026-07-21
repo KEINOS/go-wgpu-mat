@@ -7,9 +7,6 @@
       "request": "launch",
       "mode": "test",
       "program": "${fileDirname}",
-      "env": {
-        "CGO_ENABLED": "0"
-      },
       "args": ["-race", "-coverprofile=${workspaceFolder}/coverage.out"]
     },
     {
@@ -18,9 +15,6 @@
       "request": "launch",
       "mode": "test",
       "program": "./...",
-      "env": {
-        "CGO_ENABLED": "0"
-      },
       "args": ["-race", "-cover"]
     }
   ]

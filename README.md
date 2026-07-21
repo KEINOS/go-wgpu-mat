@@ -40,8 +40,8 @@ flowchart TB
 
 ## Installation
 
-Requires Go 1.25+. No C compiler needed —
-`gogpu/wgpu` is Pure Go.
+Requires Go 1.25+. `gogpu/wgpu` supports builds with CGO enabled or disabled.
+A C compiler is not needed when building with `CGO_ENABLED=0`.
 
 ```sh
 go get github.com/KEINOS/go-wgpu-mat/mat
@@ -50,10 +50,11 @@ go get github.com/KEINOS/go-wgpu-mat/mat
 Backend packages are registered internally by `mat`, so user code
 does not need blank imports.
 
-Build (CGo must be disabled — required by `gogpu/wgpu`):
+Build in either mode:
 
 ```sh
 CGO_ENABLED=0 go build ./...
+CGO_ENABLED=1 go build ./...
 ```
 
 ## Quickstart
@@ -173,8 +174,7 @@ func RMSNorm(a, out *Matrix) error        // row-wise
 The repository includes a `.vscode/` configuration directory that
 automatically sets up the Go environment:
 
-- **`settings.json`**: Sets `CGO_ENABLED=0` globally, enables
-  format-on-save, and configures linting
+- **`settings.json`**: Enables format-on-save and configures linting
 - **`launch.json`**: Provides debug configurations for running tests
 
 Simply open the folder in VS Code — no additional configuration needed.
@@ -182,23 +182,33 @@ Pre-configured test runners are available via the Debug menu.
 
 ## Testing
 
-`CGO_ENABLED=0` is required (enforced via `//go:build !cgo` on all
-source files). Use the Makefile targets for convenience:
+Both CGO modes are supported and tested. Use the Makefile targets for
+convenience:
 
 ```sh
-make test   # CGO_ENABLED=0 go test -cover ./...
-make lint   # CGO_ENABLED=0 golangci-lint run --fix
-make bench  # CGO_ENABLED=0 go test -run=^$ -bench=. -benchmem ./mat/...
+make test   # race and coverage tests with CGO_ENABLED=0 and 1
+make lint   # lint Go in both CGO modes, then lint Markdown
+make bench  # benchmark using the current/default CGO mode
 make fuzz   # runs both fuzzers in ./mat for 10s each
 ```
+
+On Go 1.26 and macOS arm64, the upstream Metal callback currently triggers a
+checkptr false positive under `-race`. On that platform, `make test` adds
+`-gcflags=all=-d=checkptr=0`; the race detector remains enabled. Other
+platforms, including Linux CI, retain the default checkptr behavior.
 
 Or run manually:
 
 ```sh
-CGO_ENABLED=0 go test -cover ./...
+CGO_ENABLED=0 go test -race -cover ./...
+CGO_ENABLED=1 go test -race -cover ./...
+
+# Go 1.26 on macOS arm64 with the WGPU Metal integration
+# Use the same command with CGO_ENABLED=0 when testing that mode.
+CGO_ENABLED=1 go test -race -gcflags=all=-d=checkptr=0 -cover ./...
 
 # With HTML coverage report
-CGO_ENABLED=0 go test -coverprofile=cov.out ./...
+go test -coverprofile=cov.out ./...
 go tool cover -html=cov.out
 ```
 

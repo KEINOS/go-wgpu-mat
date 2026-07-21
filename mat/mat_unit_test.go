@@ -1,5 +1,3 @@
-//go:build !cgo
-
 package mat
 
 import (
@@ -41,6 +39,38 @@ func newTestContextDeps() contextDeps {
 	return *deps
 }
 
+func newTestReadBufferDeps(mappedData []byte) readBufferDeps {
+	deps := new(readBufferDeps)
+	deps.createStaging = func(*Context, uint64) (*wgpu.Buffer, error) {
+		return new(wgpu.Buffer), nil
+	}
+	deps.releaseBuffer = func(*wgpu.Buffer) {}
+	deps.createEncoder = func(*Context) (*wgpu.CommandEncoder, error) {
+		return new(wgpu.CommandEncoder), nil
+	}
+	deps.copyBuffer = func(
+		*wgpu.CommandEncoder,
+		*wgpu.Buffer,
+		*wgpu.Buffer,
+		uint64,
+	) {
+	}
+	deps.finishEncoder = func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
+		return new(wgpu.CommandBuffer), nil
+	}
+	deps.releaseCommandBuffer = func(*wgpu.CommandBuffer) {}
+	deps.submit = func(*Context, *wgpu.CommandBuffer) error { return nil }
+	deps.mapBuffer = func(*wgpu.Buffer, uint64) error { return nil }
+	deps.mappedRange = func(*wgpu.Buffer, uint64) (*wgpu.MappedRange, error) {
+		return new(wgpu.MappedRange), nil
+	}
+	deps.mappedBytes = func(*wgpu.MappedRange) []byte { return mappedData }
+	deps.releaseMappedRange = func(*wgpu.MappedRange) {}
+	deps.unmapBuffer = func(*wgpu.Buffer) error { return nil }
+
+	return *deps
+}
+
 func TestWrapErrorNil(t *testing.T) {
 	t.Parallel()
 
@@ -57,6 +87,202 @@ func TestWrapErrorWrapsOriginal(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorContains(t, err, "mat: failed to run op")
 	require.ErrorIs(t, err, io.EOF)
+}
+
+//nolint:funlen // The assertions cover one ordered readback ownership flow.
+func TestReadBufferCopiesMappedDataAndReleasesResources(t *testing.T) {
+	t.Parallel()
+
+	want := []byte{1, 2, 3, 4}
+	deps := newTestReadBufferDeps(want)
+	src := new(wgpu.Buffer)
+	staging := new(wgpu.Buffer)
+	commandBuffer := new(wgpu.CommandBuffer)
+	releasedBuffer := false
+	releasedRange := false
+	releasedCommandBuffer := false
+	copyCalled := false
+	submitCalled := false
+	unmapped := false
+	deps.createStaging = func(*Context, uint64) (*wgpu.Buffer, error) {
+		return staging, nil
+	}
+	deps.releaseBuffer = func(*wgpu.Buffer) { releasedBuffer = true }
+	deps.copyBuffer = func(
+		_ *wgpu.CommandEncoder,
+		gotSrc, gotDst *wgpu.Buffer,
+		gotSize uint64,
+	) {
+		copyCalled = true
+
+		assert.Same(t, src, gotSrc)
+		assert.Same(t, staging, gotDst)
+		assert.Equal(t, uint64(len(want)), gotSize)
+	}
+	deps.finishEncoder = func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
+		return commandBuffer, nil
+	}
+	deps.releaseCommandBuffer = func(*wgpu.CommandBuffer) {
+		releasedCommandBuffer = true
+	}
+	deps.submit = func(_ *Context, got *wgpu.CommandBuffer) error {
+		submitCalled = true
+
+		assert.Same(t, commandBuffer, got)
+
+		return nil
+	}
+	deps.releaseMappedRange = func(*wgpu.MappedRange) { releasedRange = true }
+	deps.unmapBuffer = func(*wgpu.Buffer) error {
+		unmapped = true
+
+		return nil
+	}
+	got := make([]byte, len(want))
+
+	err := readBuffer(new(Context), src, got, deps)
+
+	require.NoError(t, err)
+	assert.Equal(t, want, got)
+	assert.True(t, releasedBuffer)
+	assert.True(t, releasedRange)
+	assert.False(t, releasedCommandBuffer)
+	assert.True(t, copyCalled)
+	assert.True(t, submitCalled)
+	assert.True(t, unmapped)
+}
+
+func TestReadBufferReleasesCommandBufferWhenSubmitFails(t *testing.T) {
+	t.Parallel()
+
+	deps := newTestReadBufferDeps(make([]byte, bytesPerFloat32Int))
+	commandBuffer := new(wgpu.CommandBuffer)
+	releasedCommandBuffer := false
+	deps.finishEncoder = func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
+		return commandBuffer, nil
+	}
+	deps.submit = func(*Context, *wgpu.CommandBuffer) error { return io.EOF }
+	deps.releaseCommandBuffer = func(got *wgpu.CommandBuffer) {
+		releasedCommandBuffer = true
+
+		assert.Same(t, commandBuffer, got)
+	}
+
+	err := readBuffer(
+		new(Context),
+		new(wgpu.Buffer),
+		make([]byte, bytesPerFloat32Int),
+		deps,
+	)
+
+	require.Error(t, err)
+	assert.True(t, releasedCommandBuffer)
+}
+
+// TestReadBufferErrors keeps the readback error contract in one table so that
+// every injected operation is checked consistently.
+//
+//nolint:funlen // Splitting this table would obscure the operation coverage.
+func TestReadBufferErrors(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		wantErr string
+		mutate  func(*readBufferDeps)
+	}{
+		{
+			name:    "create staging",
+			wantErr: "create readback buffer",
+			mutate: func(deps *readBufferDeps) {
+				deps.createStaging = func(*Context, uint64) (*wgpu.Buffer, error) {
+					return nil, io.EOF
+				}
+			},
+		},
+		{
+			name:    "create encoder",
+			wantErr: "create readback encoder",
+			mutate: func(deps *readBufferDeps) {
+				deps.createEncoder = func(*Context) (*wgpu.CommandEncoder, error) {
+					return nil, io.EOF
+				}
+			},
+		},
+		{
+			name:    "finish encoder",
+			wantErr: "finish readback encoder",
+			mutate: func(deps *readBufferDeps) {
+				deps.finishEncoder = func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
+					return nil, io.EOF
+				}
+			},
+		},
+		{
+			name:    "submit",
+			wantErr: "submit readback",
+			mutate: func(deps *readBufferDeps) {
+				deps.submit = func(*Context, *wgpu.CommandBuffer) error { return io.EOF }
+			},
+		},
+		{
+			name:    "map",
+			wantErr: "map readback buffer",
+			mutate: func(deps *readBufferDeps) {
+				deps.mapBuffer = func(*wgpu.Buffer, uint64) error { return io.EOF }
+			},
+		},
+		{
+			name:    "mapped range",
+			wantErr: "get mapped readback range",
+			mutate: func(deps *readBufferDeps) {
+				deps.mappedRange = func(*wgpu.Buffer, uint64) (*wgpu.MappedRange, error) {
+					return nil, io.EOF
+				}
+			},
+		},
+		{
+			name:    "mapped size",
+			wantErr: "mapped readback size mismatch",
+			mutate: func(deps *readBufferDeps) {
+				deps.mappedBytes = func(*wgpu.MappedRange) []byte { return []byte{1} }
+			},
+		},
+		{
+			name:    "unmap",
+			wantErr: "unmap readback buffer",
+			mutate: func(deps *readBufferDeps) {
+				deps.unmapBuffer = func(*wgpu.Buffer) error { return io.EOF }
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			deps := newTestReadBufferDeps(make([]byte, bytesPerFloat32Int))
+			test.mutate(&deps)
+
+			err := readBuffer(
+				new(Context),
+				new(wgpu.Buffer),
+				make([]byte, bytesPerFloat32Int),
+				deps,
+			)
+
+			require.Error(t, err)
+			require.ErrorContains(t, err, test.wantErr)
+		})
+	}
+}
+
+func TestDefaultReadBufferDepsReleaseNilCommandBuffer(t *testing.T) {
+	t.Parallel()
+
+	deps := defaultReadBufferDeps()
+
+	require.NotPanics(t, func() { deps.releaseCommandBuffer(nil) })
 }
 
 func TestNewContextCreateInstanceError(t *testing.T) {
