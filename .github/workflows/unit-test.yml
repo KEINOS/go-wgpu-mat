@@ -27,7 +27,12 @@ jobs:
       - name: Build
         run: go build ./...
 
-      - name: Run race and coverage tests
+      - name: Run coverage tests without CGO
+        if: matrix.cgo-enabled == '0'
+        run: go test -cover ./...
+
+      - name: Run race and coverage tests with CGO
+        if: matrix.cgo-enabled == '1'
         run: go test -race -cover ./...
 
       - name: Run markdownlint

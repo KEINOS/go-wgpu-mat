@@ -14,10 +14,10 @@ prep-test-lock:
 	rm -rf $(LOCKDIR)
 
 test: prep-test-lock
-	@for mode in 0 1; do \
-		echo "* Testing with CGO_ENABLED=$$mode..."; \
-		CGO_ENABLED=$$mode go test $(RACE_FLAGS) -cover ./... || exit 1; \
-	done
+	@echo "* Testing with CGO_ENABLED=0..."
+	@CGO_ENABLED=0 go test -cover ./...
+	@echo "* Testing with CGO_ENABLED=1 and the race detector..."
+	@CGO_ENABLED=1 go test $(RACE_FLAGS) -cover ./...
 
 lint:
 	@echo "* Running markdownlint..."

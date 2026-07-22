@@ -186,7 +186,7 @@ Both CGO modes are supported and tested. Use the Makefile targets for
 convenience:
 
 ```sh
-make test   # race and coverage tests with CGO_ENABLED=0 and 1
+make test   # coverage in both CGO modes; race detection with CGO_ENABLED=1
 make lint   # lint Go in both CGO modes, then lint Markdown
 make bench  # benchmark using the current/default CGO mode
 make fuzz   # runs both fuzzers in ./mat for 10s each
@@ -197,14 +197,17 @@ checkptr false positive under `-race`. On that platform, `make test` adds
 `-gcflags=all=-d=checkptr=0`; the race detector remains enabled. Other
 platforms, including Linux CI, retain the default checkptr behavior.
 
+The Go race detector requires CGO. The `CGO_ENABLED=0` path therefore runs
+build, coverage, and lint checks without `-race`. The `CGO_ENABLED=1` path runs
+the same checks with the race detector enabled.
+
 Or run manually:
 
 ```sh
-CGO_ENABLED=0 go test -race -cover ./...
+CGO_ENABLED=0 go test -cover ./...
 CGO_ENABLED=1 go test -race -cover ./...
 
 # Go 1.26 on macOS arm64 with the WGPU Metal integration
-# Use the same command with CGO_ENABLED=0 when testing that mode.
 CGO_ENABLED=1 go test -race -gcflags=all=-d=checkptr=0 -cover ./...
 
 # With HTML coverage report
