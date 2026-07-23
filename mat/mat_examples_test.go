@@ -447,6 +447,10 @@ func ExampleRMSNorm() {
 func serializeGPUTest(t *testing.T) {
 	t.Helper()
 
+	if os.Getenv("GO_WGPU_MAT_SKIP_GPU_TESTS") == "1" {
+		t.Skip("real WGPU tests disabled by GO_WGPU_MAT_SKIP_GPU_TESTS")
+	}
+
 	const lockDirPath = "/tmp/go-wgpu-mat-test.lockdir"
 
 	for {
@@ -633,6 +637,86 @@ func TestMatMul_success(t *testing.T) {
 	for i := range want {
 		assert.InDelta(t, want[i], got[i], 1e-6)
 	}
+}
+
+func TestMatMul_matchesCPUReference(t *testing.T) {
+	t.Parallel()
+	serializeGPUTest(t)
+
+	tests := []struct {
+		name      string
+		rows      int
+		sharedDim int
+		cols      int
+	}{
+		{name: "single element", rows: 1, sharedDim: 1, cols: 1},
+		{name: "rectangular", rows: 3, sharedDim: 5, cols: 2},
+		{name: "crosses workgroup boundaries", rows: 9, sharedDim: 7, cols: 11},
+	}
+
+	ctx, err := mat.NewContext(mat.UseCPU)
+	require.NoError(t, err)
+
+	defer ctx.Release()
+
+	for _, test := range tests {
+		t.Log(test.name)
+
+		leftData := benchmarkData(test.rows * test.sharedDim)
+		rightData := benchmarkData(test.sharedDim * test.cols)
+		want := matMulReference(
+			leftData,
+			rightData,
+			test.rows,
+			test.sharedDim,
+			test.cols,
+		)
+
+		left, err := mat.NewMatrix(ctx, test.rows, test.sharedDim)
+		require.NoError(t, err)
+
+		defer left.Release()
+
+		right, err := mat.NewMatrix(ctx, test.sharedDim, test.cols)
+		require.NoError(t, err)
+
+		defer right.Release()
+
+		out, err := mat.NewMatrix(ctx, test.rows, test.cols)
+		require.NoError(t, err)
+
+		defer out.Release()
+
+		require.NoError(t, left.Write(leftData))
+		require.NoError(t, right.Write(rightData))
+		require.NoError(t, mat.MatMul(left, right, out))
+
+		got, err := out.Read()
+		require.NoError(t, err)
+		require.Len(t, got, len(want))
+
+		for index := range want {
+			assert.InDelta(t, want[index], got[index], 1e-5, "element %d", index)
+		}
+	}
+}
+
+func matMulReference(
+	left, right []float32,
+	rows, sharedDim, cols int,
+) []float32 {
+	result := make([]float32, rows*cols)
+
+	for row := range rows {
+		for col := range cols {
+			for shared := range sharedDim {
+				result[row*cols+col] += left[row*sharedDim+shared] *
+					right[shared*cols+col]
+			}
+		}
+	}
+
+	return result
 }
 
 func TestMatMul_dimensionMismatch(t *testing.T) {

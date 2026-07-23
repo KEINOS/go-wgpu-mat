@@ -1,8 +1,9 @@
-// Package mat provides GPU-accelerated 2D matrix operations for Go.
+// Package mat provides WebGPU-buffer-backed 2D matrix operations for Go.
 //
-// It uses WebGPU (via github.com/gogpu/wgpu) to execute compute
-// shaders on the GPU. All matrices store float32 values in
-// row-major order: element (r, c) is at index r*Cols + c.
+// It uses WebGPU (via github.com/gogpu/wgpu) for matrix storage. MatMul executes
+// as a WGSL compute kernel; operations that have not yet been kernelized use a
+// host compatibility path. All matrices store float32 values in row-major
+// order: element (r, c) is at index r*Cols + c.
 //
 // Both CGO modes are supported. Use CGO_ENABLED=0 when a C toolchain is not
 // available, or CGO_ENABLED=1 when combining mat with CGO dependencies:

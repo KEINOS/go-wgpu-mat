@@ -18,7 +18,7 @@ In scope:
 - 2D `float32` matrix operations: `MatMul`, `Add`, `Scale`, `Transp`
 - Reduction: row-wise `ReduceSum`, `ReduceMax`
 - Neural-net ops: `Softmax`, `RMSNorm`
-- Simple, explicit API — no hidden allocations
+- Simple API with explicit matrix and context ownership
 
 Out of scope:
 
@@ -37,6 +37,12 @@ flowchart TB
     C -->|"Dispatch"| D["GPU Buffer (result)"]
     D -->|"Matrix.Read()"| E["Go slice\n[]float32"]
 ```
+
+`MatMul` executes through the WGSL compute shader and leaves its result in the
+output device buffer until `Read` is called. Operations not yet kernelized use
+the compatibility path: read device buffers to the host, compute in Go, and
+write the result back. That distinction is intentional and will be removed one
+operation at a time as kernels are added.
 
 ## Installation
 
@@ -187,19 +193,23 @@ convenience:
 
 ```sh
 make test   # coverage in both CGO modes; race detection with CGO_ENABLED=1
-make lint   # lint Go in both CGO modes, then lint Markdown
+make lint   # lint Markdown and Go once; the test target covers both CGO modes
 make bench  # benchmark using the current/default CGO mode
 make fuzz   # runs both fuzzers in ./mat for 10s each
 ```
 
 On Go 1.26 and macOS arm64, the upstream Metal callback currently triggers a
-checkptr false positive under `-race`. On that platform, `make test` adds
-`-gcflags=all=-d=checkptr=0`; the race detector remains enabled. Other
-platforms, including Linux CI, retain the default checkptr behavior.
+checkptr false positive and intermittent autorelease-pool crashes under
+`-race`. On that platform, `make test` keeps the race detector enabled for the
+pure and mocked unit paths but skips real WGPU tests and examples; the preceding
+CGO-disabled suite still exercises the real WGPU path without race
+instrumentation. Other platforms, including Linux CI, run the complete
+CGO-enabled suite with the race detector and default checkptr behavior.
 
 The Go race detector requires CGO. The `CGO_ENABLED=0` path therefore runs
-build, coverage, and lint checks without `-race`. The `CGO_ENABLED=1` path runs
-the same checks with the race detector enabled.
+tests and coverage without `-race`. The `CGO_ENABLED=1` path runs the same
+tests with the race detector enabled. Lint checks are independent of this test
+matrix and run once.
 
 Or run manually:
 
@@ -208,7 +218,8 @@ CGO_ENABLED=0 go test -cover ./...
 CGO_ENABLED=1 go test -race -cover ./...
 
 # Go 1.26 on macOS arm64 with the WGPU Metal integration
-CGO_ENABLED=1 go test -race -gcflags=all=-d=checkptr=0 -cover ./...
+GOMAXPROCS=1 GO_WGPU_MAT_SKIP_GPU_TESTS=1 CGO_ENABLED=1 go test -race \
+  -gcflags=all=-d=checkptr=0 -parallel=1 -run='^Test' -cover ./...
 
 # With HTML coverage report
 go test -coverprofile=cov.out ./...

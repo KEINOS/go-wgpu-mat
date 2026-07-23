@@ -51,12 +51,12 @@ func newMockMatrix(rows, cols int, values []float32) (*Matrix, *mockMatrixIO) {
 	}
 
 	matrix := &Matrix{
-		Rows: rows,
-		Cols: cols,
-		buf:  new(wgpu.Buffer),
-		ctx:  new(Context),
+		Rows:     rows,
+		Cols:     cols,
+		buf:      new(wgpu.Buffer),
+		ctx:      new(Context),
 		released: atomic.Uint32{},
-		deps: deps,
+		deps:     deps,
 	}
 
 	return matrix, storage
@@ -263,29 +263,51 @@ func TestRunRowReductionValidationErrors(t *testing.T) {
 	require.ErrorContains(t, err, "out is not initialized")
 }
 
-func TestMatMulReadAndWriteErrors(t *testing.T) {
+func TestMatMulDispatchesWithoutHostIO(t *testing.T) {
 	t.Parallel()
 
 	leftMatrix, leftStorage := newMockMatrix(2, 2, []float32{1, 2, 3, 4})
 	rightMatrix, rightStorage := newMockMatrix(2, 2, []float32{5, 6, 7, 8})
 	outMatrix, outStorage := newMockMatrix(2, 2, []float32{0, 0, 0, 0})
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = leftMatrix.ctx
 
+	// Host I/O must not be used by matrix multiplication. These errors make any
+	// accidental Read or Write call fail the test.
 	leftStorage.readErr = io.EOF
-	err := MatMul(leftMatrix, rightMatrix, outMatrix)
-	require.Error(t, err)
-	require.ErrorContains(t, err, "failed to read left")
-
-	leftStorage.readErr = nil
 	rightStorage.readErr = io.EOF
-	err = MatMul(leftMatrix, rightMatrix, outMatrix)
-	require.Error(t, err)
-	require.ErrorContains(t, err, "failed to read right")
-
-	rightStorage.readErr = nil
 	outStorage.writeErr = io.EOF
-	err = MatMul(leftMatrix, rightMatrix, outMatrix)
+
+	dispatched := false
+	err := matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
+		dispatch: func(left, right, out *Matrix) error {
+			dispatched = true
+
+			assert.Same(t, leftMatrix, left)
+			assert.Same(t, rightMatrix, right)
+			assert.Same(t, outMatrix, out)
+
+			return nil
+		},
+	})
+	require.NoError(t, err)
+	assert.True(t, dispatched)
+}
+
+func TestMatMulDispatchError(t *testing.T) {
+	t.Parallel()
+
+	leftMatrix, _ := newMockMatrix(2, 2, []float32{1, 2, 3, 4})
+	rightMatrix, _ := newMockMatrix(2, 2, []float32{5, 6, 7, 8})
+	outMatrix, _ := newMockMatrix(2, 2, []float32{0, 0, 0, 0})
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = leftMatrix.ctx
+
+	err := matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error { return io.EOF },
+	})
 	require.Error(t, err)
-	require.ErrorContains(t, err, "failed to write out")
+	require.ErrorContains(t, err, "failed to dispatch matmul")
 }
 
 func TestMatMulValidationErrors(t *testing.T) {
@@ -306,6 +328,42 @@ func TestMatMulValidationErrors(t *testing.T) {
 	err = MatMul(leftMatrix, rightMatrix, nil)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "out is not initialized")
+
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = new(Context)
+	err = matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("dispatch must not run for matrices from different contexts")
+
+			return nil
+		},
+	})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "matrices must use the same context")
+
+	outMatrix.ctx = leftMatrix.ctx
+	err = matMul(leftMatrix, rightMatrix, leftMatrix, matMulDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("dispatch must not run when output aliases an input")
+
+			return nil
+		},
+	})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "out must not alias an input")
+
+	leftMatrix.Rows = math.MaxUint32 + 1
+	rightMatrix.Rows = leftMatrix.Cols
+	outMatrix.Rows = leftMatrix.Rows
+	err = matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("dispatch must not run for dimensions above uint32")
+
+			return nil
+		},
+	})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "matrix dimensions exceed GPU kernel limits")
 }
 
 func TestTranspReadAndWriteErrors(t *testing.T) {
