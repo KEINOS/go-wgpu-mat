@@ -96,6 +96,15 @@ func TestCacheReleaseAllReleasesAndClears(t *testing.T) {
 	assert.Equal(t, 2, released)
 }
 
+func TestCacheNilReceiverQueries(t *testing.T) {
+	t.Parallel()
+
+	var cache *Cache
+
+	require.NotPanics(t, cache.ReleaseAll)
+	assert.Equal(t, 0, cache.Size())
+}
+
 func TestDefaultReleaseComputePipelineNilSafe(t *testing.T) {
 	t.Parallel()
 

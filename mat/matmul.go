@@ -52,8 +52,165 @@ type matMulDeps struct {
 	dispatch func(left, right, out *Matrix) error
 }
 
+type matMulWGPUDeps struct {
+	createBindGroupLayout func(
+		*wgpu.Device, *wgpu.BindGroupLayoutDescriptor,
+	) (*wgpu.BindGroupLayout, error)
+	getOrCreatePipeline func(
+		*Context, string, func() (*wgpu.ComputePipeline, error),
+	) (*wgpu.ComputePipeline, error)
+	createShaderModule func(
+		*wgpu.Device, *wgpu.ShaderModuleDescriptor,
+	) (*wgpu.ShaderModule, error)
+	createPipelineLayout func(
+		*wgpu.Device, *wgpu.PipelineLayoutDescriptor,
+	) (*wgpu.PipelineLayout, error)
+	createComputePipeline func(
+		*wgpu.Device, *wgpu.ComputePipelineDescriptor,
+	) (*wgpu.ComputePipeline, error)
+	createBuffer func(
+		*wgpu.Device, *wgpu.BufferDescriptor,
+	) (*wgpu.Buffer, error)
+	writeBuffer     func(*wgpu.Device, *wgpu.Buffer, uint64, []byte) error
+	createBindGroup func(
+		*wgpu.Device, *wgpu.BindGroupDescriptor,
+	) (*wgpu.BindGroup, error)
+	createCommandEncoder func(
+		*wgpu.Device, *wgpu.CommandEncoderDescriptor,
+	) (*wgpu.CommandEncoder, error)
+	beginComputePass func(
+		*wgpu.CommandEncoder, *wgpu.ComputePassDescriptor,
+	) (*wgpu.ComputePassEncoder, error)
+	setPipeline            func(*wgpu.ComputePassEncoder, *wgpu.ComputePipeline)
+	setBindGroup           func(*wgpu.ComputePassEncoder, uint32, *wgpu.BindGroup, []uint32)
+	dispatch               func(*wgpu.ComputePassEncoder, uint32, uint32, uint32)
+	endComputePass         func(*wgpu.ComputePassEncoder) error
+	finishCommandEncoder   func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error)
+	submit                 func(*wgpu.Device, *wgpu.CommandBuffer) error
+	releaseBindGroupLayout func(*wgpu.BindGroupLayout)
+	releaseShaderModule    func(*wgpu.ShaderModule)
+	releasePipelineLayout  func(*wgpu.PipelineLayout)
+	releaseBuffer          func(*wgpu.Buffer)
+	releaseBindGroup       func(*wgpu.BindGroup)
+	releaseCommandBuffer   func(*wgpu.CommandBuffer)
+}
+
 func defaultMatMulDeps() matMulDeps {
 	return matMulDeps{dispatch: dispatchMatMul}
+}
+
+func defaultMatMulWGPUDeps() matMulWGPUDeps {
+	deps := new(matMulWGPUDeps)
+	setMatMulResourceDeps(deps)
+	setMatMulCommandDeps(deps)
+	setMatMulReleaseDeps(deps)
+
+	return *deps
+}
+
+func setMatMulResourceDeps(deps *matMulWGPUDeps) {
+	deps.createBindGroupLayout = func(
+		device *wgpu.Device,
+		descriptor *wgpu.BindGroupLayoutDescriptor,
+	) (*wgpu.BindGroupLayout, error) {
+		return device.CreateBindGroupLayout(descriptor)
+	}
+	deps.getOrCreatePipeline = func(
+		ctx *Context,
+		key string,
+		factory func() (*wgpu.ComputePipeline, error),
+	) (*wgpu.ComputePipeline, error) {
+		return ctx.getOrCreatePipeline(key, factory)
+	}
+	deps.createShaderModule = func(
+		device *wgpu.Device,
+		descriptor *wgpu.ShaderModuleDescriptor,
+	) (*wgpu.ShaderModule, error) {
+		return device.CreateShaderModule(descriptor)
+	}
+	deps.createPipelineLayout = func(
+		device *wgpu.Device,
+		descriptor *wgpu.PipelineLayoutDescriptor,
+	) (*wgpu.PipelineLayout, error) {
+		return device.CreatePipelineLayout(descriptor)
+	}
+	deps.createComputePipeline = func(
+		device *wgpu.Device,
+		descriptor *wgpu.ComputePipelineDescriptor,
+	) (*wgpu.ComputePipeline, error) {
+		return device.CreateComputePipeline(descriptor)
+	}
+	deps.createBuffer = func(
+		device *wgpu.Device,
+		descriptor *wgpu.BufferDescriptor,
+	) (*wgpu.Buffer, error) {
+		return device.CreateBuffer(descriptor)
+	}
+	deps.writeBuffer = func(
+		device *wgpu.Device,
+		buffer *wgpu.Buffer,
+		offset uint64,
+		data []byte,
+	) error {
+		return device.Queue().WriteBuffer(buffer, offset, data)
+	}
+	deps.createBindGroup = func(
+		device *wgpu.Device,
+		descriptor *wgpu.BindGroupDescriptor,
+	) (*wgpu.BindGroup, error) {
+		return device.CreateBindGroup(descriptor)
+	}
+}
+
+func setMatMulCommandDeps(deps *matMulWGPUDeps) {
+	deps.createCommandEncoder = func(
+		device *wgpu.Device,
+		descriptor *wgpu.CommandEncoderDescriptor,
+	) (*wgpu.CommandEncoder, error) {
+		return device.CreateCommandEncoder(descriptor)
+	}
+	deps.beginComputePass = func(
+		encoder *wgpu.CommandEncoder,
+		descriptor *wgpu.ComputePassDescriptor,
+	) (*wgpu.ComputePassEncoder, error) {
+		return encoder.BeginComputePass(descriptor)
+	}
+	deps.setPipeline = func(pass *wgpu.ComputePassEncoder, pipeline *wgpu.ComputePipeline) {
+		pass.SetPipeline(pipeline)
+	}
+	deps.setBindGroup = func(
+		pass *wgpu.ComputePassEncoder,
+		index uint32,
+		bindGroup *wgpu.BindGroup,
+		dynamicOffsets []uint32,
+	) {
+		pass.SetBindGroup(index, bindGroup, dynamicOffsets)
+	}
+	deps.dispatch = func(pass *wgpu.ComputePassEncoder, x, y, z uint32) {
+		pass.Dispatch(x, y, z)
+	}
+	deps.endComputePass = func(pass *wgpu.ComputePassEncoder) error {
+		return pass.End()
+	}
+	deps.finishCommandEncoder = func(
+		encoder *wgpu.CommandEncoder,
+	) (*wgpu.CommandBuffer, error) {
+		return encoder.Finish()
+	}
+	deps.submit = func(device *wgpu.Device, commandBuffer *wgpu.CommandBuffer) error {
+		_, err := device.Queue().Submit(commandBuffer)
+
+		return wrapError(err, "submit command buffer")
+	}
+}
+
+func setMatMulReleaseDeps(deps *matMulWGPUDeps) {
+	deps.releaseBindGroupLayout = func(layout *wgpu.BindGroupLayout) { layout.Release() }
+	deps.releaseShaderModule = func(shader *wgpu.ShaderModule) { shader.Release() }
+	deps.releasePipelineLayout = func(layout *wgpu.PipelineLayout) { layout.Release() }
+	deps.releaseBuffer = func(buffer *wgpu.Buffer) { buffer.Release() }
+	deps.releaseBindGroup = func(bindGroup *wgpu.BindGroup) { bindGroup.Release() }
+	deps.releaseCommandBuffer = func(commandBuffer *wgpu.CommandBuffer) { commandBuffer.Release() }
 }
 
 func matMul(left, right, out *Matrix, deps matMulDeps) error {
@@ -117,35 +274,39 @@ func validateMatMulKernelContract(left, right, out *Matrix) error {
 }
 
 func dispatchMatMul(left, right, out *Matrix) error {
+	return dispatchMatMulWithDeps(left, right, out, defaultMatMulWGPUDeps())
+}
+
+func dispatchMatMulWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error {
 	ctx := left.ctx
 	device := ctx.device
 
-	bindGroupLayout, err := createMatMulBindGroupLayout(device)
+	bindGroupLayout, err := createMatMulBindGroupLayout(device, deps)
 	if err != nil {
 		return err
 	}
-	defer bindGroupLayout.Release()
+	defer deps.releaseBindGroupLayout(bindGroupLayout)
 
-	pipeline, err := ctx.getOrCreatePipeline(matMulPipelineKey, func() (*wgpu.ComputePipeline, error) {
-		return createMatMulPipeline(device, bindGroupLayout)
+	pipeline, err := deps.getOrCreatePipeline(ctx, matMulPipelineKey, func() (*wgpu.ComputePipeline, error) {
+		return createMatMulPipeline(device, bindGroupLayout, deps)
 	})
 	if err != nil {
 		return wrapError(err, "create matmul pipeline")
 	}
 
-	uniform, err := createMatMulUniform(device, left, right)
+	uniform, err := createMatMulUniform(device, left, right, deps)
 	if err != nil {
 		return err
 	}
-	defer uniform.Release()
+	defer deps.releaseBuffer(uniform)
 
-	bindGroup, err := createMatMulBindGroup(device, bindGroupLayout, uniform, left, right, out)
+	bindGroup, err := createMatMulBindGroup(device, bindGroupLayout, uniform, left, right, out, deps)
 	if err != nil {
 		return err
 	}
-	defer bindGroup.Release()
+	defer deps.releaseBindGroup(bindGroup)
 
-	return encodeAndSubmitMatMul(device, pipeline, bindGroup, out)
+	return encodeAndSubmitMatMul(device, pipeline, bindGroup, out, deps)
 }
 
 func encodeAndSubmitMatMul(
@@ -153,39 +314,41 @@ func encodeAndSubmitMatMul(
 	pipeline *wgpu.ComputePipeline,
 	bindGroup *wgpu.BindGroup,
 	out *Matrix,
+	deps matMulWGPUDeps,
 ) error {
-	encoder, err := device.CreateCommandEncoder(&wgpu.CommandEncoderDescriptor{
+	encoder, err := deps.createCommandEncoder(device, &wgpu.CommandEncoderDescriptor{
 		Label: "go-wgpu-mat-matmul-encoder",
 	})
 	if err != nil {
 		return wrapError(err, "create matmul command encoder")
 	}
 
-	pass, err := encoder.BeginComputePass(nil)
+	pass, err := deps.beginComputePass(encoder, nil)
 	if err != nil {
 		return wrapError(err, "begin matmul compute pass")
 	}
 
-	pass.SetPipeline(pipeline)
-	pass.SetBindGroup(0, bindGroup, nil)
-	pass.Dispatch(
+	deps.setPipeline(pass, pipeline)
+	deps.setBindGroup(pass, 0, bindGroup, nil)
+	deps.dispatch(
+		pass,
 		ceilDiv(dimensionU32(out.Cols), matMulWorkgroup),
 		ceilDiv(dimensionU32(out.Rows), matMulWorkgroup),
 		1,
 	)
 
-	err = pass.End()
+	err = deps.endComputePass(pass)
 	if err != nil {
 		return wrapError(err, "end matmul compute pass")
 	}
 
-	commandBuffer, err := encoder.Finish()
+	commandBuffer, err := deps.finishCommandEncoder(encoder)
 	if err != nil {
 		return wrapError(err, "finish matmul command encoder")
 	}
-	defer commandBuffer.Release()
+	defer deps.releaseCommandBuffer(commandBuffer)
 
-	_, err = device.Queue().Submit(commandBuffer)
+	err = deps.submit(device, commandBuffer)
 	if err != nil {
 		return wrapError(err, "submit matmul command buffer")
 	}
@@ -193,8 +356,11 @@ func encodeAndSubmitMatMul(
 	return nil
 }
 
-func createMatMulBindGroupLayout(device *wgpu.Device) (*wgpu.BindGroupLayout, error) {
-	layout, err := device.CreateBindGroupLayout(&wgpu.BindGroupLayoutDescriptor{
+func createMatMulBindGroupLayout(
+	device *wgpu.Device,
+	deps matMulWGPUDeps,
+) (*wgpu.BindGroupLayout, error) {
+	layout, err := deps.createBindGroupLayout(device, &wgpu.BindGroupLayoutDescriptor{
 		Label: "go-wgpu-mat-matmul-bind-group-layout",
 		Entries: []wgpu.BindGroupLayoutEntry{
 			matMulLayoutEntry(matMulLeftBinding, gputypes.BufferBindingTypeReadOnlyStorage, 0),
@@ -213,8 +379,9 @@ func createMatMulBindGroupLayout(device *wgpu.Device) (*wgpu.BindGroupLayout, er
 func createMatMulPipeline(
 	device *wgpu.Device,
 	bindGroupLayout *wgpu.BindGroupLayout,
+	deps matMulWGPUDeps,
 ) (*wgpu.ComputePipeline, error) {
-	shader, err := device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
+	shader, err := deps.createShaderModule(device, &wgpu.ShaderModuleDescriptor{
 		Label: "go-wgpu-mat-matmul-shader",
 		WGSL:  matMulWGSL,
 		SPIRV: nil,
@@ -222,18 +389,18 @@ func createMatMulPipeline(
 	if err != nil {
 		return nil, wrapError(err, "create matmul shader")
 	}
-	defer shader.Release()
+	defer deps.releaseShaderModule(shader)
 
-	pipelineLayout, err := device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
+	pipelineLayout, err := deps.createPipelineLayout(device, &wgpu.PipelineLayoutDescriptor{
 		Label:            "go-wgpu-mat-matmul-pipeline-layout",
 		BindGroupLayouts: []*wgpu.BindGroupLayout{bindGroupLayout},
 	})
 	if err != nil {
 		return nil, wrapError(err, "create matmul pipeline layout")
 	}
-	defer pipelineLayout.Release()
+	defer deps.releasePipelineLayout(pipelineLayout)
 
-	pipeline, err := device.CreateComputePipeline(&wgpu.ComputePipelineDescriptor{
+	pipeline, err := deps.createComputePipeline(device, &wgpu.ComputePipelineDescriptor{
 		Label:                         "go-wgpu-mat-matmul-pipeline",
 		Layout:                        pipelineLayout,
 		Module:                        shader,
@@ -263,8 +430,12 @@ func dimensionU32(value int) uint32 {
 	return uint32(value) //nolint:gosec // validateMatMul rejects values above uint32.
 }
 
-func createMatMulUniform(device *wgpu.Device, left, right *Matrix) (*wgpu.Buffer, error) {
-	uniform, err := device.CreateBuffer(&wgpu.BufferDescriptor{
+func createMatMulUniform(
+	device *wgpu.Device,
+	left, right *Matrix,
+	deps matMulWGPUDeps,
+) (*wgpu.Buffer, error) {
+	uniform, err := deps.createBuffer(device, &wgpu.BufferDescriptor{
 		Label:            "go-wgpu-mat-matmul-dimensions",
 		Size:             matMulUniformSize,
 		Usage:            wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst,
@@ -279,9 +450,9 @@ func createMatMulUniform(device *wgpu.Device, left, right *Matrix) (*wgpu.Buffer
 	binary.LittleEndian.PutUint32(dimensions[4:8], dimensionU32(left.Cols))
 	binary.LittleEndian.PutUint32(dimensions[8:12], dimensionU32(right.Cols))
 
-	err = device.Queue().WriteBuffer(uniform, 0, dimensions)
+	err = deps.writeBuffer(device, uniform, 0, dimensions)
 	if err != nil {
-		uniform.Release()
+		deps.releaseBuffer(uniform)
 
 		return nil, wrapError(err, "write matmul dimensions")
 	}
@@ -294,8 +465,9 @@ func createMatMulBindGroup(
 	layout *wgpu.BindGroupLayout,
 	uniform *wgpu.Buffer,
 	left, right, out *Matrix,
+	deps matMulWGPUDeps,
 ) (*wgpu.BindGroup, error) {
-	bindGroup, err := device.CreateBindGroup(&wgpu.BindGroupDescriptor{
+	bindGroup, err := deps.createBindGroup(device, &wgpu.BindGroupDescriptor{
 		Label:  "go-wgpu-mat-matmul-bind-group",
 		Layout: layout,
 		Entries: []wgpu.BindGroupEntry{
