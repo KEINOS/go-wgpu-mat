@@ -20,6 +20,11 @@ import (
 //
 //nolint:varnamelen // example
 func Example() {
+	if os.Getenv("GO_WGPU_MAT_SKIP_GPU_TESTS") == "1" {
+		fmt.Println("skip")
+		return
+	}
+
 	panicOnErr := func(err error) {
 		if err != nil {
 			panic(err)
