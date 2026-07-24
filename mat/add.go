@@ -112,9 +112,14 @@ func validateAddKernelContract(out *Matrix) error {
 }
 
 func isCPUAdapter(ctx *Context) bool {
-	if ctx.adapter == nil {
-		// Mock context — keep existing dispatch behavior for tests.
+	// Mock contexts have no adapter or pipes — keep them as real GPU path for tests.
+	if ctx.adapter == nil && ctx.pipes == nil {
 		return false
+	}
+
+	if ctx.adapter == nil {
+		// Real GPU context has a non-nil adapter. Nil means stub/fallback (no GPU available).
+		return true
 	}
 
 	info := ctx.adapter.Info()
