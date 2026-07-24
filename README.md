@@ -38,8 +38,9 @@ flowchart TB
     D -->|"Matrix.Read()"| E["Go slice\n[]float32"]
 ```
 
-`MatMul` executes through the WGSL compute shader and leaves its result in the
-output device buffer until `Read` is called. Operations not yet kernelized use
+`MatMul` and non-aliased, same-context `Add` execute through WGSL compute
+shaders and leave their results in the output device buffer until `Read` is
+called. Operations not yet kernelized use
 the compatibility path: read device buffers to the host, compute in Go, and
 write the result back. That distinction is intentional and will be removed one
 operation at a time as kernels are added.
@@ -195,8 +196,16 @@ convenience:
 make test   # coverage in both CGO modes; race detection with CGO_ENABLED=1
 make lint   # lint Markdown and Go once; the test target covers both CGO modes
 make bench  # benchmark using the current/default CGO mode
+make bench-isolated # run each benchmark sample in a separate process
 make fuzz   # runs both fuzzers in ./mat for 10s each
 ```
+
+`make bench-isolated` preserves completed samples if a native GPU backend
+crashes. It writes one log per process and a `combined.txt` file under a new
+temporary directory. Configure it with `BENCH_PATTERN`, `BENCH_SAMPLES`,
+`BENCH_TIME`, `BENCH_OUT`, and `CGO_ENABLED`. Benchmarks report both end-to-end
+latency with a readback after every operation and device-resident latency with
+one final synchronization.
 
 On Go 1.26 and macOS arm64, the upstream Metal callback currently triggers a
 checkptr false positive and intermittent autorelease-pool crashes under

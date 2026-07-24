@@ -2,8 +2,10 @@ package mat
 
 import (
 	"fmt"
+	"sync/atomic"
 
 	"github.com/KEINOS/go-wgpu-mat/mat/internal/backends"
+	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
 )
 
@@ -14,6 +16,8 @@ type Context struct {
 	adapter  *wgpu.Adapter
 	device   *wgpu.Device
 	pipes    *pipelineCache
+	limits   gputypes.Limits
+	released atomic.Uint32
 }
 
 // ContextMode specifies which adapter type NewContext should prefer.
@@ -34,6 +38,7 @@ type contextDeps struct {
 	requestDevice func(*wgpu.Adapter, *wgpu.DeviceDescriptor) (
 		*wgpu.Device, error,
 	)
+	deviceLimits    func(*wgpu.Device) gputypes.Limits
 	releaseInstance func(*wgpu.Instance)
 	releaseAdapter  func(*wgpu.Adapter)
 }
@@ -52,6 +57,9 @@ func defaultContextDeps() contextDeps {
 		desc *wgpu.DeviceDescriptor,
 	) (*wgpu.Device, error) {
 		return adapter.RequestDevice(desc)
+	}
+	deps.deviceLimits = func(device *wgpu.Device) gputypes.Limits {
+		return device.Limits()
 	}
 	deps.releaseInstance = func(inst *wgpu.Instance) {
 		if inst != nil {
@@ -116,6 +124,8 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		adapter:  adapter,
 		device:   dev,
 		pipes:    newPipelineCache(defaultReleaseComputePipeline),
+		limits:   deps.deviceLimits(dev),
+		released: atomic.Uint32{},
 	}, nil
 }
 
@@ -159,9 +169,10 @@ func adapterOptionsForMode(mode ContextMode) (*wgpu.RequestAdapterOptions, error
 }
 
 // Release frees the Device, Adapter, and Instance in reverse order.
-// It is a no-op when called on a nil receiver.
+// It is a no-op when called on a nil receiver or more than once.
+// Release must not run concurrently with matrix operations using this Context.
 func (c *Context) Release() {
-	if c == nil {
+	if c == nil || !c.released.CompareAndSwap(0, 1) {
 		return
 	}
 
@@ -172,14 +183,17 @@ func (c *Context) Release() {
 
 	if c.device != nil {
 		c.device.Release()
+		c.device = nil
 	}
 
 	if c.adapter != nil {
 		c.adapter.Release()
+		c.adapter = nil
 	}
 
 	if c.instance != nil {
 		c.instance.Release()
+		c.instance = nil
 	}
 }
 
@@ -189,6 +203,10 @@ func (c *Context) getOrCreatePipeline(
 ) (*wgpu.ComputePipeline, error) {
 	if c == nil {
 		return nil, newError("context is nil")
+	}
+
+	if c.released.Load() != 0 {
+		return nil, newError("context is released")
 	}
 
 	if c.pipes == nil {

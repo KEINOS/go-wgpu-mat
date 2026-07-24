@@ -18,11 +18,12 @@ func benchmarkData(length int) []float32 {
 	return data
 }
 
-func benchmarkBinaryOperation(
+func benchmarkBinaryOperation( //nolint:cyclop,funlen // Benchmark setup and errors remain readable together.
 	b *testing.B,
 	rows int,
 	cols int,
 	operation binaryOperation,
+	syncEachIteration bool,
 ) {
 	b.Helper()
 
@@ -69,6 +70,15 @@ func benchmarkBinaryOperation(
 			b.Fatal(err)
 		}
 
+		if syncEachIteration {
+			_, err = outMatrix.Read()
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	}
+
+	if !syncEachIteration {
 		_, err = outMatrix.Read()
 		if err != nil {
 			b.Fatal(err)
@@ -76,11 +86,12 @@ func benchmarkBinaryOperation(
 	}
 }
 
-func benchmarkMatMulOperation(
+func benchmarkMatMulOperation( //nolint:cyclop,funlen // Benchmark setup and errors remain readable together.
 	b *testing.B,
 	rows int,
 	sharedDim int,
 	cols int,
+	syncEachIteration bool,
 ) {
 	b.Helper()
 
@@ -127,6 +138,15 @@ func benchmarkMatMulOperation(
 			b.Fatal(err)
 		}
 
+		if syncEachIteration {
+			_, err = outMatrix.Read()
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	}
+
+	if !syncEachIteration {
 		_, err = outMatrix.Read()
 		if err != nil {
 			b.Fatal(err)
@@ -134,13 +154,14 @@ func benchmarkMatMulOperation(
 	}
 }
 
-func benchmarkUnaryOperation(
+func benchmarkUnaryOperation( //nolint:cyclop // Benchmark setup and synchronization errors must fail locally.
 	b *testing.B,
-	rows int,
-	cols int,
 	operation unaryOperation,
+	syncEachIteration bool,
 ) {
 	b.Helper()
+
+	const rows, cols = 128, 128
 
 	ctx, err := mat.NewContext()
 	if err != nil {
@@ -174,6 +195,15 @@ func benchmarkUnaryOperation(
 			b.Fatal(err)
 		}
 
+		if syncEachIteration {
+			_, err = outMatrix.Read()
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	}
+
+	if !syncEachIteration {
 		_, err = outMatrix.Read()
 		if err != nil {
 			b.Fatal(err)
@@ -182,17 +212,37 @@ func benchmarkUnaryOperation(
 }
 
 func BenchmarkMatMul64x64(b *testing.B) {
-	benchmarkMatMulOperation(b, 64, 64, 64)
+	b.Run("EndToEnd", func(b *testing.B) {
+		benchmarkMatMulOperation(b, 64, 64, 64, true)
+	})
+	b.Run("DeviceResident", func(b *testing.B) {
+		benchmarkMatMulOperation(b, 64, 64, 64, false)
+	})
 }
 
 func BenchmarkAdd256x256(b *testing.B) {
-	benchmarkBinaryOperation(b, 256, 256, mat.Add)
+	b.Run("EndToEnd", func(b *testing.B) {
+		benchmarkBinaryOperation(b, 256, 256, mat.Add, true)
+	})
+	b.Run("DeviceResident", func(b *testing.B) {
+		benchmarkBinaryOperation(b, 256, 256, mat.Add, false)
+	})
 }
 
 func BenchmarkSoftmax128x128(b *testing.B) {
-	benchmarkUnaryOperation(b, 128, 128, mat.Softmax)
+	b.Run("EndToEnd", func(b *testing.B) {
+		benchmarkUnaryOperation(b, mat.Softmax, true)
+	})
+	b.Run("DeviceResident", func(b *testing.B) {
+		benchmarkUnaryOperation(b, mat.Softmax, false)
+	})
 }
 
 func BenchmarkRMSNorm128x128(b *testing.B) {
-	benchmarkUnaryOperation(b, 128, 128, mat.RMSNorm)
+	b.Run("EndToEnd", func(b *testing.B) {
+		benchmarkUnaryOperation(b, mat.RMSNorm, true)
+	})
+	b.Run("DeviceResident", func(b *testing.B) {
+		benchmarkUnaryOperation(b, mat.RMSNorm, false)
+	})
 }

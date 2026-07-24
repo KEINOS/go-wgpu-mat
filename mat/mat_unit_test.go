@@ -6,9 +6,15 @@ import (
 	"math"
 	"testing"
 
+	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	testCaseFinishEncoder = "finish encoder"
+	testCaseSubmit        = "submit"
 )
 
 // ============================================================================
@@ -32,6 +38,9 @@ func newTestContextDeps() contextDeps {
 		*wgpu.DeviceDescriptor,
 	) (*wgpu.Device, error) {
 		return new(wgpu.Device), nil
+	}
+	deps.deviceLimits = func(*wgpu.Device) gputypes.Limits {
+		return gputypes.DefaultLimits()
 	}
 	deps.releaseInstance = func(*wgpu.Instance) {}
 	deps.releaseAdapter = func(*wgpu.Adapter) {}
@@ -210,7 +219,7 @@ func TestReadBufferErrors(t *testing.T) {
 			},
 		},
 		{
-			name:    "finish encoder",
+			name:    testCaseFinishEncoder,
 			wantErr: "finish readback encoder",
 			mutate: func(deps *readBufferDeps) {
 				deps.finishEncoder = func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
@@ -219,7 +228,7 @@ func TestReadBufferErrors(t *testing.T) {
 			},
 		},
 		{
-			name:    "submit",
+			name:    testCaseSubmit,
 			wantErr: "submit readback",
 			mutate: func(deps *readBufferDeps) {
 				deps.submit = func(*Context, *wgpu.CommandBuffer) error { return io.EOF }
@@ -360,6 +369,111 @@ func TestContextReleaseWithNilFields(t *testing.T) {
 	ctx := new(Context)
 
 	require.NotPanics(t, func() { ctx.Release() })
+}
+
+func TestContextReleaseIsIdempotent(t *testing.T) {
+	t.Parallel()
+
+	releasedPipelines := 0
+	ctx := new(Context)
+	ctx.pipes = newPipelineCache(func(*wgpu.ComputePipeline) {
+		releasedPipelines++
+	})
+	_, err := ctx.pipes.getOrCreate("test", func() (*wgpu.ComputePipeline, error) {
+		return new(wgpu.ComputePipeline), nil
+	})
+	require.NoError(t, err)
+
+	ctx.Release()
+	ctx.Release()
+
+	assert.Equal(t, uint32(1), ctx.released.Load())
+	assert.Equal(t, 1, releasedPipelines)
+}
+
+func TestNewMatrixRejectsReleasedContext(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	ctx.device = new(wgpu.Device)
+	ctx.released.Store(1)
+
+	deps := matrixDeps{
+		createBuffer: func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error) {
+			t.Fatal("buffer creation must not run for a released context")
+
+			return nil, io.EOF
+		},
+		writeBuffer: nil,
+		readBuffer:  nil,
+	}
+
+	matrix, err := newMatrix(ctx, 1, 1, deps)
+
+	assert.Nil(t, matrix)
+	require.ErrorContains(t, err, "context is released")
+}
+
+func TestNewMatrixRejectsContextWithoutDevice(t *testing.T) {
+	t.Parallel()
+
+	deps := defaultMatrixDeps()
+	matrix, err := newMatrix(new(Context), 1, 1, deps)
+
+	assert.Nil(t, matrix)
+	require.ErrorContains(t, err, "context is nil")
+}
+
+func TestNewMatrixRejectsDeviceBufferLimits(t *testing.T) {
+	t.Parallel()
+
+	bufferLimits := gputypes.DefaultLimits()
+	bufferLimits.MaxBufferSize = 3
+	bufferLimits.MaxStorageBufferBindingSize = 4
+	storageLimits := gputypes.DefaultLimits()
+	storageLimits.MaxBufferSize = 4
+	storageLimits.MaxStorageBufferBindingSize = 3
+
+	tests := []struct {
+		name    string
+		limits  gputypes.Limits
+		wantErr string
+	}{
+		{
+			name:    "maximum buffer size",
+			limits:  bufferLimits,
+			wantErr: "exceeds device maximum buffer size",
+		},
+		{
+			name:    "maximum storage binding size",
+			limits:  storageLimits,
+			wantErr: "exceeds device maximum storage buffer binding size",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx := new(Context)
+			ctx.device = new(wgpu.Device)
+			ctx.limits = testCase.limits
+			deps := matrixDeps{
+				createBuffer: func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error) {
+					t.Fatal("buffer creation must not exceed device limits")
+
+					return nil, io.EOF
+				},
+				writeBuffer: nil,
+				readBuffer:  nil,
+			}
+
+			matrix, err := newMatrix(ctx, 1, 1, deps)
+
+			assert.Nil(t, matrix)
+			require.ErrorContains(t, err, testCase.wantErr)
+		})
+	}
 }
 
 func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
@@ -726,4 +840,32 @@ func TestMatrixReleaseNilBuffer(t *testing.T) {
 	require.NotPanics(t, func() { matrix.Release() })
 
 	require.NotPanics(t, func() { matrix.Release() })
+}
+
+func TestMatrixReadWriteRejectReleasedMatrix(t *testing.T) {
+	t.Parallel()
+
+	matrix, _ := newMockMatrix(1, 1, []float32{1})
+	matrix.released.Store(1)
+
+	err := matrix.Write([]float32{2})
+	require.ErrorContains(t, err, "matrix is released")
+
+	data, err := matrix.Read()
+	assert.Nil(t, data)
+	require.ErrorContains(t, err, "matrix is released")
+}
+
+func TestMatrixReadWriteRejectReleasedContext(t *testing.T) {
+	t.Parallel()
+
+	matrix, _ := newMockMatrix(1, 1, []float32{1})
+	matrix.ctx.released.Store(1)
+
+	err := matrix.Write([]float32{2})
+	require.ErrorContains(t, err, "context is released")
+
+	data, err := matrix.Read()
+	assert.Nil(t, data)
+	require.ErrorContains(t, err, "context is released")
 }

@@ -29,9 +29,12 @@ lint:
 	@echo "* Running golangci-lint..."
 	golangci-lint run --fix
 
-.PHONY: bench
+.PHONY: bench bench-isolated
 bench:
 	go test -run=^$$ -bench=. -benchmem ./mat/...
+
+bench-isolated:
+	./scripts/bench-isolated.sh
 
 .PHONY: fuzz
 fuzz: prep-test-lock

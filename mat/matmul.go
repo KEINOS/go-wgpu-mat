@@ -270,6 +270,16 @@ func validateMatMulKernelContract(left, right, out *Matrix) error {
 		return newError("matrix dimensions exceed GPU kernel limits")
 	}
 
+	return validateMatMulDispatchLimits(left.ctx, out)
+}
+
+func validateMatMulDispatchLimits(ctx *Context, out *Matrix) error {
+	maxWorkgroups := ctx.limits.MaxComputeWorkgroupsPerDimension
+	if maxWorkgroups > 0 && (ceilDiv(dimensionU32(out.Cols), matMulWorkgroup) > maxWorkgroups ||
+		ceilDiv(dimensionU32(out.Rows), matMulWorkgroup) > maxWorkgroups) {
+		return newError("matmul dispatch exceeds device workgroup limits")
+	}
+
 	return nil
 }
 
@@ -316,44 +326,18 @@ func encodeAndSubmitMatMul(
 	out *Matrix,
 	deps matMulWGPUDeps,
 ) error {
-	encoder, err := deps.createCommandEncoder(device, &wgpu.CommandEncoderDescriptor{
-		Label: "go-wgpu-mat-matmul-encoder",
-	})
-	if err != nil {
-		return wrapError(err, "create matmul command encoder")
-	}
-
-	pass, err := deps.beginComputePass(encoder, nil)
-	if err != nil {
-		return wrapError(err, "begin matmul compute pass")
-	}
-
-	deps.setPipeline(pass, pipeline)
-	deps.setBindGroup(pass, 0, bindGroup, nil)
-	deps.dispatch(
-		pass,
-		ceilDiv(dimensionU32(out.Cols), matMulWorkgroup),
-		ceilDiv(dimensionU32(out.Rows), matMulWorkgroup),
-		1,
+	return encodeAndSubmitCompute(
+		device,
+		pipeline,
+		bindGroup,
+		computeDispatch{
+			x: ceilDiv(dimensionU32(out.Cols), matMulWorkgroup),
+			y: ceilDiv(dimensionU32(out.Rows), matMulWorkgroup),
+			z: 1,
+		},
+		"matmul",
+		deps,
 	)
-
-	err = deps.endComputePass(pass)
-	if err != nil {
-		return wrapError(err, "end matmul compute pass")
-	}
-
-	commandBuffer, err := deps.finishCommandEncoder(encoder)
-	if err != nil {
-		return wrapError(err, "finish matmul command encoder")
-	}
-	defer deps.releaseCommandBuffer(commandBuffer)
-
-	err = deps.submit(device, commandBuffer)
-	if err != nil {
-		return wrapError(err, "submit matmul command buffer")
-	}
-
-	return nil
 }
 
 func createMatMulBindGroupLayout(
@@ -381,38 +365,7 @@ func createMatMulPipeline(
 	bindGroupLayout *wgpu.BindGroupLayout,
 	deps matMulWGPUDeps,
 ) (*wgpu.ComputePipeline, error) {
-	shader, err := deps.createShaderModule(device, &wgpu.ShaderModuleDescriptor{
-		Label: "go-wgpu-mat-matmul-shader",
-		WGSL:  matMulWGSL,
-		SPIRV: nil,
-	})
-	if err != nil {
-		return nil, wrapError(err, "create matmul shader")
-	}
-	defer deps.releaseShaderModule(shader)
-
-	pipelineLayout, err := deps.createPipelineLayout(device, &wgpu.PipelineLayoutDescriptor{
-		Label:            "go-wgpu-mat-matmul-pipeline-layout",
-		BindGroupLayouts: []*wgpu.BindGroupLayout{bindGroupLayout},
-	})
-	if err != nil {
-		return nil, wrapError(err, "create matmul pipeline layout")
-	}
-	defer deps.releasePipelineLayout(pipelineLayout)
-
-	pipeline, err := deps.createComputePipeline(device, &wgpu.ComputePipelineDescriptor{
-		Label:                         "go-wgpu-mat-matmul-pipeline",
-		Layout:                        pipelineLayout,
-		Module:                        shader,
-		EntryPoint:                    "main",
-		Constants:                     nil,
-		ZeroInitializeWorkgroupMemory: nil,
-	})
-	if err != nil {
-		return nil, wrapError(err, "create matmul compute pipeline")
-	}
-
-	return pipeline, nil
+	return createComputePipeline(device, bindGroupLayout, "matmul", matMulWGSL, deps)
 }
 
 func matrixByteSize(matrix *Matrix) uint64 {

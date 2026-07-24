@@ -4,9 +4,17 @@ import "math"
 
 const rmsNormEpsilon float32 = 1e-5
 
-func validateMatrixInitialized(name string, m *Matrix) error {
-	if m == nil || m.ctx == nil || m.buf == nil {
+func validateMatrixInitialized(name string, matrix *Matrix) error {
+	if matrix == nil || matrix.ctx == nil || matrix.buf == nil {
 		return newError("%s is not initialized", name)
+	}
+
+	if matrix.released.Load() != 0 {
+		return newError("%s is released", name)
+	}
+
+	if matrix.ctx.released.Load() != 0 {
+		return newError("context is released")
 	}
 
 	return nil
@@ -232,9 +240,7 @@ func MatMul(left, right, out *Matrix) error {
 
 // Add computes out = left + right.
 func Add(left, right, out *Matrix) error {
-	return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
-		return a + b
-	})
+	return add(left, right, out, defaultAddDeps())
 }
 
 // Scale computes out = input * scalar.

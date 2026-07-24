@@ -158,7 +158,7 @@ func TestDispatchMatMulWGPUErrors(t *testing.T) {
 	}
 }
 
-func TestCreateMatMulPipelineErrors(t *testing.T) {
+func TestCreateMatMulPipelineErrors(t *testing.T) { //nolint:dupl // MatMul errors form an independent API contract.
 	t.Parallel()
 
 	tests := []struct {
@@ -228,7 +228,7 @@ func TestCreateMatMulUniformWriteError(t *testing.T) {
 }
 
 //nolint:funlen // Error cases stay together for auditability.
-func TestEncodeAndSubmitMatMulErrors(t *testing.T) {
+func TestEncodeAndSubmitMatMulErrors(t *testing.T) { //nolint:dupl // MatMul errors form an independent API contract.
 	t.Parallel()
 
 	tests := []struct {
@@ -266,7 +266,7 @@ func TestEncodeAndSubmitMatMulErrors(t *testing.T) {
 			},
 		},
 		{
-			name:    "finish encoder",
+			name:    testCaseFinishEncoder,
 			wantErr: "finish matmul command encoder",
 			mutate: func(deps *matMulWGPUDeps) {
 				deps.finishCommandEncoder = func(
@@ -277,7 +277,7 @@ func TestEncodeAndSubmitMatMulErrors(t *testing.T) {
 			},
 		},
 		{
-			name:    "submit",
+			name:    testCaseSubmit,
 			wantErr: "submit matmul command buffer",
 			mutate: func(deps *matMulWGPUDeps) {
 				deps.submit = func(*wgpu.Device, *wgpu.CommandBuffer) error { return io.EOF }

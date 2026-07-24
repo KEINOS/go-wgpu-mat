@@ -58,7 +58,15 @@ func newMatrix(
 	rows, cols int,
 	deps matrixDeps,
 ) (*Matrix, error) {
-	if ctx == nil || ctx.device == nil {
+	if ctx == nil {
+		return nil, newError("context is nil")
+	}
+
+	if ctx.released.Load() != 0 {
+		return nil, newError("context is released")
+	}
+
+	if ctx.device == nil {
 		return nil, newError("context is nil")
 	}
 
@@ -77,6 +85,11 @@ func newMatrix(
 	high, size := bits.Mul64(elementCount, bytesPerFloat32U64)
 	if high != 0 {
 		return nil, newError("matrix byte size overflow")
+	}
+
+	err := validateDeviceBufferSize(ctx, size)
+	if err != nil {
+		return nil, err
 	}
 
 	bufferDescriptor := new(wgpu.BufferDescriptor)
@@ -101,6 +114,27 @@ func newMatrix(
 	return matrix, nil
 }
 
+func validateDeviceBufferSize(ctx *Context, size uint64) error {
+	if ctx.limits.MaxBufferSize > 0 && size > ctx.limits.MaxBufferSize {
+		return newError(
+			"matrix byte size %d exceeds device maximum buffer size %d",
+			size,
+			ctx.limits.MaxBufferSize,
+		)
+	}
+
+	if ctx.limits.MaxStorageBufferBindingSize > 0 &&
+		size > ctx.limits.MaxStorageBufferBindingSize {
+		return newError(
+			"matrix byte size %d exceeds device maximum storage buffer binding size %d",
+			size,
+			ctx.limits.MaxStorageBufferBindingSize,
+		)
+	}
+
+	return nil
+}
+
 // ----------------------------------------------------------------------------
 //  Methods
 // ----------------------------------------------------------------------------
@@ -110,6 +144,14 @@ func newMatrix(
 func (m *Matrix) Write(data []float32) error {
 	if m == nil || m.ctx == nil || m.buf == nil {
 		return newError("matrix is not initialized")
+	}
+
+	if m.released.Load() != 0 {
+		return newError("matrix is released")
+	}
+
+	if m.ctx.released.Load() != 0 {
+		return newError("context is released")
 	}
 
 	want := m.Rows * m.Cols
@@ -141,6 +183,14 @@ func (m *Matrix) Read() ([]float32, error) {
 		return nil, newError("matrix is not initialized")
 	}
 
+	if m.released.Load() != 0 {
+		return nil, newError("matrix is released")
+	}
+
+	if m.ctx.released.Load() != 0 {
+		return nil, newError("context is released")
+	}
+
 	elementCount := m.Rows * m.Cols
 
 	raw := make([]byte, elementCount*bytesPerFloat32Int)
@@ -162,6 +212,7 @@ func (m *Matrix) Read() ([]float32, error) {
 
 // Release frees the GPU buffer held by this matrix.
 // Calling Release more than once is safe (subsequent calls are no-ops).
+// Release must not run concurrently with operations using the matrix.
 func (m *Matrix) Release() {
 	if m == nil || !m.released.CompareAndSwap(0, 1) {
 		return

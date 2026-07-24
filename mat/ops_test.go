@@ -102,6 +102,18 @@ func TestValidateMatrixInitialized(t *testing.T) {
 	err = validateMatrixInitialized("input", matrix)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "input is not initialized")
+
+	matrix, _ = newMockMatrix(1, 1, []float32{1})
+	matrix.released.Store(1)
+	err = validateMatrixInitialized("input", matrix)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "input is released")
+
+	matrix, _ = newMockMatrix(1, 1, []float32{1})
+	matrix.ctx.released.Store(1)
+	err = validateMatrixInitialized("input", matrix)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "context is released")
 }
 
 func TestValidateSameShapeOutMismatch(t *testing.T) {
@@ -177,6 +189,14 @@ func TestRunBinaryElementwiseValidationErrors(t *testing.T) {
 		})
 	require.Error(t, err)
 	require.ErrorContains(t, err, "out is not initialized")
+
+	mismatchedOut, _ := newMockMatrix(2, 1, []float32{0, 0})
+	err = runBinaryElementwise(leftMatrix, rightMatrix, mismatchedOut,
+		func(leftValue, rightValue float32) float32 {
+			return leftValue + rightValue
+		})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "dimension mismatch")
 }
 
 func TestRunUnaryElementwiseReadAndWriteErrors(t *testing.T) {
@@ -217,6 +237,96 @@ func TestRunUnaryElementwiseValidationErrors(t *testing.T) {
 	})
 	require.Error(t, err)
 	require.ErrorContains(t, err, "out is not initialized")
+}
+
+func TestAddDispatchesWithoutHostIO(t *testing.T) { //nolint:dupl // Each operation guards its own host-I/O contract.
+	t.Parallel()
+
+	leftMatrix, leftStorage := newMockMatrix(2, 2, []float32{1, 2, 3, 4})
+	rightMatrix, rightStorage := newMockMatrix(2, 2, []float32{5, 6, 7, 8})
+	outMatrix, outStorage := newMockMatrix(2, 2, []float32{0, 0, 0, 0})
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = leftMatrix.ctx
+	leftStorage.readErr = io.EOF
+	rightStorage.readErr = io.EOF
+	outStorage.writeErr = io.EOF
+
+	dispatched := false
+	err := add(leftMatrix, rightMatrix, outMatrix, addDeps{
+		dispatch: func(left, right, out *Matrix) error {
+			dispatched = true
+
+			assert.Same(t, leftMatrix, left)
+			assert.Same(t, rightMatrix, right)
+			assert.Same(t, outMatrix, out)
+
+			return nil
+		},
+	})
+
+	require.NoError(t, err)
+	assert.True(t, dispatched)
+}
+
+func TestAddCompatibilityPathForAliasOrDifferentContext(t *testing.T) {
+	t.Parallel()
+
+	leftMatrix, leftStorage := newMockMatrix(1, 2, []float32{1, 2})
+	rightMatrix, _ := newMockMatrix(1, 2, []float32{3, 4})
+
+	err := add(leftMatrix, rightMatrix, leftMatrix, addDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("aliased add must use the compatibility path")
+
+			return nil
+		},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []float32{4, 6}, leftStorage.data)
+}
+
+func TestAddDispatchError(t *testing.T) {
+	t.Parallel()
+
+	leftMatrix, _ := newMockMatrix(1, 1, []float32{1})
+	rightMatrix, _ := newMockMatrix(1, 1, []float32{2})
+	outMatrix, _ := newMockMatrix(1, 1, []float32{0})
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = leftMatrix.ctx
+
+	err := add(leftMatrix, rightMatrix, outMatrix, addDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error { return io.EOF },
+	})
+	require.ErrorContains(t, err, "failed to dispatch add")
+}
+
+func TestAddValidationErrors(t *testing.T) {
+	t.Parallel()
+
+	matrix, _ := newMockMatrix(1, 1, []float32{1})
+
+	err := add(nil, matrix, matrix, addDeps{dispatch: nil})
+	require.ErrorContains(t, err, "left is not initialized")
+
+	err = add(matrix, nil, matrix, addDeps{dispatch: nil})
+	require.ErrorContains(t, err, "right is not initialized")
+
+	err = add(matrix, matrix, nil, addDeps{dispatch: nil})
+	require.ErrorContains(t, err, "out is not initialized")
+
+	left, _ := newMockMatrix(0, 1, nil)
+	right, _ := newMockMatrix(0, 1, nil)
+	out, _ := newMockMatrix(0, 1, nil)
+	right.ctx = left.ctx
+	out.ctx = left.ctx
+	err = add(left, right, out, addDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("invalid dimensions must not dispatch")
+
+			return nil
+		},
+	})
+	require.ErrorContains(t, err, "matrix dimensions exceed add kernel limits")
 }
 
 func TestRunRowReductionReadAndWriteErrors(t *testing.T) {
@@ -263,7 +373,7 @@ func TestRunRowReductionValidationErrors(t *testing.T) {
 	require.ErrorContains(t, err, "out is not initialized")
 }
 
-func TestMatMulDispatchesWithoutHostIO(t *testing.T) {
+func TestMatMulDispatchesWithoutHostIO(t *testing.T) { //nolint:dupl // Each operation guards its own host-I/O contract.
 	t.Parallel()
 
 	leftMatrix, leftStorage := newMockMatrix(2, 2, []float32{1, 2, 3, 4})
@@ -310,7 +420,7 @@ func TestMatMulDispatchError(t *testing.T) {
 	require.ErrorContains(t, err, "failed to dispatch matmul")
 }
 
-func TestMatMulValidationErrors(t *testing.T) {
+func TestMatMulValidationErrors(t *testing.T) { //nolint:funlen // Validation cases are clearest together.
 	t.Parallel()
 
 	rightMatrix, _ := newMockMatrix(2, 2, []float32{5, 6, 7, 8})
@@ -364,6 +474,22 @@ func TestMatMulValidationErrors(t *testing.T) {
 	})
 	require.Error(t, err)
 	require.ErrorContains(t, err, "matrix dimensions exceed GPU kernel limits")
+
+	leftMatrix, _ = newMockMatrix(9, 1, make([]float32, 9))
+	rightMatrix, _ = newMockMatrix(1, 1, []float32{1})
+	outMatrix, _ = newMockMatrix(9, 1, make([]float32, 9))
+	rightMatrix.ctx = leftMatrix.ctx
+	outMatrix.ctx = leftMatrix.ctx
+	leftMatrix.ctx.limits.MaxComputeWorkgroupsPerDimension = 1
+	err = matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
+		dispatch: func(*Matrix, *Matrix, *Matrix) error {
+			t.Fatal("dispatch must not exceed device workgroup limits")
+
+			return nil
+		},
+	})
+	require.Error(t, err)
+	require.ErrorContains(t, err, "matmul dispatch exceeds device workgroup limits")
 }
 
 func TestTranspReadAndWriteErrors(t *testing.T) {
