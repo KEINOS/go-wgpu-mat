@@ -51,6 +51,15 @@ func add(left, right, out *Matrix, deps addDeps) error {
 		})
 	}
 
+	// Detect GPU unavailability (e.g., no GPU on CI runner) and fall back to CPU.
+	// When the adapter is a software/CPU adapter, the WGSL kernel silently returns zeros.
+	// In this case, we use the software path which reads/writes buffers directly.
+	if isCPUAdapter(left.ctx) {
+		return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
+			return a + b
+		})
+	}
+
 	err = validateAddKernelContract(out)
 	if err != nil {
 		return err
@@ -101,6 +110,17 @@ func validateAddKernelContract(out *Matrix) error {
 	}
 
 	return nil
+}
+
+func isCPUAdapter(ctx *Context) bool {
+	if ctx.adapter == nil {
+		// Not a real GPU context (e.g., test mock) — keep original behavior.
+		return false
+	}
+
+	info := ctx.adapter.Info()
+
+	return info.DeviceType == gputypes.DeviceTypeCPU
 }
 
 func dispatchAdd(left, right, out *Matrix) error {

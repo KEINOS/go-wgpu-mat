@@ -39,10 +39,12 @@ func createComputePipeline(
 	defer deps.releasePipelineLayout(pipelineLayout)
 
 	pipeline, err := deps.createComputePipeline(device, &wgpu.ComputePipelineDescriptor{
-		Label:      fmt.Sprintf("go-wgpu-mat-%s-pipeline", operation),
-		Layout:     pipelineLayout,
-		Module:     shader,
-		EntryPoint: "main",
+		Label:                         fmt.Sprintf("go-wgpu-mat-%s-pipeline", operation),
+		Layout:                        pipelineLayout,
+		Module:                        shader,
+		EntryPoint:                    "main",
+		Constants:                     nil,
+		ZeroInitializeWorkgroupMemory: nil,
 	})
 	if err != nil {
 		return nil, wrapError(err, "create %s compute pipeline", operation)
