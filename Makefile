@@ -8,7 +8,7 @@ RACE_ENV :=
 ifeq ($(WGPU_GOOS)/$(WGPU_GOARCH),darwin/arm64)
 # On macOS arm64 the race detector triggers checkptr panics in Metal FFI.
 # Disable checkptr, limit parallelism, and exclude Example() to avoid crashes.
-RACE_FLAGS += -gcflags=all=-d=checkptr=0 -parallel=1 -run='^Test'
+RACE_FLAGS += -gcflags=all=-d=checkptr=0 -parallel=1
 RACE_ENV := GOMAXPROCS=1 GO_WGPU_MAT_SKIP_GPU_TESTS=1
 endif
 
@@ -20,9 +20,9 @@ clean:
 .PHONY: test
 test: clean
 	@echo "* Testing with CGO_ENABLED=0..."
-	@GO_WGPU_MAT_SKIP_GPU_TESTS=1 CGO_ENABLED=0 go test -run='^Test' -cover ./...
+	@CGO_ENABLED=0 go test -cover ./...
 	@echo "* Testing with CGO_ENABLED=1 and the race detector..."
-	@$(RACE_ENV) CGO_ENABLED=1 go test $(RACE_FLAGS) -cover ./...
+	@$(RACE_ENV) CGO_ENABLED=1 go test -run='^Test' $(RACE_FLAGS) -cover ./...
 
 .PHONY: lint
 lint:
