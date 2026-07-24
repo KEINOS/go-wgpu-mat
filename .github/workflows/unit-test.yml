@@ -24,13 +24,20 @@ jobs:
           go-version: 'stable'
           check-latest: true
 
+      - name: Install wgpu-native
+        run: |
+          curl -sL https://github.com/gfx-rs/wgpu-native/releases/download/v29.0.1.1/wgpu-linux-x86_64-release.zip -o wgpu-native.zip
+          unzip -o wgpu-native.zip
+          sudo cp libwgpu_native.so /usr/lib/
+          sudo ldconfig
+
       - name: Run coverage tests without CGO
         if: matrix.cgo-enabled == '0'
-        run: go test -cover ./...
+        run: go test -tags rust -cover ./...
 
       - name: Run race and coverage tests with CGO
         if: matrix.cgo-enabled == '1'
-        run: go test -race -cover ./...
+        run: go test -tags rust -race -cover ./...
 
   lint:
     runs-on: ubuntu-latest
