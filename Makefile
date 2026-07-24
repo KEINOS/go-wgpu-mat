@@ -6,18 +6,16 @@ RACE_FLAGS := -race
 RACE_ENV :=
 
 ifeq ($(WGPU_GOOS)/$(WGPU_GOARCH),darwin/arm64)
-# On macOS arm64 the race detector triggers checkptr panics in Metal FFI.
-# Skip race detector on this platform — coverage is still meaningful.
-RACE_FLAGS :=
+RACE_FLAGS += -gcflags=all=-d=checkptr=0 -parallel=1 -run=^Test
 RACE_ENV := GOMAXPROCS=1 GO_WGPU_MAT_SKIP_GPU_TESTS=1
 endif
 
-.PHONY: clean
-clean:
+.PHONY: prep-test-lock
+prep-test-lock:
 	rm -rf $(LOCKDIR)
 
 .PHONY: test
-test: clean
+test: prep-test-lock
 	@echo "* Testing with CGO_ENABLED=0..."
 	@CGO_ENABLED=0 go test -cover ./...
 	@echo "* Testing with CGO_ENABLED=1 and the race detector..."
@@ -39,6 +37,6 @@ bench-isolated:
 	./scripts/bench-isolated.sh
 
 .PHONY: fuzz
-fuzz: clean
+fuzz: prep-test-lock
 	go test -parallel=1 -run=^$$ -fuzz=FuzzMatrixWriteReadRoundTrip -fuzztime=10s ./mat
 	go test -parallel=1 -run=^$$ -fuzz=FuzzSoftmaxRowSums -fuzztime=10s ./mat
