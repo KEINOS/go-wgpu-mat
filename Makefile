@@ -15,6 +15,7 @@ endif
 .PHONY: clean
 clean:
 	rm -rf $(LOCKDIR)
+	go clean -testcache
 
 .PHONY: test
 test: clean
