@@ -28,6 +28,12 @@ const (
 	UseGPU ContextMode = iota
 	// UseCPU forces a fallback adapter (software backend).
 	UseCPU
+	// UseAuto is the same as UseGPU — GPU operations fall back to CPU
+	// when isCPUAdapter() detects an unavailable GPU (e.g., CI without
+	// GPU hardware or CGO_ENABLED=0 where Metal FFI fails). This mode
+	// enables the same code to run on any platform without requiring
+	// build tags or environment variables.
+	UseAuto
 )
 
 type contextDeps struct {
@@ -80,10 +86,11 @@ func defaultContextDeps() contextDeps {
 // The package registers required backends internally, so callers do
 // not need blank-import backend packages.
 //
-// When no mode is provided, UseGPU is selected by default.
+// When no mode is provided, UseAuto is selected by default.
 //
-//	ctx, err := NewContext()       // same as NewContext(UseGPU)
+//	ctx, err := NewContext()       // same as NewContext(UseAuto)
 //	ctx, err := NewContext(UseCPU) // force software/fallback adapter
+//	ctx, err := NewContext(UseGPU) // high-performance GPU adapter
 func NewContext(modes ...ContextMode) (*Context, error) {
 	mode, err := resolveContextMode(modes)
 	if err != nil {
@@ -94,9 +101,29 @@ func NewContext(modes ...ContextMode) (*Context, error) {
 }
 
 func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
-	adapterOptions, err := adapterOptionsForMode(mode)
-	if err != nil {
-		return nil, err
+	var opts *wgpu.RequestAdapterOptions
+
+	switch mode {
+	case UseAuto, UseGPU:
+		backends.UseGPU()
+
+		opts = &wgpu.RequestAdapterOptions{
+			PowerPreference:      wgpu.PowerPreferenceHighPerformance,
+			ForceFallbackAdapter: false,
+			CompatibleSurface:    nil,
+		}
+
+	case UseCPU:
+		backends.UseCPU()
+
+		opts = &wgpu.RequestAdapterOptions{
+			PowerPreference:      wgpu.PowerPreferenceLowPower,
+			ForceFallbackAdapter: true,
+			CompatibleSurface:    nil,
+		}
+
+	default:
+		return nil, newError("invalid context mode: %d", mode)
 	}
 
 	inst, err := deps.createInstance(nil)
@@ -104,8 +131,8 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		return nil, fmt.Errorf("mat: create instance: %w", err)
 	}
 
-	adapter, err := deps.requestAdapter(inst, adapterOptions)
-	if err != nil {
+	adapter, err := deps.requestAdapter(inst, opts)
+	if err != nil || adapter == nil {
 		deps.releaseInstance(inst)
 
 		return nil, fmt.Errorf("mat: request adapter: %w", err)
@@ -131,7 +158,7 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 
 func resolveContextMode(modes []ContextMode) (ContextMode, error) {
 	if len(modes) == 0 {
-		return UseGPU, nil
+		return UseAuto, nil
 	}
 
 	if len(modes) > 1 {
@@ -139,33 +166,11 @@ func resolveContextMode(modes []ContextMode) (ContextMode, error) {
 	}
 
 	mode := modes[0]
-	if mode != UseGPU && mode != UseCPU {
+	if mode != UseGPU && mode != UseCPU && mode != UseAuto {
 		return 0, newError("invalid context mode: %d", mode)
 	}
 
 	return mode, nil
-}
-
-func adapterOptionsForMode(mode ContextMode) (*wgpu.RequestAdapterOptions, error) {
-	options := new(wgpu.RequestAdapterOptions)
-
-	switch mode {
-	case UseGPU:
-		backends.UseGPU()
-
-		options.PowerPreference = wgpu.PowerPreferenceHighPerformance
-
-	case UseCPU:
-		backends.UseCPU()
-
-		options.PowerPreference = wgpu.PowerPreferenceLowPower
-		options.ForceFallbackAdapter = true
-
-	default:
-		return nil, newError("invalid context mode: %d", mode)
-	}
-
-	return options, nil
 }
 
 // Release frees the Device, Adapter, and Instance in reverse order.

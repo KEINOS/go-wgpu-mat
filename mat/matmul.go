@@ -219,12 +219,43 @@ func matMul(left, right, out *Matrix, deps matMulDeps) error {
 		return err
 	}
 
+	// Detect GPU unavailability and fall back to CPU.
+	if isCPUAdapter(left.ctx) {
+		return matMulCPU(left, right, out)
+	}
+
 	err = deps.dispatch(left, right, out)
 	if err != nil {
 		return wrapError(err, "failed to dispatch matmul")
 	}
 
 	return nil
+}
+
+func matMulCPU(left, right, out *Matrix) error {
+	leftData, err := left.Read()
+	if err != nil {
+		return wrapError(err, "failed to read left")
+	}
+
+	rightData, err := right.Read()
+	if err != nil {
+		return wrapError(err, "failed to read right")
+	}
+
+	result := make([]float32, out.Rows*out.Cols)
+	for row := range left.Rows {
+		for col := range right.Cols {
+			var sum float32
+			for k := range left.Cols {
+				sum += leftData[row*left.Cols+k] * rightData[k*right.Cols+col]
+			}
+
+			result[row*right.Cols+col] = sum
+		}
+	}
+
+	return out.Write(result)
 }
 
 func validateMatMul(left, right, out *Matrix) error {

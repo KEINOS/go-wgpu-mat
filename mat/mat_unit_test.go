@@ -510,7 +510,7 @@ func TestResolveContextMode(t *testing.T) {
 
 	mode, err := resolveContextMode(nil)
 	require.NoError(t, err)
-	assert.Equal(t, UseGPU, mode)
+	assert.Equal(t, UseAuto, mode)
 
 	mode, err = resolveContextMode([]ContextMode{UseCPU})
 	require.NoError(t, err)
@@ -521,24 +521,6 @@ func TestResolveContextMode(t *testing.T) {
 	require.ErrorContains(t, err, "only one context mode")
 
 	_, err = resolveContextMode([]ContextMode{ContextMode(99)})
-	require.Error(t, err)
-	require.ErrorContains(t, err, "invalid context mode")
-}
-
-func TestAdapterOptionsForMode(t *testing.T) {
-	t.Parallel()
-
-	options, err := adapterOptionsForMode(UseGPU)
-	require.NoError(t, err)
-	assert.Equal(t, wgpu.PowerPreferenceHighPerformance, options.PowerPreference)
-	assert.False(t, options.ForceFallbackAdapter)
-
-	options, err = adapterOptionsForMode(UseCPU)
-	require.NoError(t, err)
-	assert.Equal(t, wgpu.PowerPreferenceLowPower, options.PowerPreference)
-	assert.True(t, options.ForceFallbackAdapter)
-
-	_, err = adapterOptionsForMode(ContextMode(77))
 	require.Error(t, err)
 	require.ErrorContains(t, err, "invalid context mode")
 }

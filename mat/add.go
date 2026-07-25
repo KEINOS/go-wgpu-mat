@@ -122,15 +122,6 @@ func isCPUAdapter(ctx *Context) bool {
 		return true
 	}
 
-	// Detect Metal FFI crash (e.g., CGO_ENABLED=0 on darwin/arm64).
-	// If Info() panics due to missing Metal framework, fall back to CPU path.
-	defer func() {
-		if r := recover(); r != nil {
-			// Metal FFI failed — treat as CPU fallback.
-			_ = r
-		}
-	}()
-
 	info := ctx.adapter.Info()
 
 	return info.DeviceType == gputypes.DeviceTypeCPU
@@ -141,13 +132,6 @@ func dispatchAdd(left, right, out *Matrix) error {
 }
 
 func dispatchAddWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error {
-	defer func() {
-		if r := recover(); r != nil {
-			// Metal FFI crash — return a wrapped error.
-			_ = r
-		}
-	}()
-
 	device := left.ctx.device
 
 	bindGroupLayout, err := createAddBindGroupLayout(device, deps)
