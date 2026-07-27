@@ -38,12 +38,14 @@ flowchart TB
     D -->|"Matrix.Read()"| E["Go slice\n[]float32"]
 ```
 
-`MatMul` and non-aliased, same-context `Add` execute through WGSL compute
-shaders and leave their results in the output device buffer until `Read` is
-called. Operations not yet kernelized use
-the compatibility path: read device buffers to the host, compute in Go, and
-write the result back. That distinction is intentional and will be removed one
-operation at a time as kernels are added.
+`MatMul` and `Add` execute through WGSL compute shaders when a GPU is available.
+If the adapter is detected as a CPU or software adapter (e.g., on CI without GPU
+hardware), these operations fall back to a pure-Go CPU implementation. The result
+remains in the output device buffer until `Read` is called.
+
+Operations not yet kernelized use the compatibility path: read device buffers
+to the host, compute in Go, and write the result back. That distinction is
+intentional and will be removed one operation at a time as kernels are added.
 
 ## Installation
 
@@ -83,8 +85,8 @@ func main() {
     }
   }
 
-  // UseGPU (default) or UseCPU
-  ctx, err := mat.NewContext(mat.UseGPU)
+  // UseAuto (default) or UseGPU or UseCPU
+  ctx, err := mat.NewContext()       // UseAuto — try GPU, fall back to CPU
   panicOnErr(err)
 
   defer ctx.Release()
@@ -133,6 +135,7 @@ type ContextMode uint8
 const (
   UseGPU ContextMode = iota
   UseCPU
+  UseAuto
 )
 
 func NewContext(modes ...ContextMode) (*Context, error)
@@ -207,28 +210,15 @@ temporary directory. Configure it with `BENCH_PATTERN`, `BENCH_SAMPLES`,
 latency with a readback after every operation and device-resident latency with
 one final synchronization.
 
-On Go 1.26 and macOS arm64, the upstream Metal callback currently triggers a
-checkptr false positive and intermittent autorelease-pool crashes under
-`-race`. On that platform, `make test` keeps the race detector enabled for the
-pure and mocked unit paths but skips real WGPU tests and examples; the preceding
-CGO-disabled suite still exercises the real WGPU path without race
-instrumentation. Other platforms, including Linux CI, run the complete
-CGO-enabled suite with the race detector and default checkptr behavior.
-
-The Go race detector requires CGO. The `CGO_ENABLED=0` path therefore runs
-tests and coverage without `-race`. The `CGO_ENABLED=1` path runs the same
-tests with the race detector enabled. Lint checks are independent of this test
-matrix and run once.
+The Go race detector requires CGO. `make test` runs the `CGO_ENABLED=0` suite
+first (without race instrumentation) and the `CGO_ENABLED=1` suite second
+(with race detection). Lint checks are independent and run once.
 
 Or run manually:
 
 ```sh
 CGO_ENABLED=0 go test -cover ./...
 CGO_ENABLED=1 go test -race -cover ./...
-
-# Go 1.26 on macOS arm64 with the WGPU Metal integration
-GOMAXPROCS=1 GO_WGPU_MAT_SKIP_GPU_TESTS=1 CGO_ENABLED=1 go test -race \
-  -gcflags=all=-d=checkptr=0 -parallel=1 -run='^Test' -cover ./...
 
 # With HTML coverage report
 go test -coverprofile=cov.out ./...
