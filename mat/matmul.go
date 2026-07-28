@@ -224,6 +224,11 @@ func matMul(left, right, out *Matrix, deps matMulDeps) error {
 		return matMulCPU(left, right, out)
 	}
 
+	err = validateMatMulKernelContract(left, right, out)
+	if err != nil {
+		return err
+	}
+
 	err = deps.dispatch(left, right, out)
 	if err != nil {
 		return wrapError(err, "failed to dispatch matmul")
@@ -243,15 +248,15 @@ func matMulCPU(left, right, out *Matrix) error {
 		return wrapError(err, "failed to read right")
 	}
 
-	result := make([]float32, out.Rows*out.Cols)
-	for row := range left.Rows {
-		for col := range right.Cols {
+	result := make([]float32, out.rows*out.cols)
+	for row := range left.rows {
+		for col := range right.cols {
 			var sum float32
-			for k := range left.Cols {
-				sum += leftData[row*left.Cols+k] * rightData[k*right.Cols+col]
+			for k := range left.cols {
+				sum += leftData[row*left.cols+k] * rightData[k*right.cols+col]
 			}
 
-			result[row*right.Cols+col] = sum
+			result[row*right.cols+col] = sum
 		}
 	}
 
@@ -279,7 +284,12 @@ func validateMatMul(left, right, out *Matrix) error {
 		return err
 	}
 
-	err = validateMatMulKernelContract(left, right, out)
+	err = validateSameContext(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, left, right)
 	if err != nil {
 		return err
 	}
@@ -288,17 +298,14 @@ func validateMatMul(left, right, out *Matrix) error {
 }
 
 func validateMatMulKernelContract(left, right, out *Matrix) error {
-	if left.ctx != right.ctx || left.ctx != out.ctx {
-		return newError("matrices must use the same context")
-	}
-
-	if out == left || out == right {
-		return newError("out must not alias an input")
-	}
-
-	if left.Rows > math.MaxUint32 || left.Cols > math.MaxUint32 ||
-		right.Cols > math.MaxUint32 {
-		return newError("matrix dimensions exceed GPU kernel limits")
+	if left.rows > math.MaxUint32 || left.cols > math.MaxUint32 ||
+		right.cols > math.MaxUint32 {
+		return sentinelError(
+			ErrKernelLimit,
+			"matrix dimensions exceed GPU kernel limits: left=%s right=%s",
+			left.Shape(),
+			right.Shape(),
+		)
 	}
 
 	return validateMatMulDispatchLimits(left.ctx, out)
@@ -306,9 +313,18 @@ func validateMatMulKernelContract(left, right, out *Matrix) error {
 
 func validateMatMulDispatchLimits(ctx *Context, out *Matrix) error {
 	maxWorkgroups := ctx.limits.MaxComputeWorkgroupsPerDimension
-	if maxWorkgroups > 0 && (ceilDiv(dimensionU32(out.Cols), matMulWorkgroup) > maxWorkgroups ||
-		ceilDiv(dimensionU32(out.Rows), matMulWorkgroup) > maxWorkgroups) {
-		return newError("matmul dispatch exceeds device workgroup limits")
+	xWorkgroups := ceilDiv(dimensionU32(out.cols), matMulWorkgroup)
+	yWorkgroups := ceilDiv(dimensionU32(out.rows), matMulWorkgroup)
+
+	if maxWorkgroups > 0 &&
+		(xWorkgroups > maxWorkgroups || yWorkgroups > maxWorkgroups) {
+		return sentinelError(
+			ErrDeviceLimit,
+			"matmul dispatch exceeds device workgroup limits: need %dx%d, max %d per dimension",
+			xWorkgroups,
+			yWorkgroups,
+			maxWorkgroups,
+		)
 	}
 
 	return nil
@@ -362,8 +378,8 @@ func encodeAndSubmitMatMul(
 		pipeline,
 		bindGroup,
 		computeDispatch{
-			x: ceilDiv(dimensionU32(out.Cols), matMulWorkgroup),
-			y: ceilDiv(dimensionU32(out.Rows), matMulWorkgroup),
+			x: ceilDiv(dimensionU32(out.cols), matMulWorkgroup),
+			y: ceilDiv(dimensionU32(out.rows), matMulWorkgroup),
 			z: 1,
 		},
 		"matmul",
@@ -400,8 +416,8 @@ func createMatMulPipeline(
 }
 
 func matrixByteSize(matrix *Matrix) uint64 {
-	rows := uint64(matrix.Rows) //nolint:gosec // NewMatrix requires positive dimensions.
-	cols := uint64(matrix.Cols) //nolint:gosec // NewMatrix requires positive dimensions.
+	rows := uint64(matrix.rows) //nolint:gosec // NewMatrix requires positive dimensions.
+	cols := uint64(matrix.cols) //nolint:gosec // NewMatrix requires positive dimensions.
 
 	return rows * cols * bytesPerFloat32U64
 }
@@ -430,9 +446,9 @@ func createMatMulUniform(
 	}
 
 	dimensions := make([]byte, matMulUniformSize)
-	binary.LittleEndian.PutUint32(dimensions[0:4], dimensionU32(left.Rows))
-	binary.LittleEndian.PutUint32(dimensions[4:8], dimensionU32(left.Cols))
-	binary.LittleEndian.PutUint32(dimensions[8:12], dimensionU32(right.Cols))
+	binary.LittleEndian.PutUint32(dimensions[0:4], dimensionU32(left.rows))
+	binary.LittleEndian.PutUint32(dimensions[4:8], dimensionU32(left.cols))
+	binary.LittleEndian.PutUint32(dimensions[8:12], dimensionU32(right.cols))
 
 	err = deps.writeBuffer(device, uniform, 0, dimensions)
 	if err != nil {

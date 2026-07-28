@@ -1,12 +1,20 @@
 package mat
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"sync/atomic"
 
 	"github.com/KEINOS/go-wgpu-mat/mat/internal/backends"
 	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
+)
+
+var (
+	errNilBackendInstance = errors.New("backend returned a nil instance")
+	errNilBackendAdapter  = errors.New("backend returned a nil adapter")
+	errNilBackendDevice   = errors.New("backend returned a nil device")
 )
 
 // Context holds a live WGPU Instance, Adapter, and Device.
@@ -17,6 +25,9 @@ type Context struct {
 	device   *wgpu.Device
 	pipes    *pipelineCache
 	limits   gputypes.Limits
+	mode     ContextMode
+	isCPU    bool
+	infoSet  bool
 	released atomic.Uint32
 }
 
@@ -24,17 +35,28 @@ type Context struct {
 type ContextMode uint8
 
 const (
-	// UseGPU prefers a high-performance GPU adapter.
+	// UseGPU requires a non-CPU, high-performance adapter.
 	UseGPU ContextMode = iota
 	// UseCPU forces a fallback adapter (software backend).
 	UseCPU
-	// UseAuto is the same as UseGPU — GPU operations fall back to CPU
-	// when isCPUAdapter() detects an unavailable GPU (e.g., CI without
-	// GPU hardware or CGO_ENABLED=0 where Metal FFI fails). This mode
-	// enables the same code to run on any platform without requiring
-	// build tags or environment variables.
+	// UseAuto tries a high-performance GPU adapter first, then retries with a
+	// software/fallback adapter if no GPU adapter is available.
 	UseAuto
 )
+
+// String returns the stable name of the context mode.
+func (m ContextMode) String() string {
+	switch m {
+	case UseGPU:
+		return "gpu"
+	case UseCPU:
+		return "cpu"
+	case UseAuto:
+		return "auto"
+	default:
+		return "ContextMode(" + strconv.FormatUint(uint64(m), 10) + ")"
+	}
+}
 
 type contextDeps struct {
 	createInstance func(*wgpu.InstanceDescriptor) (*wgpu.Instance, error)
@@ -44,7 +66,9 @@ type contextDeps struct {
 	requestDevice func(*wgpu.Adapter, *wgpu.DeviceDescriptor) (
 		*wgpu.Device, error,
 	)
+	adapterInfo     func(*wgpu.Adapter) gputypes.AdapterInfo
 	deviceLimits    func(*wgpu.Device) gputypes.Limits
+	releaseDevice   func(*wgpu.Device)
 	releaseInstance func(*wgpu.Instance)
 	releaseAdapter  func(*wgpu.Adapter)
 }
@@ -64,8 +88,16 @@ func defaultContextDeps() contextDeps {
 	) (*wgpu.Device, error) {
 		return adapter.RequestDevice(desc)
 	}
+	deps.adapterInfo = func(adapter *wgpu.Adapter) gputypes.AdapterInfo {
+		return adapter.Info()
+	}
 	deps.deviceLimits = func(device *wgpu.Device) gputypes.Limits {
 		return device.Limits()
+	}
+	deps.releaseDevice = func(device *wgpu.Device) {
+		if device != nil {
+			device.Release()
+		}
 	}
 	deps.releaseInstance = func(inst *wgpu.Instance) {
 		if inst != nil {
@@ -101,49 +133,43 @@ func NewContext(modes ...ContextMode) (*Context, error) {
 }
 
 func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
-	var opts *wgpu.RequestAdapterOptions
-
-	switch mode {
-	case UseAuto, UseGPU:
-		backends.UseGPU()
-
-		opts = &wgpu.RequestAdapterOptions{
-			PowerPreference:      wgpu.PowerPreferenceHighPerformance,
-			ForceFallbackAdapter: false,
-			CompatibleSurface:    nil,
-		}
-
-	case UseCPU:
-		backends.UseCPU()
-
-		opts = &wgpu.RequestAdapterOptions{
-			PowerPreference:      wgpu.PowerPreferenceLowPower,
-			ForceFallbackAdapter: true,
-			CompatibleSurface:    nil,
-		}
-
-	default:
-		return nil, newError("invalid context mode: %d", mode)
+	adapterOptions, err := contextAdapterOptions(mode)
+	if err != nil {
+		return nil, err
 	}
 
 	inst, err := deps.createInstance(nil)
 	if err != nil {
+		deps.releaseInstance(inst)
+
 		return nil, fmt.Errorf("mat: create instance: %w", err)
 	}
 
-	adapter, err := deps.requestAdapter(inst, opts)
-	if err != nil || adapter == nil {
-		deps.releaseInstance(inst)
-
-		return nil, fmt.Errorf("mat: request adapter: %w", err)
+	if inst == nil {
+		return nil, sentinelWrapError(
+			ErrBackendUnavailable,
+			errNilBackendInstance,
+			"create instance",
+		)
 	}
 
-	dev, err := deps.requestDevice(adapter, nil)
-	if err != nil {
+	adapter, dev, backendErr := requestFirstAvailableDevice(deps, inst, adapterOptions)
+	if backendErr != nil {
+		deps.releaseInstance(inst)
+
+		return nil, backendErr
+	}
+
+	adapterInfo := deps.adapterInfo(adapter)
+	if mode == UseGPU && adapterInfo.DeviceType == gputypes.DeviceTypeCPU {
+		deps.releaseDevice(dev)
 		deps.releaseAdapter(adapter)
 		deps.releaseInstance(inst)
 
-		return nil, fmt.Errorf("mat: request device: %w", err)
+		return nil, sentinelError(
+			ErrBackendUnavailable,
+			"request GPU adapter: backend selected a CPU adapter",
+		)
 	}
 
 	return &Context{
@@ -152,8 +178,101 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		device:   dev,
 		pipes:    newPipelineCache(defaultReleaseComputePipeline),
 		limits:   deps.deviceLimits(dev),
+		mode:     mode,
+		isCPU:    adapterInfo.DeviceType == gputypes.DeviceTypeCPU,
+		infoSet:  true,
 		released: atomic.Uint32{},
 	}, nil
+}
+
+func contextAdapterOptions(mode ContextMode) ([]*wgpu.RequestAdapterOptions, error) {
+	gpu := &wgpu.RequestAdapterOptions{
+		PowerPreference:      wgpu.PowerPreferenceHighPerformance,
+		ForceFallbackAdapter: false,
+		CompatibleSurface:    nil,
+	}
+	cpu := &wgpu.RequestAdapterOptions{
+		PowerPreference:      wgpu.PowerPreferenceLowPower,
+		ForceFallbackAdapter: true,
+		CompatibleSurface:    nil,
+	}
+
+	switch mode {
+	case UseGPU:
+		backends.UseGPU()
+
+		return []*wgpu.RequestAdapterOptions{gpu}, nil
+	case UseCPU:
+		backends.UseCPU()
+
+		return []*wgpu.RequestAdapterOptions{cpu}, nil
+	case UseAuto:
+		backends.UseGPU()
+		backends.UseCPU()
+
+		return []*wgpu.RequestAdapterOptions{gpu, cpu}, nil
+	default:
+		return nil, sentinelError(ErrInvalidMode, "invalid context mode: %d", mode)
+	}
+}
+
+func requestFirstAvailableDevice(
+	deps contextDeps,
+	instance *wgpu.Instance,
+	options []*wgpu.RequestAdapterOptions,
+) (*wgpu.Adapter, *wgpu.Device, error) {
+	var lastErr error
+
+	lastStage := "request adapter"
+
+	for _, option := range options {
+		adapter, err := deps.requestAdapter(instance, option)
+		if err != nil {
+			lastErr = err
+
+			if adapter != nil {
+				deps.releaseAdapter(adapter)
+			}
+
+			continue
+		}
+
+		if adapter == nil {
+			lastErr = errNilBackendAdapter
+
+			continue
+		}
+
+		device, err := deps.requestDevice(adapter, nil)
+		if err == nil && device != nil {
+			return adapter, device, nil
+		}
+
+		if device != nil {
+			deps.releaseDevice(device)
+		}
+
+		deps.releaseAdapter(adapter)
+
+		lastStage = "request device"
+
+		if err != nil {
+			lastErr = err
+		} else {
+			lastErr = errNilBackendDevice
+		}
+	}
+
+	if lastErr == nil {
+		lastErr = ErrBackendUnavailable
+	}
+
+	return nil, nil, sentinelWrapError(
+		ErrBackendUnavailable,
+		lastErr,
+		"%s",
+		lastStage,
+	)
 }
 
 func resolveContextMode(modes []ContextMode) (ContextMode, error) {
@@ -162,15 +281,33 @@ func resolveContextMode(modes []ContextMode) (ContextMode, error) {
 	}
 
 	if len(modes) > 1 {
-		return 0, newError("only one context mode can be specified")
+		return 0, sentinelError(
+			ErrInvalidMode,
+			"only one context mode can be specified",
+		)
 	}
 
 	mode := modes[0]
 	if mode != UseGPU && mode != UseCPU && mode != UseAuto {
-		return 0, newError("invalid context mode: %d", mode)
+		return 0, sentinelError(ErrInvalidMode, "invalid context mode: %d", mode)
 	}
 
 	return mode, nil
+}
+
+// Mode reports the mode requested when this Context was created. For UseAuto,
+// the actual adapter may be either hardware or software.
+func (c *Context) Mode() ContextMode {
+	if c == nil {
+		return UseAuto
+	}
+
+	return c.mode
+}
+
+// Released reports whether Release has been called.
+func (c *Context) Released() bool {
+	return c == nil || c.released.Load() != 0
 }
 
 // Release frees the Device, Adapter, and Instance in reverse order.
@@ -202,16 +339,24 @@ func (c *Context) Release() {
 	}
 }
 
+// Close releases the context and always returns nil. It allows Context to be
+// used as an io.Closer while preserving the idempotent Release API.
+func (c *Context) Close() error {
+	c.Release()
+
+	return nil
+}
+
 func (c *Context) getOrCreatePipeline(
 	key string,
 	factory func() (*wgpu.ComputePipeline, error),
 ) (*wgpu.ComputePipeline, error) {
 	if c == nil {
-		return nil, newError("context is nil")
+		return nil, sentinelError(ErrNilContext, "context is nil")
 	}
 
 	if c.released.Load() != 0 {
-		return nil, newError("context is released")
+		return nil, sentinelError(ErrContextReleased, "context is released")
 	}
 
 	if c.pipes == nil {

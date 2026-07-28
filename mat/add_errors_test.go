@@ -219,13 +219,13 @@ func TestAddKernelLimits(t *testing.T) {
 	err := validateAddKernelContract(out)
 	require.ErrorContains(t, err, "matrix dimensions exceed add kernel limits")
 
-	out.Rows = math.MaxUint32
-	out.Cols = 2
+	out.rows = math.MaxUint32
+	out.cols = 2
 	err = validateAddKernelContract(out)
 	require.ErrorContains(t, err, "matrix dimensions exceed add kernel limits")
 
-	out.Rows = 257
-	out.Cols = 1
+	out.rows = 257
+	out.cols = 1
 	out.ctx.limits.MaxComputeWorkgroupsPerDimension = 1
 	err = validateAddKernelContract(out)
 	require.ErrorContains(t, err, "add dispatch exceeds device workgroup limits")

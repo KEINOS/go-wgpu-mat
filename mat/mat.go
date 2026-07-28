@@ -3,6 +3,7 @@ package mat
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 	"math"
 	"math/bits"
 	"sync/atomic"
@@ -23,19 +24,44 @@ const (
 //  Type: Matrix
 // ============================================================================
 
-// Matrix represents a 2D float32 array stored on the GPU.
+// Shape is the immutable-by-copy shape of a Matrix.
+type Shape struct {
+	rows int
+	cols int
+}
+
+// String formats a shape as "rowsxcols".
+func (s Shape) String() string {
+	return fmt.Sprintf("%dx%d", s.rows, s.cols)
+}
+
+// Rows returns the number of rows.
+func (s Shape) Rows() int {
+	return s.rows
+}
+
+// Cols returns the number of columns.
+func (s Shape) Cols() int {
+	return s.cols
+}
+
+// Len returns the number of elements in the shape. Shapes returned by Matrix
+// are always valid and cannot overflow int.
+func (s Shape) Len() int {
+	return s.rows * s.cols
+}
+
+// Matrix represents a 2D float32 array stored in a WGPU storage buffer.
 //
 // Data is stored in row-major order: element (r, c) is at
-// index r*Cols + c within the underlying GPU buffer.
+// index r*Cols() + c within the underlying GPU buffer.
 //
-// All operations on a Matrix submit commands to the GPU queue.
-// Results are synchronized on Read.
+// Kernelized GPU operations submit commands to the device queue. CPU fallback
+// and host compatibility operations complete synchronously. Read waits for
+// pending device work before returning host data.
 type Matrix struct {
-	// Rows is the number of rows.
-	Rows int
-	// Cols is the number of columns.
-	Cols int
-
+	rows     int
+	cols     int
 	buf      *wgpu.Buffer
 	ctx      *Context
 	released atomic.Uint32
@@ -46,7 +72,7 @@ type Matrix struct {
 //  Constructors
 // ----------------------------------------------------------------------------
 
-// NewMatrix allocates a GPU buffer for a rows x cols float32 matrix.
+// NewMatrix allocates a WGPU buffer for a rows x cols float32 matrix.
 // The initial buffer contents are undefined; call Write to upload
 // data before performing calculations.
 func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error) {
@@ -58,42 +84,23 @@ func newMatrix(
 	rows, cols int,
 	deps matrixDeps,
 ) (*Matrix, error) {
-	if ctx == nil {
-		return nil, newError("context is nil")
+	err := validateContextForMatrix(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	if ctx.released.Load() != 0 {
-		return nil, newError("context is released")
+	size, err := matrixBufferSize(rows, cols)
+	if err != nil {
+		return nil, err
 	}
 
-	if ctx.device == nil {
-		return nil, newError("context is nil")
-	}
-
-	if rows <= 0 || cols <= 0 {
-		return nil, newError("matrix dimensions must be positive")
-	}
-
-	rowCount := uint64(rows)
-	colCount := uint64(cols)
-
-	high, elementCount := bits.Mul64(rowCount, colCount)
-	if high != 0 {
-		return nil, newError("matrix dimensions overflow")
-	}
-
-	high, size := bits.Mul64(elementCount, bytesPerFloat32U64)
-	if high != 0 {
-		return nil, newError("matrix byte size overflow")
-	}
-
-	err := validateDeviceBufferSize(ctx, size)
+	err = validateDeviceBufferSize(ctx, size)
 	if err != nil {
 		return nil, err
 	}
 
 	bufferDescriptor := new(wgpu.BufferDescriptor)
-	bufferDescriptor.Label = "go-wgpu-mat"
+	bufferDescriptor.Label = fmt.Sprintf("go-wgpu-mat-%dx%d", rows, cols)
 	bufferDescriptor.Size = size
 	bufferDescriptor.Usage = wgpu.BufferUsageStorage |
 		wgpu.BufferUsageCopyDst |
@@ -104,9 +111,16 @@ func newMatrix(
 		return nil, wrapError(err, "failed to create buffer")
 	}
 
+	if buf == nil {
+		return nil, sentinelError(
+			ErrBackendUnavailable,
+			"failed to create buffer: backend returned a nil buffer",
+		)
+	}
+
 	matrix := new(Matrix)
-	matrix.Rows = rows
-	matrix.Cols = cols
+	matrix.rows = rows
+	matrix.cols = cols
 	matrix.buf = buf
 	matrix.ctx = ctx
 	matrix.deps = deps
@@ -114,9 +128,61 @@ func newMatrix(
 	return matrix, nil
 }
 
+func validateContextForMatrix(ctx *Context) error {
+	if ctx == nil {
+		return sentinelError(ErrNilContext, "context is nil")
+	}
+
+	if ctx.released.Load() != 0 {
+		return sentinelError(ErrContextReleased, "context is released")
+	}
+
+	if ctx.device == nil {
+		return sentinelError(
+			ErrContextNotInitialized,
+			"context is not initialized",
+		)
+	}
+
+	return nil
+}
+
+func matrixBufferSize(rows, cols int) (uint64, error) {
+	if rows <= 0 || cols <= 0 {
+		return 0, sentinelError(
+			ErrInvalidDimension,
+			"matrix dimensions must be positive: got %dx%d",
+			rows,
+			cols,
+		)
+	}
+
+	high, elementCount := bits.Mul64(uint64(rows), uint64(cols))
+	if high != 0 {
+		return 0, sentinelError(
+			ErrOverflow,
+			"matrix dimensions overflow: %dx%d",
+			rows,
+			cols,
+		)
+	}
+
+	high, size := bits.Mul64(elementCount, bytesPerFloat32U64)
+	if high != 0 {
+		return 0, sentinelError(
+			ErrOverflow,
+			"matrix byte size overflow: %d elements",
+			elementCount,
+		)
+	}
+
+	return size, nil
+}
+
 func validateDeviceBufferSize(ctx *Context, size uint64) error {
 	if ctx.limits.MaxBufferSize > 0 && size > ctx.limits.MaxBufferSize {
-		return newError(
+		return sentinelError(
+			ErrDeviceLimit,
 			"matrix byte size %d exceeds device maximum buffer size %d",
 			size,
 			ctx.limits.MaxBufferSize,
@@ -125,7 +191,8 @@ func validateDeviceBufferSize(ctx *Context, size uint64) error {
 
 	if ctx.limits.MaxStorageBufferBindingSize > 0 &&
 		size > ctx.limits.MaxStorageBufferBindingSize {
-		return newError(
+		return sentinelError(
+			ErrDeviceLimit,
 			"matrix byte size %d exceeds device maximum storage buffer binding size %d",
 			size,
 			ctx.limits.MaxStorageBufferBindingSize,
@@ -139,25 +206,83 @@ func validateDeviceBufferSize(ctx *Context, size uint64) error {
 //  Methods
 // ----------------------------------------------------------------------------
 
+// Rows returns the number of rows.
+func (m *Matrix) Rows() int {
+	if m == nil {
+		return 0
+	}
+
+	return m.rows
+}
+
+// Cols returns the number of columns.
+func (m *Matrix) Cols() int {
+	if m == nil {
+		return 0
+	}
+
+	return m.cols
+}
+
+// Shape returns the matrix shape as an immutable-by-copy value.
+func (m *Matrix) Shape() Shape {
+	if m == nil {
+		return Shape{rows: 0, cols: 0}
+	}
+
+	return Shape{rows: m.rows, cols: m.cols}
+}
+
+// Len returns the number of matrix elements.
+func (m *Matrix) Len() int {
+	if m == nil {
+		return 0
+	}
+
+	return m.rows * m.cols
+}
+
+// Released reports whether Release has been called.
+func (m *Matrix) Released() bool {
+	return m == nil || m.released.Load() != 0
+}
+
+// String returns a compact diagnostic representation of the matrix.
+func (m *Matrix) String() string {
+	if m == nil {
+		return "Matrix<nil>"
+	}
+
+	if m.Released() {
+		return fmt.Sprintf("Matrix[%s, released]", m.Shape())
+	}
+
+	return fmt.Sprintf("Matrix[%s]", m.Shape())
+}
+
 // Write uploads data to the GPU buffer.
-// data must have exactly m.Rows*m.Cols elements.
+// data must have exactly m.Len() elements.
 func (m *Matrix) Write(data []float32) error {
 	if m == nil || m.ctx == nil || m.buf == nil {
-		return newError("matrix is not initialized")
+		return sentinelError(ErrNotInitialized, "matrix is not initialized")
 	}
 
 	if m.released.Load() != 0 {
-		return newError("matrix is released")
+		return sentinelError(ErrReleased, "matrix is released")
 	}
 
 	if m.ctx.released.Load() != 0 {
-		return newError("context is released")
+		return sentinelError(ErrContextReleased, "context is released")
 	}
 
-	want := m.Rows * m.Cols
+	want := m.Len()
 	if len(data) != want {
-		return newError(
-			"fail to write: got %d elements, want %d", len(data), want,
+		return sentinelError(
+			ErrLengthMismatch,
+			"fail to write %s: got %d elements, want %d",
+			m.Shape(),
+			len(data),
+			want,
 		)
 	}
 
@@ -177,21 +302,21 @@ func (m *Matrix) Write(data []float32) error {
 }
 
 // Read downloads the matrix data from the GPU and returns it as a
-// flat float32 slice in row-major order (length = m.Rows*m.Cols).
+// flat float32 slice in row-major order (length = m.Len()).
 func (m *Matrix) Read() ([]float32, error) {
 	if m == nil || m.ctx == nil || m.buf == nil {
-		return nil, newError("matrix is not initialized")
+		return nil, sentinelError(ErrNotInitialized, "matrix is not initialized")
 	}
 
 	if m.released.Load() != 0 {
-		return nil, newError("matrix is released")
+		return nil, sentinelError(ErrReleased, "matrix is released")
 	}
 
 	if m.ctx.released.Load() != 0 {
-		return nil, newError("context is released")
+		return nil, sentinelError(ErrContextReleased, "context is released")
 	}
 
-	elementCount := m.Rows * m.Cols
+	elementCount := m.Len()
 
 	raw := make([]byte, elementCount*bytesPerFloat32Int)
 
@@ -221,6 +346,14 @@ func (m *Matrix) Release() {
 	if m.buf != nil {
 		m.buf.Release()
 	}
+}
+
+// Close releases the matrix and always returns nil. It allows Matrix to be
+// used as an io.Closer while preserving the idempotent Release API.
+func (m *Matrix) Close() error {
+	m.Release()
+
+	return nil
 }
 
 // ============================================================================
@@ -338,11 +471,10 @@ func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps
 	if err != nil {
 		return wrapError(err, "finish readback encoder")
 	}
+	defer deps.releaseCommandBuffer(commandBuffer)
 
 	err = deps.submit(ctx, commandBuffer)
 	if err != nil {
-		deps.releaseCommandBuffer(commandBuffer)
-
 		return wrapError(err, "submit readback")
 	}
 

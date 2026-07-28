@@ -39,9 +39,15 @@ func newTestContextDeps() contextDeps {
 	) (*wgpu.Device, error) {
 		return new(wgpu.Device), nil
 	}
+	deps.adapterInfo = func(*wgpu.Adapter) gputypes.AdapterInfo {
+		var info gputypes.AdapterInfo
+
+		return info
+	}
 	deps.deviceLimits = func(*wgpu.Device) gputypes.Limits {
 		return gputypes.DefaultLimits()
 	}
+	deps.releaseDevice = func(*wgpu.Device) {}
 	deps.releaseInstance = func(*wgpu.Instance) {}
 	deps.releaseAdapter = func(*wgpu.Adapter) {}
 
@@ -155,7 +161,7 @@ func TestReadBufferCopiesMappedDataAndReleasesResources(t *testing.T) {
 	assert.Equal(t, want, got)
 	assert.True(t, releasedBuffer)
 	assert.True(t, releasedRange)
-	assert.False(t, releasedCommandBuffer)
+	assert.True(t, releasedCommandBuffer)
 	assert.True(t, copyCalled)
 	assert.True(t, submitCalled)
 	assert.True(t, unmapped)
@@ -421,7 +427,8 @@ func TestNewMatrixRejectsContextWithoutDevice(t *testing.T) {
 	matrix, err := newMatrix(new(Context), 1, 1, deps)
 
 	assert.Nil(t, matrix)
-	require.ErrorContains(t, err, "context is nil")
+	require.ErrorContains(t, err, "context is not initialized")
+	require.ErrorIs(t, err, ErrContextNotInitialized)
 }
 
 func TestNewMatrixRejectsDeviceBufferLimits(t *testing.T) {
@@ -482,6 +489,7 @@ func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
 	deps := defaultContextDeps()
 
 	require.NotPanics(t, func() {
+		deps.releaseDevice(nil)
 		deps.releaseInstance(nil)
 		deps.releaseAdapter(nil)
 	})
@@ -493,7 +501,7 @@ func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
 	require.NotNil(t, ctx.adapter)
 	require.NotNil(t, ctx.instance)
 
-	ctx.device.Release()
+	deps.releaseDevice(ctx.device)
 	ctx.device = nil
 
 	require.NotPanics(t, func() {
@@ -615,6 +623,26 @@ func TestNewMatrixCreateBufferError(t *testing.T) {
 	require.ErrorContains(t, err, "mat: failed to create buffer")
 }
 
+func TestNewMatrixRejectsNilBuffer(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	ctx.device = new(wgpu.Device)
+	deps := defaultMatrixDeps()
+	deps.createBuffer = func(
+		*Context,
+		*wgpu.BufferDescriptor,
+	) (*wgpu.Buffer, error) {
+		return nil, nil //nolint:nilnil // verify defensive nil handling
+	}
+
+	matrix, err := newMatrix(ctx, 2, 2, deps)
+
+	assert.Nil(t, matrix)
+	require.ErrorIs(t, err, ErrBackendUnavailable)
+	require.ErrorContains(t, err, "nil buffer")
+}
+
 func TestNewMatrixSuccessInjectedDeps(t *testing.T) {
 	t.Parallel()
 
@@ -635,8 +663,8 @@ func TestNewMatrixSuccessInjectedDeps(t *testing.T) {
 	matrix, err := newMatrix(ctx, 2, 2, *deps)
 
 	require.NoError(t, err)
-	assert.Equal(t, 2, matrix.Rows)
-	assert.Equal(t, 2, matrix.Cols)
+	assert.Equal(t, 2, matrix.rows)
+	assert.Equal(t, 2, matrix.cols)
 	assert.Equal(t, buffer, matrix.buf)
 }
 
@@ -655,8 +683,8 @@ func TestMatrixWriteLenMismatch(t *testing.T) {
 	t.Parallel()
 
 	matrix := new(Matrix)
-	matrix.Rows = 2
-	matrix.Cols = 2
+	matrix.rows = 2
+	matrix.cols = 2
 	matrix.ctx = new(Context)
 	matrix.buf = new(wgpu.Buffer)
 
@@ -681,8 +709,8 @@ func TestMatrixWriteBackendError(t *testing.T) {
 	t.Parallel()
 
 	matrix := new(Matrix)
-	matrix.Rows = 1
-	matrix.Cols = 1
+	matrix.rows = 1
+	matrix.cols = 1
 	matrix.ctx = new(Context)
 	matrix.buf = new(wgpu.Buffer)
 
@@ -709,8 +737,8 @@ func TestMatrixWriteSuccessConvertsToBytes(t *testing.T) {
 	t.Parallel()
 
 	matrix := new(Matrix)
-	matrix.Rows = 1
-	matrix.Cols = 2
+	matrix.rows = 1
+	matrix.cols = 2
 	matrix.ctx = new(Context)
 	matrix.buf = new(wgpu.Buffer)
 
@@ -756,8 +784,8 @@ func TestMatrixReadBackendError(t *testing.T) {
 	t.Parallel()
 
 	matrix := new(Matrix)
-	matrix.Rows = 1
-	matrix.Cols = 1
+	matrix.rows = 1
+	matrix.cols = 1
 	matrix.ctx = new(Context)
 	matrix.buf = new(wgpu.Buffer)
 
@@ -785,8 +813,8 @@ func TestMatrixReadSuccessConvertsFromBytes(t *testing.T) {
 	t.Parallel()
 
 	matrix := new(Matrix)
-	matrix.Rows = 1
-	matrix.Cols = 2
+	matrix.rows = 1
+	matrix.cols = 2
 	matrix.ctx = new(Context)
 	matrix.buf = new(wgpu.Buffer)
 

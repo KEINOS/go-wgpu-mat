@@ -45,12 +45,6 @@ func add(left, right, out *Matrix, deps addDeps) error {
 		return err
 	}
 
-	if left.ctx != right.ctx || left.ctx != out.ctx || out == left || out == right {
-		return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
-			return a + b
-		})
-	}
-
 	// Detect GPU unavailability (e.g., no GPU on CI runner) and fall back to CPU.
 	// When the adapter is a software/CPU adapter, the WGSL kernel silently returns zeros.
 	if isCPUAdapter(left.ctx) {
@@ -73,45 +67,42 @@ func add(left, right, out *Matrix, deps addDeps) error {
 }
 
 func validateAdd(left, right, out *Matrix) error {
-	matrices := []struct {
-		name   string
-		matrix *Matrix
-	}{
-		{name: "left", matrix: left},
-		{name: "right", matrix: right},
-		{name: "out", matrix: out},
-	}
-
-	for _, item := range matrices {
-		err := validateMatrixInitialized(item.name, item.matrix)
-		if err != nil {
-			return err
-		}
-	}
-
-	return validateSameShape(left, right, out)
+	return validateBinaryOperation(left, right, out)
 }
 
 func validateAddKernelContract(out *Matrix) error {
-	rows := uint64(out.Rows) //nolint:gosec // NewMatrix requires positive dimensions.
-	cols := uint64(out.Cols) //nolint:gosec // NewMatrix requires positive dimensions.
+	rows := uint64(out.rows) //nolint:gosec // NewMatrix requires positive dimensions.
+	cols := uint64(out.cols) //nolint:gosec // NewMatrix requires positive dimensions.
 
 	elementCount := rows * cols
 	if elementCount == 0 || elementCount > math.MaxUint32 {
-		return newError("matrix dimensions exceed add kernel limits")
+		return sentinelError(
+			ErrKernelLimit,
+			"matrix dimensions exceed add kernel limits: out=%s",
+			out.Shape(),
+		)
 	}
 
 	workgroups := ceilDiv(uint32(elementCount), addWorkgroupSize)
 
 	maxWorkgroups := out.ctx.limits.MaxComputeWorkgroupsPerDimension
 	if maxWorkgroups > 0 && workgroups > maxWorkgroups {
-		return newError("add dispatch exceeds device workgroup limits")
+		return sentinelError(
+			ErrDeviceLimit,
+			"add dispatch exceeds device workgroup limits: need %d, max %d",
+			workgroups,
+			maxWorkgroups,
+		)
 	}
 
 	return nil
 }
 
 func isCPUAdapter(ctx *Context) bool {
+	if ctx.infoSet {
+		return ctx.isCPU
+	}
+
 	// Mock contexts have no adapter or pipes — keep them as real GPU path for tests.
 	if ctx.adapter == nil && ctx.pipes == nil {
 		return false
@@ -216,8 +207,8 @@ func encodeAndSubmitAdd(
 	out *Matrix,
 	deps matMulWGPUDeps,
 ) error {
-	rows := uint64(out.Rows)            //nolint:gosec // validateAddKernelContract checks this conversion.
-	cols := uint64(out.Cols)            //nolint:gosec // validateAddKernelContract checks this conversion.
+	rows := uint64(out.rows)            //nolint:gosec // validateAddKernelContract checks this conversion.
+	cols := uint64(out.cols)            //nolint:gosec // validateAddKernelContract checks this conversion.
 	elementCount := uint32(rows * cols) //nolint:gosec // Dispatch follows validateAddKernelContract.
 
 	return encodeAndSubmitCompute(

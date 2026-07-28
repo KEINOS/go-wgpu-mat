@@ -1,6 +1,7 @@
 package mat_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -26,13 +27,14 @@ func Example() {
 		}
 	}
 
-	// UseGPU (default) or UseCPU
-	ctx, err := mat.NewContext(mat.UseGPU)
+	// Examples use the deterministic CPU backend. Applications normally use
+	// NewContext() (UseAuto) to prefer a GPU and fall back to CPU.
+	ctx, err := mat.NewContext(mat.UseCPU)
 	panicOnErr(err)
 
 	defer ctx.Release()
 
-	// 2×2 matrices stored on the GPU
+	// 2×2 matrices stored in WGPU buffers
 	a, err := mat.NewMatrix(ctx, 2, 2)
 	panicOnErr(err)
 
@@ -52,7 +54,7 @@ func Example() {
 	err = b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
 	panicOnErr(err)
 
-	// Compute C = A × B on the GPU
+	// Compute C = A × B
 	err = mat.MatMul(a, b, c)
 	panicOnErr(err)
 
@@ -67,7 +69,7 @@ func Example() {
 
 // Example of creating a new matrix for a compute context.
 func ExampleNewMatrix() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +82,7 @@ func ExampleNewMatrix() {
 	defer mtx.Release()
 
 	fmt.Printf("Type: %T\n", mtx)
-	fmt.Printf("Matrix: %dx%d\n", mtx.Rows, mtx.Cols)
+	fmt.Printf("Matrix: %dx%d\n", mtx.Rows(), mtx.Cols())
 	// Output:
 	// Type: *mat.Matrix
 	// Matrix: 2x3
@@ -88,7 +90,7 @@ func ExampleNewMatrix() {
 
 //nolint:dupl // allow dup for clarity in examples
 func ExampleMatMul() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -139,7 +141,7 @@ func ExampleMatMul() {
 
 //nolint:dupl // allow dup for clarity in examples
 func ExampleAdd() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -189,7 +191,7 @@ func ExampleAdd() {
 }
 
 func ExampleScale() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -231,7 +233,7 @@ func ExampleScale() {
 }
 
 func ExampleTransp() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -273,7 +275,7 @@ func ExampleTransp() {
 }
 
 func ExampleReduceSum() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -315,7 +317,7 @@ func ExampleReduceSum() {
 }
 
 func ExampleReduceMax() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -357,7 +359,7 @@ func ExampleReduceMax() {
 }
 
 func ExampleSoftmax() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -399,7 +401,7 @@ func ExampleSoftmax() {
 }
 
 func ExampleRMSNorm() {
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
 		panic(err)
 	}
@@ -491,6 +493,12 @@ func TestNewContext_modes(t *testing.T) {
 	require.NotPanics(t, func() { ctxCPU.Release() })
 
 	ctxGPU, err := mat.NewContext(mat.UseGPU)
+	if errors.Is(err, mat.ErrBackendUnavailable) {
+		assert.Nil(t, ctxGPU)
+
+		return
+	}
+
 	require.NoError(t, err)
 	require.NotNil(t, ctxGPU)
 	require.NotPanics(t, func() { ctxGPU.Release() })
@@ -511,8 +519,8 @@ func TestNewMatrix_dimensions(t *testing.T) {
 
 	defer matrix.Release()
 
-	assert.Equal(t, 3, matrix.Rows, "Rows mismatch")
-	assert.Equal(t, 4, matrix.Cols, "Cols mismatch")
+	assert.Equal(t, 3, matrix.Rows(), "Rows mismatch")
+	assert.Equal(t, 4, matrix.Cols(), "Cols mismatch")
 }
 
 // TestMatrix_Write_Read_roundtrip writes a known pattern and

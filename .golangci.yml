@@ -9,3 +9,4 @@ linters:
     - wsl
     - testpackage
     - depguard
+    - gomodguard

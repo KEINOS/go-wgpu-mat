@@ -86,7 +86,7 @@ func main() {
   }
 
   // UseAuto (default) or UseGPU or UseCPU
-  ctx, err := mat.NewContext()       // UseAuto — try GPU, fall back to CPU
+  ctx, err := mat.NewContext()       // UseAuto — try GPU, then CPU adapter
   panicOnErr(err)
 
   defer ctx.Release()
@@ -140,14 +140,24 @@ const (
 
 func NewContext(modes ...ContextMode) (*Context, error)
 func (c *Context) Release()
+func (c *Context) Close() error
+func (c *Context) Mode() ContextMode
+func (c *Context) Released() bool
 
-// Matrix is a 2D float32 array stored on the GPU.
-type Matrix struct { Rows, Cols int; ... }
+// Matrix is a 2D float32 array stored in a WGPU buffer.
+// Its shape is fixed at construction time.
+type Matrix struct { ... }
 
 func NewMatrix(ctx *Context, rows, cols int) (*Matrix, error)
+func (m *Matrix) Rows() int
+func (m *Matrix) Cols() int
+func (m *Matrix) Shape() Shape
+func (m *Matrix) Len() int
 func (m *Matrix) Write(data []float32) error
 func (m *Matrix) Read() ([]float32, error)
 func (m *Matrix) Release()
+func (m *Matrix) Close() error
+func (m *Matrix) Released() bool
 
 // Operations — return error on dimension mismatch (no panics).
 func MatMul(a, b, out *Matrix) error      // out = A × B
@@ -160,9 +170,27 @@ func Softmax(a, out *Matrix) error        // row-wise
 func RMSNorm(a, out *Matrix) error        // row-wise
 ```
 
+Matrix shapes are immutable. Every operation requires all operands to belong
+to the same `Context`, and `out` must be distinct from every input. These
+uniform rules keep execution predictable as more operations are kernelized.
+
+Validation and lifecycle errors support `errors.Is`:
+
+```go
+err := mat.MatMul(a, b, out)
+if errors.Is(err, mat.ErrDimensionMismatch) {
+  // Inspect the error text for the actual and expected shapes.
+}
+```
+
+Other sentinels include `ErrNilContext`, `ErrContextNotInitialized`,
+`ErrContextReleased`, `ErrNotInitialized`, `ErrReleased`,
+`ErrLengthMismatch`, `ErrContextMismatch`, `ErrAliasedOutput`,
+`ErrOverflow`, `ErrDeviceLimit`, and `ErrKernelLimit`.
+
 ## Data layout
 
-- **Row-major**: element `(r, c)` is at index `r*cols + c`.
+- **Row-major**: element `(r, c)` is at index `r*m.Cols() + c`.
 - **Precision**: `float32` (IEEE-754 single precision).
   `float16` is planned for a future milestone.
 - **Alignment**: 4-byte (float32). Storage buffers require no
@@ -170,12 +198,14 @@ func RMSNorm(a, out *Matrix) error        // row-wise
 
 ## Concurrency
 
-- Each operation submits GPU commands asynchronously. The CPU
-  returns immediately after submission.
+- Kernelized GPU operations submit commands asynchronously. Host compatibility
+  paths and CPU fallback operations complete synchronously.
 - Results are synchronized on `Matrix.Read()`, which maps the
   GPU buffer back to the host and waits for completion.
 - `Device.Queue()` is safe to call from multiple goroutines.
   Do not write to the same GPU buffer from two goroutines at once.
+- `Release`/`Close` must not run concurrently with operations. Release matrices
+  before releasing their `Context`.
 
 ## Development
 

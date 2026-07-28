@@ -1,65 +1,140 @@
 package mat
 
+import "slices"
+
 import "math"
 
 const rmsNormEpsilon float32 = 1e-5
+const minimumMatricesForContextCheck = 2
 
 func validateMatrixInitialized(name string, matrix *Matrix) error {
 	if matrix == nil || matrix.ctx == nil || matrix.buf == nil {
-		return newError("%s is not initialized", name)
+		return sentinelError(ErrNotInitialized, "%s is not initialized", name)
 	}
 
 	if matrix.released.Load() != 0 {
-		return newError("%s is released", name)
+		return sentinelError(ErrReleased, "%s is released", name)
 	}
 
 	if matrix.ctx.released.Load() != 0 {
-		return newError("context is released")
+		return sentinelError(ErrContextReleased, "context is released")
+	}
+
+	if matrix.rows <= 0 || matrix.cols <= 0 {
+		return sentinelError(
+			ErrInvalidState,
+			"%s has invalid shape %s",
+			name,
+			matrix.Shape(),
+		)
 	}
 
 	return nil
 }
 
-func validateMatMulDims(a, b, out *Matrix) error {
-	if a.Cols != b.Rows || out.Rows != a.Rows || out.Cols != b.Cols {
-		return newError("dimension mismatch")
+func validateMatMulDims(left, right, out *Matrix) error {
+	if left.cols != right.rows || out.rows != left.rows || out.cols != right.cols {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: left=%s right=%s out=%s; want left.cols == right.rows and out=%dx%d",
+			left.Shape(),
+			right.Shape(),
+			out.Shape(),
+			left.rows,
+			right.cols,
+		)
 	}
 
 	return nil
 }
 
 func validateSameShape(left, right, out *Matrix) error {
-	if left.Rows != right.Rows || left.Cols != right.Cols {
-		return newError("dimension mismatch")
+	if left.rows != right.rows || left.cols != right.cols {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: left=%s right=%s; want equal shapes",
+			left.Shape(),
+			right.Shape(),
+		)
 	}
 
-	if out.Rows != left.Rows || out.Cols != left.Cols {
-		return newError("dimension mismatch")
+	if out.rows != left.rows || out.cols != left.cols {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: inputs=%s out=%s; want out=%s",
+			left.Shape(),
+			out.Shape(),
+			left.Shape(),
+		)
 	}
 
 	return nil
+}
+
+func validateSameContext(matrices ...*Matrix) error {
+	if len(matrices) < minimumMatricesForContextCheck {
+		return nil
+	}
+
+	context := matrices[0].ctx
+	for _, matrix := range matrices[1:] {
+		if matrix.ctx != context {
+			return sentinelError(
+				ErrContextMismatch,
+				"matrices must use the same context",
+			)
+		}
+	}
+
+	return nil
+}
+
+func validateOutputNotAliased(out *Matrix, inputs ...*Matrix) error {
+	if slices.Contains(inputs, out) {
+		return sentinelError(
+			ErrAliasedOutput,
+			"out must not alias an input",
+		)
+	}
+
+	return nil
+}
+
+func validateBinaryOperation(left, right, out *Matrix) error {
+	matrices := []struct {
+		name   string
+		matrix *Matrix
+	}{
+		{name: "left", matrix: left},
+		{name: "right", matrix: right},
+		{name: "out", matrix: out},
+	}
+
+	for _, item := range matrices {
+		err := validateMatrixInitialized(item.name, item.matrix)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := validateSameContext(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, left, right)
+	if err != nil {
+		return err
+	}
+
+	return validateSameShape(left, right, out)
 }
 
 func runBinaryElementwise(
 	left, right, out *Matrix,
 	operation func(float32, float32) float32,
 ) error {
-	err := validateMatrixInitialized("left", left)
-	if err != nil {
-		return err
-	}
-
-	err = validateMatrixInitialized("right", right)
-	if err != nil {
-		return err
-	}
-
-	err = validateMatrixInitialized("out", out)
-	if err != nil {
-		return err
-	}
-
-	err = validateSameShape(left, right, out)
+	err := validateBinaryOperation(left, right, out)
 	if err != nil {
 		return err
 	}
@@ -88,8 +163,13 @@ func runBinaryElementwise(
 }
 
 func validateUnaryShape(input, out *Matrix) error {
-	if out.Rows != input.Rows || out.Cols != input.Cols {
-		return newError("dimension mismatch")
+	if out.rows != input.rows || out.cols != input.cols {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: input=%s out=%s; want equal shapes",
+			input.Shape(),
+			out.Shape(),
+		)
 	}
 
 	return nil
@@ -105,6 +185,16 @@ func runUnaryElementwise(
 	}
 
 	err = validateMatrixInitialized("out", out)
+	if err != nil {
+		return err
+	}
+
+	err = validateSameContext(input, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, input)
 	if err != nil {
 		return err
 	}
@@ -133,56 +223,153 @@ func runUnaryElementwise(
 }
 
 func validateTransposeShape(input, out *Matrix) error {
-	if out.Rows != input.Cols || out.Cols != input.Rows {
-		return newError("dimension mismatch")
+	if out.rows != input.cols || out.cols != input.rows {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: input=%s out=%s; want out=%dx%d",
+			input.Shape(),
+			out.Shape(),
+			input.cols,
+			input.rows,
+		)
 	}
 
 	return nil
 }
 
 func validateRowReductionShape(input, out *Matrix) error {
-	if out.Rows != input.Rows || out.Cols != 1 {
-		return newError("dimension mismatch")
+	if out.rows != input.rows || out.cols != 1 {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: input=%s out=%s; want out=%dx1",
+			input.Shape(),
+			out.Shape(),
+			input.rows,
+		)
 	}
 
 	return nil
 }
 
+type softmaxRowStats struct {
+	maxValue           float32
+	positiveInfinity   int
+	containsNotANumber bool
+}
+
 func applySoftmaxRow(inputData, outputData []float32, offset, cols int) {
-	maxValue := inputData[offset]
-	for col := 1; col < cols; col++ {
-		value := inputData[offset+col]
-		if value > maxValue {
-			maxValue = value
+	inputRow := inputData[offset : offset+cols]
+	outputRow := outputData[offset : offset+cols]
+	stats := inspectSoftmaxRow(inputRow)
+
+	if applySpecialSoftmaxRow(inputRow, outputRow, stats) {
+		return
+	}
+
+	applyFiniteSoftmaxRow(inputRow, outputRow, stats.maxValue)
+}
+
+func inspectSoftmaxRow(input []float32) softmaxRowStats {
+	stats := new(softmaxRowStats)
+	stats.maxValue = input[0]
+
+	for _, value := range input {
+		if math.IsNaN(float64(value)) {
+			stats.containsNotANumber = true
+
+			return *stats
+		}
+
+		if math.IsInf(float64(value), 1) {
+			stats.positiveInfinity++
+		}
+
+		if value > stats.maxValue {
+			stats.maxValue = value
 		}
 	}
 
-	sumExp := float32(0)
+	return *stats
+}
 
-	for col := range cols {
-		expValue := float32(math.Exp(float64(inputData[offset+col] - maxValue)))
-		outputData[offset+col] = expValue
+func applySpecialSoftmaxRow(
+	input, output []float32,
+	stats softmaxRowStats,
+) bool {
+	if stats.containsNotANumber {
+		fillNaN(output)
+
+		return true
+	}
+
+	if stats.positiveInfinity > 0 {
+		fillPositiveInfinitySoftmax(input, output, stats.positiveInfinity)
+
+		return true
+	}
+
+	if math.IsInf(float64(stats.maxValue), -1) {
+		fillUniform(output)
+
+		return true
+	}
+
+	return false
+}
+
+func applyFiniteSoftmaxRow(input, output []float32, maxValue float32) {
+	sumExp := float64(0)
+
+	for index, value := range input {
+		expValue := math.Exp(float64(value - maxValue))
+		output[index] = float32(expValue)
 		sumExp += expValue
 	}
 
-	for col := range cols {
-		outputData[offset+col] /= sumExp
+	for index := range output {
+		output[index] = float32(float64(output[index]) / sumExp)
+	}
+}
+
+func fillPositiveInfinitySoftmax(input, output []float32, count int) {
+	probability := float32(1) / float32(count)
+
+	for index, value := range input {
+		if math.IsInf(float64(value), 1) {
+			output[index] = probability
+		} else {
+			output[index] = 0
+		}
+	}
+}
+
+func fillUniform(values []float32) {
+	probability := float32(1) / float32(len(values))
+	for index := range values {
+		values[index] = probability
+	}
+}
+
+func fillNaN(values []float32) {
+	nan := float32(math.NaN())
+	for index := range values {
+		values[index] = nan
 	}
 }
 
 func applyRMSNormRow(inputData, outputData []float32, offset, cols int) {
-	sumSquares := float32(0)
+	sumSquares := float64(0)
 
 	for col := range cols {
-		value := inputData[offset+col]
+		value := float64(inputData[offset+col])
 		sumSquares += value * value
 	}
 
-	meanSquare := sumSquares / float32(cols)
-	denominator := float32(math.Sqrt(float64(meanSquare + rmsNormEpsilon)))
+	meanSquare := sumSquares / float64(cols)
+	denominator := math.Sqrt(meanSquare + float64(rmsNormEpsilon))
 
 	for col := range cols {
-		outputData[offset+col] = inputData[offset+col] / denominator
+		outputData[offset+col] = float32(float64(inputData[offset+col]) / denominator)
 	}
 }
 
@@ -201,6 +388,16 @@ func runRowReduction(
 		return err
 	}
 
+	err = validateSameContext(input, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, input)
+	if err != nil {
+		return err
+	}
+
 	err = validateRowReductionShape(input, out)
 	if err != nil {
 		return err
@@ -211,11 +408,11 @@ func runRowReduction(
 		return wrapError(err, "failed to read input")
 	}
 
-	result := make([]float32, out.Rows)
-	for row := range input.Rows {
+	result := make([]float32, out.rows)
+	for row := range input.rows {
 		acc := initialValue
-		for col := range input.Cols {
-			acc = combine(acc, inputData[row*input.Cols+col])
+		for col := range input.cols {
+			acc = combine(acc, inputData[row*input.cols+col])
 		}
 
 		result[row] = acc
@@ -262,6 +459,16 @@ func Transp(input, out *Matrix) error {
 		return err
 	}
 
+	err = validateSameContext(input, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, input)
+	if err != nil {
+		return err
+	}
+
 	err = validateTransposeShape(input, out)
 	if err != nil {
 		return err
@@ -272,10 +479,10 @@ func Transp(input, out *Matrix) error {
 		return wrapError(err, "failed to read input")
 	}
 
-	result := make([]float32, out.Rows*out.Cols)
-	for row := range input.Rows {
-		for col := range input.Cols {
-			result[col*out.Cols+row] = inputData[row*input.Cols+col]
+	result := make([]float32, out.rows*out.cols)
+	for row := range input.rows {
+		for col := range input.cols {
+			result[col*out.cols+row] = inputData[row*input.cols+col]
 		}
 	}
 
@@ -296,7 +503,7 @@ func ReduceSum(input, out *Matrix) error {
 
 // ReduceMax computes row-wise max and stores the result in out.
 func ReduceMax(input, out *Matrix) error {
-	return runRowReduction(input, out, -float32(math.MaxFloat32),
+	return runRowReduction(input, out, float32(math.Inf(-1)),
 		func(accumulator, value float32) float32 {
 			if value > accumulator {
 				return value
@@ -318,6 +525,16 @@ func Softmax(input, out *Matrix) error {
 		return err
 	}
 
+	err = validateSameContext(input, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, input)
+	if err != nil {
+		return err
+	}
+
 	err = validateUnaryShape(input, out)
 	if err != nil {
 		return err
@@ -330,9 +547,9 @@ func Softmax(input, out *Matrix) error {
 
 	result := make([]float32, len(inputData))
 
-	for row := range input.Rows {
-		rowOffset := row * input.Cols
-		applySoftmaxRow(inputData, result, rowOffset, input.Cols)
+	for row := range input.rows {
+		rowOffset := row * input.cols
+		applySoftmaxRow(inputData, result, rowOffset, input.cols)
 	}
 
 	err = out.Write(result)
@@ -355,6 +572,16 @@ func RMSNorm(input, out *Matrix) error {
 		return err
 	}
 
+	err = validateSameContext(input, out)
+	if err != nil {
+		return err
+	}
+
+	err = validateOutputNotAliased(out, input)
+	if err != nil {
+		return err
+	}
+
 	err = validateUnaryShape(input, out)
 	if err != nil {
 		return err
@@ -367,9 +594,9 @@ func RMSNorm(input, out *Matrix) error {
 
 	result := make([]float32, len(inputData))
 
-	for row := range input.Rows {
-		rowOffset := row * input.Cols
-		applyRMSNormRow(inputData, result, rowOffset, input.Cols)
+	for row := range input.rows {
+		rowOffset := row * input.cols
+		applyRMSNormRow(inputData, result, rowOffset, input.cols)
 	}
 
 	err = out.Write(result)

@@ -51,8 +51,8 @@ func newMockMatrix(rows, cols int, values []float32) (*Matrix, *mockMatrixIO) {
 	}
 
 	matrix := &Matrix{
-		Rows:     rows,
-		Cols:     cols,
+		rows:     rows,
+		cols:     cols,
 		buf:      new(wgpu.Buffer),
 		ctx:      new(Context),
 		released: atomic.Uint32{},
@@ -60,6 +60,12 @@ func newMockMatrix(rows, cols int, values []float32) (*Matrix, *mockMatrixIO) {
 	}
 
 	return matrix, storage
+}
+
+func shareMockContext(first *Matrix, matrices ...*Matrix) {
+	for _, matrix := range matrices {
+		matrix.ctx = first.ctx
+	}
 }
 
 func encodeFloat32(values []float32) []byte {
@@ -88,8 +94,8 @@ func TestValidateMatrixInitialized(t *testing.T) {
 	require.ErrorContains(t, err, "input is not initialized")
 
 	matrix := &Matrix{
-		Rows:     0,
-		Cols:     0,
+		rows:     0,
+		cols:     0,
 		buf:      nil,
 		ctx:      nil,
 		released: atomic.Uint32{},
@@ -134,6 +140,7 @@ func TestRunBinaryElementwiseReadAndWriteErrors(t *testing.T) {
 	leftMatrix, leftStorage := newMockMatrix(1, 2, []float32{1, 2})
 	rightMatrix, rightStorage := newMockMatrix(1, 2, []float32{3, 4})
 	outMatrix, outStorage := newMockMatrix(1, 2, []float32{0, 0})
+	shareMockContext(leftMatrix, rightMatrix, outMatrix)
 
 	leftStorage.readErr = io.EOF
 	err := runBinaryElementwise(leftMatrix, rightMatrix, outMatrix,
@@ -176,6 +183,7 @@ func TestRunBinaryElementwiseValidationErrors(t *testing.T) {
 	require.ErrorContains(t, err, "left is not initialized")
 
 	leftMatrix, _ := newMockMatrix(1, 2, []float32{1, 2})
+	shareMockContext(leftMatrix, rightMatrix, outMatrix)
 	err = runBinaryElementwise(leftMatrix, nil, outMatrix,
 		func(leftValue, rightValue float32) float32 {
 			return leftValue + rightValue
@@ -191,6 +199,7 @@ func TestRunBinaryElementwiseValidationErrors(t *testing.T) {
 	require.ErrorContains(t, err, "out is not initialized")
 
 	mismatchedOut, _ := newMockMatrix(2, 1, []float32{0, 0})
+	shareMockContext(leftMatrix, mismatchedOut)
 	err = runBinaryElementwise(leftMatrix, rightMatrix, mismatchedOut,
 		func(leftValue, rightValue float32) float32 {
 			return leftValue + rightValue
@@ -204,6 +213,7 @@ func TestRunUnaryElementwiseReadAndWriteErrors(t *testing.T) {
 
 	inputMatrix, inputStorage := newMockMatrix(1, 2, []float32{1, 2})
 	outMatrix, outStorage := newMockMatrix(1, 2, []float32{0, 0})
+	shareMockContext(inputMatrix, outMatrix)
 
 	inputStorage.readErr = io.EOF
 	err := runUnaryElementwise(inputMatrix, outMatrix, func(value float32) float32 {
@@ -268,21 +278,24 @@ func TestAddDispatchesWithoutHostIO(t *testing.T) { //nolint:dupl // Each operat
 	assert.True(t, dispatched)
 }
 
-func TestAddCompatibilityPathForAliasOrDifferentContext(t *testing.T) {
+func TestAddRejectsAliasAndDifferentContext(t *testing.T) {
 	t.Parallel()
 
-	leftMatrix, leftStorage := newMockMatrix(1, 2, []float32{1, 2})
+	leftMatrix, _ := newMockMatrix(1, 2, []float32{1, 2})
 	rightMatrix, _ := newMockMatrix(1, 2, []float32{3, 4})
 
 	err := add(leftMatrix, rightMatrix, leftMatrix, addDeps{
 		dispatch: func(*Matrix, *Matrix, *Matrix) error {
-			t.Fatal("aliased add must use the compatibility path")
+			t.Fatal("invalid add must not dispatch")
 
 			return nil
 		},
 	})
-	require.NoError(t, err)
-	assert.Equal(t, []float32{4, 6}, leftStorage.data)
+	require.ErrorIs(t, err, ErrContextMismatch)
+
+	shareMockContext(leftMatrix, rightMatrix)
+	err = add(leftMatrix, rightMatrix, leftMatrix, addDeps{dispatch: nil})
+	require.ErrorIs(t, err, ErrAliasedOutput)
 }
 
 func TestAddDispatchError(t *testing.T) {
@@ -326,7 +339,7 @@ func TestAddValidationErrors(t *testing.T) {
 			return nil
 		},
 	})
-	require.ErrorContains(t, err, "matrix dimensions exceed add kernel limits")
+	require.ErrorIs(t, err, ErrInvalidState)
 }
 
 func TestRunRowReductionReadAndWriteErrors(t *testing.T) {
@@ -334,6 +347,7 @@ func TestRunRowReductionReadAndWriteErrors(t *testing.T) {
 
 	inputMatrix, inputStorage := newMockMatrix(1, 2, []float32{1, 2})
 	outMatrix, outStorage := newMockMatrix(1, 1, []float32{0})
+	shareMockContext(inputMatrix, outMatrix)
 
 	inputStorage.readErr = io.EOF
 	err := runRowReduction(inputMatrix, outMatrix, 0,
@@ -462,9 +476,9 @@ func TestMatMulValidationErrors(t *testing.T) { //nolint:funlen // Validation ca
 	require.Error(t, err)
 	require.ErrorContains(t, err, "out must not alias an input")
 
-	leftMatrix.Rows = math.MaxUint32 + 1
-	rightMatrix.Rows = leftMatrix.Cols
-	outMatrix.Rows = leftMatrix.Rows
+	leftMatrix.rows = math.MaxUint32 + 1
+	rightMatrix.rows = leftMatrix.cols
+	outMatrix.rows = leftMatrix.rows
 	err = matMul(leftMatrix, rightMatrix, outMatrix, matMulDeps{
 		dispatch: func(*Matrix, *Matrix, *Matrix) error {
 			t.Fatal("dispatch must not run for dimensions above uint32")
@@ -497,6 +511,7 @@ func TestTranspReadAndWriteErrors(t *testing.T) {
 
 	inputMatrix, inputStorage := newMockMatrix(2, 3, []float32{1, 2, 3, 4, 5, 6})
 	outMatrix, outStorage := newMockMatrix(3, 2, []float32{0, 0, 0, 0, 0, 0})
+	shareMockContext(inputMatrix, outMatrix)
 
 	inputStorage.readErr = io.EOF
 	err := Transp(inputMatrix, outMatrix)
@@ -529,6 +544,7 @@ func TestSoftmaxReadAndWriteErrors(t *testing.T) {
 
 	inputMatrix, inputStorage := newMockMatrix(1, 3, []float32{1, 2, 3})
 	outMatrix, outStorage := newMockMatrix(1, 3, []float32{0, 0, 0})
+	shareMockContext(inputMatrix, outMatrix)
 
 	inputStorage.readErr = io.EOF
 	err := Softmax(inputMatrix, outMatrix)
@@ -561,6 +577,7 @@ func TestRMSNormReadAndWriteErrors(t *testing.T) {
 
 	inputMatrix, inputStorage := newMockMatrix(1, 2, []float32{3, 4})
 	outMatrix, outStorage := newMockMatrix(1, 2, []float32{0, 0})
+	shareMockContext(inputMatrix, outMatrix)
 
 	inputStorage.readErr = io.EOF
 	err := RMSNorm(inputMatrix, outMatrix)

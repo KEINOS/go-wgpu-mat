@@ -5,14 +5,15 @@ WGPU_GOARCH := $(shell go env GOARCH)
 # On darwin/arm64 the race detector triggers checkptr panics in Metal FFI.
 # Disable checkptr for local macOS testing; CI (linux) is unaffected.
 ifeq ($(WGPU_GOOS)/$(WGPU_GOARCH),darwin/arm64)
-RACE_FLAGS := -gcflags=all=-d=checkptr=0 -parallel=1
+RACE_FLAGS := -race -gcflags=all=-d=checkptr=0 -parallel=1
 else
 RACE_FLAGS := -race
 endif
 
 # CGO_ENABLED=0: Metal FFI RequestAdapter hangs on some platforms.
-# Set timeout so integration tests are killed instead of blocking.
-CGO0_FLAGS := -timeout=30s
+# Set timeout and serialize tests so integration tests neither block nor race
+# through the process-global backend/driver state.
+CGO0_FLAGS := -timeout=30s -parallel=1
 
 .PHONY: clean
 clean:
