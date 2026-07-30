@@ -16,8 +16,8 @@ import (
 //  Examples for documentation (public API tests follows after examples)
 // ============================================================================
 
-// Example of basic usage in the README.md. This test ensures that the example
-// code compiles and runs without errors.
+// Example demonstrates the same workflow as the README quickstart with the
+// deterministic CPU adapter so its output can be tested on any machine.
 //
 //nolint:varnamelen // example
 func Example() {

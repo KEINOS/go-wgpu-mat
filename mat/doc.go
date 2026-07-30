@@ -1,11 +1,11 @@
 // Package mat provides WebGPU-buffer-backed 2D matrix operations for Go.
 //
 // It uses WebGPU (via github.com/gogpu/wgpu) for matrix storage. MatMul, Add,
-// Mul, Scale, Transp, ReduceSumTo, BroadcastTo, and ReshapeTo execute as WGSL
-// compute kernels when a GPU is available; they fall back to pure Go on a CPU
-// adapter. ReduceMax, Softmax, and RMSNorm use a host compatibility path. All
-// matrices store float32 values in row-major order: element (r, c) is at index
-// r*m.Cols()+c.
+// Mul, Scale, Transp, ReduceSum, ReduceSumTo, BroadcastTo, and ReshapeTo execute
+// as WGSL compute kernels when a GPU is available; they fall back to pure Go on
+// a CPU adapter. ReduceMax, Softmax, and RMSNorm use a host compatibility path.
+// All matrices store float32 values in row-major order: element (r, c) is at
+// index r*m.Cols()+c.
 //
 // Matrix shapes are fixed at construction time. Every operation requires all
 // operands to belong to the same Context, and the output must not alias an

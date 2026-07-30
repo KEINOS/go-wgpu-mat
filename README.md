@@ -33,18 +33,18 @@ Out of scope:
 ```mermaid
 flowchart TB
     A["Go slice\n[]float32"]
-    A -->|"Matrix.Write()"| B["GPU Buffer (input)"]
-    B --> C["WGSL Compute Shader"]
-    C -->|"Dispatch"| D["GPU Buffer (result)"]
+    A -->|"Matrix.Write()"| B["WGPU Buffer (input)"]
+    B --> C["WGSL kernel or pure-Go fallback"]
+    C -->|"Compute"| D["WGPU Buffer (result)"]
     D -->|"Matrix.Read()"| E["Go slice\n[]float32"]
 ```
 
-`MatMul`, `Add`, `Mul`, `Scale`, `Transp`, `ReduceSumTo`, `BroadcastTo`, and
-`ReshapeTo` execute through WGSL compute shaders when a GPU is available. `Add`
-and `Mul` support 2D broadcasting. If the adapter is detected as a CPU or
-software adapter (e.g., on CI without GPU hardware), these operations fall back
-to a pure-Go CPU implementation. The result remains in the output device buffer
-until `Read` is called.
+`MatMul`, `Add`, `Mul`, `Scale`, `Transp`, `ReduceSum`, `ReduceSumTo`,
+`BroadcastTo`, and `ReshapeTo` execute through WGSL compute shaders when a GPU
+is available. `Add` and `Mul` support 2D broadcasting. If the adapter is
+detected as a CPU or software adapter (e.g., on CI without GPU hardware), these
+operations fall back to a pure-Go CPU implementation. The result remains in the
+output WGPU buffer until `Read` is called.
 
 `ReduceMax`, `Softmax`, and `RMSNorm` currently use the compatibility path: read
 device buffers to the host, compute in Go, and write the result back.
@@ -93,7 +93,7 @@ func main() {
 
   defer ctx.Release()
 
-  // 2×2 matrices stored on the GPU
+  // 2×2 matrices stored in WGPU buffers owned by the selected adapter
   a, err := mat.NewMatrix(ctx, 2, 2)
   panicOnErr(err)
 
@@ -113,7 +113,7 @@ func main() {
   err = b.Write([]float32{5, 6, 7, 8}) // [[5,6],[7,8]]
   panicOnErr(err)
 
-  // Compute C = A × B on the GPU
+  // Compute C = A × B with the selected adapter
   err = mat.MatMul(a, b, c)
   panicOnErr(err)
 
@@ -139,6 +139,7 @@ const (
   UseCPU
   UseAuto
 )
+func (m ContextMode) String() string
 
 func NewContext(modes ...ContextMode) (*Context, error)
 func (c *Context) Release()
@@ -157,6 +158,14 @@ type Stats struct {
   PeakLiveBuffers    uint64
 }
 
+// Shape is an immutable-by-copy matrix shape.
+type Shape struct { ... }
+
+func (s Shape) Rows() int
+func (s Shape) Cols() int
+func (s Shape) Len() int
+func (s Shape) String() string
+
 // Matrix is a 2D float32 array stored in a WGPU buffer.
 // Its shape is fixed at construction time.
 type Matrix struct { ... }
@@ -171,6 +180,7 @@ func (m *Matrix) Read() ([]float32, error)
 func (m *Matrix) Release()
 func (m *Matrix) Close() error
 func (m *Matrix) Released() bool
+func (m *Matrix) String() string
 
 // Operations — return error on dimension mismatch (no panics).
 func MatMul(a, b, out *Matrix) error      // out = A × B
@@ -193,6 +203,9 @@ uniform rules keep execution predictable as more operations are kernelized.
 `Context.Stats` can verify that a sequence remains device-resident: compare
 snapshots around the sequence and check that `HostReads` and `HostWrites` did
 not change. Internal uniform uploads are not counted as host writes.
+`CommandSubmissions` includes compute and readback submissions. The buffer
+counters include `Matrix` buffers and transient internal buffers used for
+uniform data and readback.
 
 Validation and lifecycle errors support `errors.Is`:
 
@@ -204,9 +217,10 @@ if errors.Is(err, mat.ErrDimensionMismatch) {
 ```
 
 Other sentinels include `ErrNilContext`, `ErrContextNotInitialized`,
-`ErrContextReleased`, `ErrNotInitialized`, `ErrReleased`,
-`ErrLengthMismatch`, `ErrContextMismatch`, `ErrAliasedOutput`,
-`ErrOverflow`, `ErrDeviceLimit`, and `ErrKernelLimit`.
+`ErrContextReleased`, `ErrInvalidMode`, `ErrBackendUnavailable`,
+`ErrNotInitialized`, `ErrReleased`, `ErrInvalidState`, `ErrInvalidDimension`,
+`ErrLengthMismatch`, `ErrContextMismatch`, `ErrAliasedOutput`, `ErrOverflow`,
+`ErrDeviceLimit`, and `ErrKernelLimit`.
 
 ## Data layout
 
@@ -275,10 +289,12 @@ go test -coverprofile=cov.out ./...
 go tool cover -html=cov.out
 ```
 
-GPU results are compared to a CPU reference. Tolerances:
+Operation results are compared to pure-Go reference implementations.
+Test tolerances:
 
-- Most operations: `|gpu − cpu| < 1e-5`
-- `Softmax`: `|gpu − cpu| < 1e-4`
+- Most individual operations: `|gpu − cpu| ≤ 1e-5`
+- `Softmax`, `RMSNorm`, and multi-operation device-resident chains:
+  `|gpu − cpu| ≤ 1e-4`
 
 ## References
 
