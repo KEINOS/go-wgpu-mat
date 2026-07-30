@@ -32,11 +32,15 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
 `
 
 type addDeps struct {
-	dispatch func(left, right, out *Matrix) error
+	dispatch          func(left, right, out *Matrix) error
+	dispatchBroadcast func(tensorOperation, *Matrix, *Matrix, *Matrix, float32) error
 }
 
 func defaultAddDeps() addDeps {
-	return addDeps{dispatch: dispatchAdd}
+	return addDeps{
+		dispatch:          dispatchAdd,
+		dispatchBroadcast: dispatchTensorOperation,
+	}
 }
 
 func add(left, right, out *Matrix, deps addDeps) error {
@@ -48,9 +52,13 @@ func add(left, right, out *Matrix, deps addDeps) error {
 	// Detect GPU unavailability (e.g., no GPU on CI runner) and fall back to CPU.
 	// When the adapter is a software/CPU adapter, the WGSL kernel silently returns zeros.
 	if isCPUAdapter(left.ctx) {
-		return runBinaryElementwise(left, right, out, func(a, b float32) float32 {
+		return runBinaryBroadcast(left, right, out, func(a, b float32) float32 {
 			return a + b
 		})
+	}
+
+	if left.Shape() != right.Shape() {
+		return deps.dispatchBroadcast(tensorOpAdd, left, right, out, 0)
 	}
 
 	err = validateAddKernelContract(out)
@@ -67,7 +75,7 @@ func add(left, right, out *Matrix, deps addDeps) error {
 }
 
 func validateAdd(left, right, out *Matrix) error {
-	return validateBinaryOperation(left, right, out)
+	return validateBinaryBroadcastOperation(left, right, out)
 }
 
 func validateAddKernelContract(out *Matrix) error {
@@ -139,7 +147,15 @@ func dispatchAddWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error {
 		},
 	)
 	if err != nil {
+		if pipeline != nil {
+			deps.releaseComputePipeline(pipeline)
+		}
+
 		return wrapError(err, "create add pipeline")
+	}
+
+	if pipeline == nil {
+		return sentinelError(ErrBackendUnavailable, "create add pipeline returned nil")
 	}
 
 	bindGroup, err := createAddBindGroup(device, bindGroupLayout, left, right, out, deps)
@@ -148,7 +164,7 @@ func dispatchAddWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error {
 	}
 	defer deps.releaseBindGroup(bindGroup)
 
-	return encodeAndSubmitAdd(device, pipeline, bindGroup, out, deps)
+	return encodeAndSubmitAdd(left.ctx, pipeline, bindGroup, out, deps)
 }
 
 func createAddBindGroupLayout(
@@ -164,7 +180,15 @@ func createAddBindGroupLayout(
 		},
 	})
 	if err != nil {
+		if layout != nil {
+			deps.releaseBindGroupLayout(layout)
+		}
+
 		return nil, wrapError(err, "create add bind group layout")
+	}
+
+	if layout == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create add bind group layout returned nil")
 	}
 
 	return layout, nil
@@ -194,14 +218,22 @@ func createAddBindGroup(
 		},
 	})
 	if err != nil {
+		if bindGroup != nil {
+			deps.releaseBindGroup(bindGroup)
+		}
+
 		return nil, wrapError(err, "create add bind group")
+	}
+
+	if bindGroup == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create add bind group returned nil")
 	}
 
 	return bindGroup, nil
 }
 
 func encodeAndSubmitAdd(
-	device *wgpu.Device,
+	ctx *Context,
 	pipeline *wgpu.ComputePipeline,
 	bindGroup *wgpu.BindGroup,
 	out *Matrix,
@@ -212,7 +244,7 @@ func encodeAndSubmitAdd(
 	elementCount := uint32(rows * cols) //nolint:gosec // Dispatch follows validateAddKernelContract.
 
 	return encodeAndSubmitCompute(
-		device,
+		ctx,
 		pipeline,
 		bindGroup,
 		computeDispatch{x: ceilDiv(elementCount, addWorkgroupSize), y: 1, z: 1},

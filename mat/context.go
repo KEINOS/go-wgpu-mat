@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"sync/atomic"
 
 	"github.com/KEINOS/go-wgpu-mat/mat/internal/backends"
@@ -29,6 +30,31 @@ type Context struct {
 	isCPU    bool
 	infoSet  bool
 	released atomic.Uint32
+	queueMu  sync.Mutex
+	stats    contextStats
+}
+
+type contextStats struct {
+	hostReads          atomic.Uint64
+	hostWrites         atomic.Uint64
+	commandSubmissions atomic.Uint64
+	bufferAllocations  atomic.Uint64
+	liveBuffers        atomic.Uint64
+	peakLiveBuffers    atomic.Uint64
+}
+
+// Stats is an immutable-by-copy snapshot of Context activity.
+//
+// HostReads and HostWrites include only completed public Matrix.Read and
+// Matrix.Write payload transfers. Internal staging and uniform-buffer traffic
+// is excluded from those two counters.
+type Stats struct {
+	HostReads          uint64
+	HostWrites         uint64
+	CommandSubmissions uint64
+	BufferAllocations  uint64
+	LiveBuffers        uint64
+	PeakLiveBuffers    uint64
 }
 
 // ContextMode specifies which adapter type NewContext should prefer.
@@ -182,6 +208,15 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		isCPU:    adapterInfo.DeviceType == gputypes.DeviceTypeCPU,
 		infoSet:  true,
 		released: atomic.Uint32{},
+		queueMu:  sync.Mutex{},
+		stats: contextStats{
+			hostReads:          atomic.Uint64{},
+			hostWrites:         atomic.Uint64{},
+			commandSubmissions: atomic.Uint64{},
+			bufferAllocations:  atomic.Uint64{},
+			liveBuffers:        atomic.Uint64{},
+			peakLiveBuffers:    atomic.Uint64{},
+		},
 	}, nil
 }
 
@@ -310,6 +345,30 @@ func (c *Context) Released() bool {
 	return c == nil || c.released.Load() != 0
 }
 
+// Stats returns a concurrency-safe snapshot of cumulative context activity.
+// It can be called before or after Release.
+func (c *Context) Stats() Stats {
+	if c == nil {
+		return Stats{
+			HostReads:          0,
+			HostWrites:         0,
+			CommandSubmissions: 0,
+			BufferAllocations:  0,
+			LiveBuffers:        0,
+			PeakLiveBuffers:    0,
+		}
+	}
+
+	return Stats{
+		HostReads:          c.stats.hostReads.Load(),
+		HostWrites:         c.stats.hostWrites.Load(),
+		CommandSubmissions: c.stats.commandSubmissions.Load(),
+		BufferAllocations:  c.stats.bufferAllocations.Load(),
+		LiveBuffers:        c.stats.liveBuffers.Load(),
+		PeakLiveBuffers:    c.stats.peakLiveBuffers.Load(),
+	}
+}
+
 // Release frees the Device, Adapter, and Instance in reverse order.
 // It is a no-op when called on a nil receiver or more than once.
 // Release must not run concurrently with matrix operations using this Context.
@@ -345,6 +404,53 @@ func (c *Context) Close() error {
 	c.Release()
 
 	return nil
+}
+
+func (c *Context) recordBufferAllocation() {
+	if c == nil {
+		return
+	}
+
+	c.stats.bufferAllocations.Add(1)
+	live := c.stats.liveBuffers.Add(1)
+
+	for {
+		peak := c.stats.peakLiveBuffers.Load()
+		if live <= peak || c.stats.peakLiveBuffers.CompareAndSwap(peak, live) {
+			return
+		}
+	}
+}
+
+func (c *Context) recordBufferRelease() {
+	if c != nil {
+		c.stats.liveBuffers.Add(^uint64(0))
+	}
+}
+
+func (c *Context) recordHostRead() {
+	if c != nil {
+		c.stats.hostReads.Add(1)
+	}
+}
+
+func (c *Context) recordHostWrite() {
+	if c != nil {
+		c.stats.hostWrites.Add(1)
+	}
+}
+
+func (c *Context) recordSubmission() {
+	if c != nil {
+		c.stats.commandSubmissions.Add(1)
+	}
+}
+
+func (c *Context) withQueue(operation func() error) error {
+	c.queueMu.Lock()
+	defer c.queueMu.Unlock()
+
+	return operation()
 }
 
 func (c *Context) getOrCreatePipeline(

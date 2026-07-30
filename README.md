@@ -15,7 +15,8 @@ multiply is the kernel hot path.
 
 In scope:
 
-- 2D `float32` matrix operations: `MatMul`, `Add`, `Scale`, `Transp`
+- 2D `float32` matrix operations: `MatMul`, `Add`, `Mul`, `Scale`, `Transp`
+- Shape operations: `BroadcastTo`, `ReduceSumTo`, `ReshapeTo`
 - Reduction: row-wise `ReduceSum`, `ReduceMax`
 - Neural-net ops: `Softmax`, `RMSNorm`
 - Simple API with explicit matrix and context ownership
@@ -38,14 +39,15 @@ flowchart TB
     D -->|"Matrix.Read()"| E["Go slice\n[]float32"]
 ```
 
-`MatMul` and `Add` execute through WGSL compute shaders when a GPU is available.
-If the adapter is detected as a CPU or software adapter (e.g., on CI without GPU
-hardware), these operations fall back to a pure-Go CPU implementation. The result
-remains in the output device buffer until `Read` is called.
+`MatMul`, `Add`, `Mul`, `Scale`, `Transp`, `ReduceSumTo`, `BroadcastTo`, and
+`ReshapeTo` execute through WGSL compute shaders when a GPU is available. `Add`
+and `Mul` support 2D broadcasting. If the adapter is detected as a CPU or
+software adapter (e.g., on CI without GPU hardware), these operations fall back
+to a pure-Go CPU implementation. The result remains in the output device buffer
+until `Read` is called.
 
-Operations not yet kernelized use the compatibility path: read device buffers
-to the host, compute in Go, and write the result back. That distinction is
-intentional and will be removed one operation at a time as kernels are added.
+`ReduceMax`, `Softmax`, and `RMSNorm` currently use the compatibility path: read
+device buffers to the host, compute in Go, and write the result back.
 
 ## Installation
 
@@ -143,6 +145,17 @@ func (c *Context) Release()
 func (c *Context) Close() error
 func (c *Context) Mode() ContextMode
 func (c *Context) Released() bool
+func (c *Context) Stats() Stats
+
+// Stats is a concurrency-safe snapshot of context activity.
+type Stats struct {
+  HostReads          uint64
+  HostWrites         uint64
+  CommandSubmissions uint64
+  BufferAllocations  uint64
+  LiveBuffers        uint64
+  PeakLiveBuffers    uint64
+}
 
 // Matrix is a 2D float32 array stored in a WGPU buffer.
 // Its shape is fixed at construction time.
@@ -161,10 +174,14 @@ func (m *Matrix) Released() bool
 
 // Operations — return error on dimension mismatch (no panics).
 func MatMul(a, b, out *Matrix) error      // out = A × B
-func Add(a, b, out *Matrix) error         // out = A + B
+func Add(a, b, out *Matrix) error         // 2D broadcast: out = A + B
+func Mul(a, b, out *Matrix) error         // 2D broadcast: out = A * B
 func Scale(a *Matrix, s float32, out *Matrix) error
 func Transp(a, out *Matrix) error         // out = Aᵀ
 func ReduceSum(a, out *Matrix) error      // row-wise sum
+func ReduceSumTo(a, out *Matrix) error    // reduce singleton out axes
+func BroadcastTo(a, out *Matrix) error    // expand singleton input axes
+func ReshapeTo(a, out *Matrix) error      // equal-length device copy
 func ReduceMax(a, out *Matrix) error      // row-wise max
 func Softmax(a, out *Matrix) error        // row-wise
 func RMSNorm(a, out *Matrix) error        // row-wise
@@ -173,6 +190,9 @@ func RMSNorm(a, out *Matrix) error        // row-wise
 Matrix shapes are immutable. Every operation requires all operands to belong
 to the same `Context`, and `out` must be distinct from every input. These
 uniform rules keep execution predictable as more operations are kernelized.
+`Context.Stats` can verify that a sequence remains device-resident: compare
+snapshots around the sequence and check that `HostReads` and `HostWrites` did
+not change. Internal uniform uploads are not counted as host writes.
 
 Validation and lifecycle errors support `errors.Is`:
 

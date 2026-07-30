@@ -86,10 +86,12 @@ type matMulWGPUDeps struct {
 	dispatch               func(*wgpu.ComputePassEncoder, uint32, uint32, uint32)
 	endComputePass         func(*wgpu.ComputePassEncoder) error
 	finishCommandEncoder   func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error)
+	discardCommandEncoder  func(*wgpu.CommandEncoder)
 	submit                 func(*wgpu.Device, *wgpu.CommandBuffer) error
 	releaseBindGroupLayout func(*wgpu.BindGroupLayout)
 	releaseShaderModule    func(*wgpu.ShaderModule)
 	releasePipelineLayout  func(*wgpu.PipelineLayout)
+	releaseComputePipeline func(*wgpu.ComputePipeline)
 	releaseBuffer          func(*wgpu.Buffer)
 	releaseBindGroup       func(*wgpu.BindGroup)
 	releaseCommandBuffer   func(*wgpu.CommandBuffer)
@@ -197,6 +199,7 @@ func setMatMulCommandDeps(deps *matMulWGPUDeps) {
 	) (*wgpu.CommandBuffer, error) {
 		return encoder.Finish()
 	}
+	deps.discardCommandEncoder = (*wgpu.CommandEncoder).DiscardEncoding
 	deps.submit = func(device *wgpu.Device, commandBuffer *wgpu.CommandBuffer) error {
 		_, err := device.Queue().Submit(commandBuffer)
 
@@ -208,6 +211,7 @@ func setMatMulReleaseDeps(deps *matMulWGPUDeps) {
 	deps.releaseBindGroupLayout = func(layout *wgpu.BindGroupLayout) { layout.Release() }
 	deps.releaseShaderModule = func(shader *wgpu.ShaderModule) { shader.Release() }
 	deps.releasePipelineLayout = func(layout *wgpu.PipelineLayout) { layout.Release() }
+	deps.releaseComputePipeline = (*wgpu.ComputePipeline).Release
 	deps.releaseBuffer = func(buffer *wgpu.Buffer) { buffer.Release() }
 	deps.releaseBindGroup = func(bindGroup *wgpu.BindGroup) { bindGroup.Release() }
 	deps.releaseCommandBuffer = func(commandBuffer *wgpu.CommandBuffer) { commandBuffer.Release() }
@@ -348,14 +352,25 @@ func dispatchMatMulWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error
 		return createMatMulPipeline(device, bindGroupLayout, deps)
 	})
 	if err != nil {
+		if pipeline != nil {
+			deps.releaseComputePipeline(pipeline)
+		}
+
 		return wrapError(err, "create matmul pipeline")
 	}
 
-	uniform, err := createMatMulUniform(device, left, right, deps)
+	if pipeline == nil {
+		return sentinelError(ErrBackendUnavailable, "create matmul pipeline returned nil")
+	}
+
+	uniform, err := createMatMulUniform(ctx, left, right, deps)
 	if err != nil {
 		return err
 	}
-	defer deps.releaseBuffer(uniform)
+	defer func() {
+		deps.releaseBuffer(uniform)
+		ctx.recordBufferRelease()
+	}()
 
 	bindGroup, err := createMatMulBindGroup(device, bindGroupLayout, uniform, left, right, out, deps)
 	if err != nil {
@@ -363,18 +378,18 @@ func dispatchMatMulWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error
 	}
 	defer deps.releaseBindGroup(bindGroup)
 
-	return encodeAndSubmitMatMul(device, pipeline, bindGroup, out, deps)
+	return encodeAndSubmitMatMul(ctx, pipeline, bindGroup, out, deps)
 }
 
 func encodeAndSubmitMatMul(
-	device *wgpu.Device,
+	ctx *Context,
 	pipeline *wgpu.ComputePipeline,
 	bindGroup *wgpu.BindGroup,
 	out *Matrix,
 	deps matMulWGPUDeps,
 ) error {
 	return encodeAndSubmitCompute(
-		device,
+		ctx,
 		pipeline,
 		bindGroup,
 		computeDispatch{
@@ -401,7 +416,15 @@ func createMatMulBindGroupLayout(
 		},
 	})
 	if err != nil {
+		if layout != nil {
+			deps.releaseBindGroupLayout(layout)
+		}
+
 		return nil, wrapError(err, "create matmul bind group layout")
+	}
+
+	if layout == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create matmul bind group layout returned nil")
 	}
 
 	return layout, nil
@@ -431,28 +454,41 @@ func dimensionU32(value int) uint32 {
 }
 
 func createMatMulUniform(
-	device *wgpu.Device,
+	ctx *Context,
 	left, right *Matrix,
 	deps matMulWGPUDeps,
 ) (*wgpu.Buffer, error) {
-	uniform, err := deps.createBuffer(device, &wgpu.BufferDescriptor{
+	uniform, err := deps.createBuffer(ctx.device, &wgpu.BufferDescriptor{
 		Label:            "go-wgpu-mat-matmul-dimensions",
 		Size:             matMulUniformSize,
 		Usage:            wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst,
 		MappedAtCreation: false,
 	})
 	if err != nil {
+		if uniform != nil {
+			deps.releaseBuffer(uniform)
+		}
+
 		return nil, wrapError(err, "create matmul uniform buffer")
 	}
+
+	if uniform == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create matmul uniform buffer returned nil")
+	}
+
+	ctx.recordBufferAllocation()
 
 	dimensions := make([]byte, matMulUniformSize)
 	binary.LittleEndian.PutUint32(dimensions[0:4], dimensionU32(left.rows))
 	binary.LittleEndian.PutUint32(dimensions[4:8], dimensionU32(left.cols))
 	binary.LittleEndian.PutUint32(dimensions[8:12], dimensionU32(right.cols))
 
-	err = deps.writeBuffer(device, uniform, 0, dimensions)
+	err = ctx.withQueue(func() error {
+		return deps.writeBuffer(ctx.device, uniform, 0, dimensions)
+	})
 	if err != nil {
 		deps.releaseBuffer(uniform)
+		ctx.recordBufferRelease()
 
 		return nil, wrapError(err, "write matmul dimensions")
 	}
@@ -478,7 +514,15 @@ func createMatMulBindGroup(
 		},
 	})
 	if err != nil {
+		if bindGroup != nil {
+			deps.releaseBindGroup(bindGroup)
+		}
+
 		return nil, wrapError(err, "create matmul bind group")
+	}
+
+	if bindGroup == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create matmul bind group returned nil")
 	}
 
 	return bindGroup, nil

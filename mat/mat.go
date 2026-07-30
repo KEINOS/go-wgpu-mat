@@ -108,6 +108,10 @@ func newMatrix(
 
 	buf, err := deps.createBuffer(ctx, bufferDescriptor)
 	if err != nil {
+		if buf != nil {
+			deps.releaseBuffer(buf)
+		}
+
 		return nil, wrapError(err, "failed to create buffer")
 	}
 
@@ -117,6 +121,8 @@ func newMatrix(
 			"failed to create buffer: backend returned a nil buffer",
 		)
 	}
+
+	ctx.recordBufferAllocation()
 
 	matrix := new(Matrix)
 	matrix.rows = rows
@@ -293,10 +299,14 @@ func (m *Matrix) Write(data []float32) error {
 		)
 	}
 
-	err := m.deps.writeBuffer(m.ctx, m.buf, raw)
+	err := m.ctx.withQueue(func() error {
+		return m.deps.writeBuffer(m.ctx, m.buf, raw)
+	})
 	if err != nil {
 		return wrapError(err, "failed to write buffer")
 	}
+
+	m.ctx.recordHostWrite()
 
 	return nil
 }
@@ -320,10 +330,14 @@ func (m *Matrix) Read() ([]float32, error) {
 
 	raw := make([]byte, elementCount*bytesPerFloat32Int)
 
-	err := m.deps.readBuffer(m.ctx, m.buf, raw)
+	err := m.ctx.withQueue(func() error {
+		return m.deps.readBuffer(m.ctx, m.buf, raw)
+	})
 	if err != nil {
 		return nil, wrapError(err, "failed to read buffer")
 	}
+
+	m.ctx.recordHostRead()
 
 	result := make([]float32, elementCount)
 	for i := range result {
@@ -344,7 +358,8 @@ func (m *Matrix) Release() {
 	}
 
 	if m.buf != nil {
-		m.buf.Release()
+		m.deps.releaseBuffer(m.buf)
+		m.ctx.recordBufferRelease()
 	}
 }
 
@@ -361,9 +376,10 @@ func (m *Matrix) Close() error {
 // ============================================================================
 
 type matrixDeps struct {
-	createBuffer func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error)
-	writeBuffer  func(*Context, *wgpu.Buffer, []byte) error
-	readBuffer   func(*Context, *wgpu.Buffer, []byte) error
+	createBuffer  func(*Context, *wgpu.BufferDescriptor) (*wgpu.Buffer, error)
+	releaseBuffer func(*wgpu.Buffer)
+	writeBuffer   func(*Context, *wgpu.Buffer, []byte) error
+	readBuffer    func(*Context, *wgpu.Buffer, []byte) error
 }
 
 type readBufferDeps struct {
@@ -393,6 +409,7 @@ func defaultMatrixDeps() matrixDeps {
 	) (*wgpu.Buffer, error) {
 		return ctx.device.CreateBuffer(desc)
 	}
+	deps.releaseBuffer = func(buf *wgpu.Buffer) { buf.Release() }
 	deps.writeBuffer = func(ctx *Context, buf *wgpu.Buffer, data []byte) error {
 		return ctx.device.Queue().WriteBuffer(buf, 0, data)
 	}
@@ -451,14 +468,29 @@ func defaultReadBufferDeps() readBufferDeps {
 	return *deps
 }
 
+//nolint:cyclop,funlen // Readback stages require local cleanup and error context.
 func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps) error {
 	size := uint64(len(data))
 
 	staging, err := deps.createStaging(ctx, size)
 	if err != nil {
+		if staging != nil {
+			deps.releaseBuffer(staging)
+		}
+
 		return wrapError(err, "create readback buffer")
 	}
-	defer deps.releaseBuffer(staging)
+
+	if staging == nil {
+		return sentinelError(ErrBackendUnavailable, "create readback buffer returned nil")
+	}
+
+	ctx.recordBufferAllocation()
+
+	defer func() {
+		deps.releaseBuffer(staging)
+		ctx.recordBufferRelease()
+	}()
 
 	encoder, err := deps.createEncoder(ctx)
 	if err != nil {
@@ -477,6 +509,8 @@ func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps
 	if err != nil {
 		return wrapError(err, "submit readback")
 	}
+
+	ctx.recordSubmission()
 
 	err = deps.mapBuffer(staging, size)
 	if err != nil {

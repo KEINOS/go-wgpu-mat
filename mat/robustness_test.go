@@ -210,6 +210,7 @@ func TestAddReturnsKernelValidationError(t *testing.T) {
 	left.ctx.limits.MaxComputeWorkgroupsPerDimension = 1
 
 	err := add(left, right, out, addDeps{
+		dispatchBroadcast: nil,
 		dispatch: func(*Matrix, *Matrix, *Matrix) error {
 			t.Fatal("invalid dispatch must not run")
 

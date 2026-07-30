@@ -410,8 +410,9 @@ func TestNewMatrixRejectsReleasedContext(t *testing.T) {
 
 			return nil, io.EOF
 		},
-		writeBuffer: nil,
-		readBuffer:  nil,
+		releaseBuffer: nil,
+		writeBuffer:   nil,
+		readBuffer:    nil,
 	}
 
 	matrix, err := newMatrix(ctx, 1, 1, deps)
@@ -471,8 +472,9 @@ func TestNewMatrixRejectsDeviceBufferLimits(t *testing.T) {
 
 					return nil, io.EOF
 				},
-				writeBuffer: nil,
-				readBuffer:  nil,
+				releaseBuffer: nil,
+				writeBuffer:   nil,
+				readBuffer:    nil,
 			}
 
 			matrix, err := newMatrix(ctx, 1, 1, deps)

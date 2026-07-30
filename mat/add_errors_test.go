@@ -201,7 +201,7 @@ func TestEncodeAndSubmitAddErrors(t *testing.T) { //nolint:dupl // Add errors fo
 			testCase.mutate(&deps)
 
 			err := encodeAndSubmitAdd(
-				nil,
+				out.ctx,
 				new(wgpu.ComputePipeline),
 				new(wgpu.BindGroup),
 				out,

@@ -88,7 +88,6 @@ func ExampleNewMatrix() {
 	// Matrix: 2x3
 }
 
-//nolint:dupl // allow dup for clarity in examples
 func ExampleMatMul() {
 	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
@@ -139,7 +138,6 @@ func ExampleMatMul() {
 	// [19 22 43 50]
 }
 
-//nolint:dupl // allow dup for clarity in examples
 func ExampleAdd() {
 	ctx, err := mat.NewContext(mat.UseCPU)
 	if err != nil {
@@ -153,7 +151,7 @@ func ExampleAdd() {
 	}
 	defer leftMatrix.Release()
 
-	rightMatrix, err := mat.NewMatrix(ctx, 2, 2)
+	rightMatrix, err := mat.NewMatrix(ctx, 1, 2)
 	if err != nil {
 		panic(err)
 	}
@@ -170,7 +168,7 @@ func ExampleAdd() {
 		panic(err)
 	}
 
-	err = rightMatrix.Write([]float32{5, 6, 7, 8})
+	err = rightMatrix.Write([]float32{5, 6})
 	if err != nil {
 		panic(err)
 	}
@@ -187,7 +185,7 @@ func ExampleAdd() {
 
 	fmt.Println(data)
 	// Output:
-	// [6 8 10 12]
+	// [6 8 8 10]
 }
 
 func ExampleScale() {

@@ -71,6 +71,36 @@ func validateSameShape(left, right, out *Matrix) error {
 	return nil
 }
 
+func broadcastDimension(left, right int) (int, bool) {
+	switch {
+	case left == right:
+		return left, true
+	case left == 1:
+		return right, true
+	case right == 1:
+		return left, true
+	default:
+		return 0, false
+	}
+}
+
+func validateBroadcastShape(left, right, out *Matrix) error {
+	rows, rowsOK := broadcastDimension(left.rows, right.rows)
+
+	cols, colsOK := broadcastDimension(left.cols, right.cols)
+	if !rowsOK || !colsOK || out.rows != rows || out.cols != cols {
+		return sentinelError(
+			ErrDimensionMismatch,
+			"dimension mismatch: left=%s right=%s out=%s; want 2D broadcast out",
+			left.Shape(),
+			right.Shape(),
+			out.Shape(),
+		)
+	}
+
+	return nil
+}
+
 func validateSameContext(matrices ...*Matrix) error {
 	if len(matrices) < minimumMatricesForContextCheck {
 		return nil
@@ -101,6 +131,17 @@ func validateOutputNotAliased(out *Matrix, inputs ...*Matrix) error {
 }
 
 func validateBinaryOperation(left, right, out *Matrix) error {
+	return validateBinaryOperationShape(left, right, out, validateSameShape)
+}
+
+func validateBinaryBroadcastOperation(left, right, out *Matrix) error {
+	return validateBinaryOperationShape(left, right, out, validateBroadcastShape)
+}
+
+func validateBinaryOperationShape(
+	left, right, out *Matrix,
+	validateShape func(*Matrix, *Matrix, *Matrix) error,
+) error {
 	matrices := []struct {
 		name   string
 		matrix *Matrix
@@ -127,7 +168,65 @@ func validateBinaryOperation(left, right, out *Matrix) error {
 		return err
 	}
 
-	return validateSameShape(left, right, out)
+	return validateShape(left, right, out)
+}
+
+//nolint:cyclop // Explicit singleton-axis indexing keeps the CPU reference readable.
+func runBinaryBroadcast(
+	left, right, out *Matrix,
+	operation func(float32, float32) float32,
+) error {
+	err := validateBinaryBroadcastOperation(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	leftData, err := left.Read()
+	if err != nil {
+		return wrapError(err, "failed to read left")
+	}
+
+	rightData, err := right.Read()
+	if err != nil {
+		return wrapError(err, "failed to read right")
+	}
+
+	result := make([]float32, out.Len())
+	for row := range out.rows {
+		for col := range out.cols {
+			leftRow := row
+			if left.rows == 1 {
+				leftRow = 0
+			}
+
+			leftCol := col
+			if left.cols == 1 {
+				leftCol = 0
+			}
+
+			rightRow := row
+			if right.rows == 1 {
+				rightRow = 0
+			}
+
+			rightCol := col
+			if right.cols == 1 {
+				rightCol = 0
+			}
+
+			result[row*out.cols+col] = operation(
+				leftData[leftRow*left.cols+leftCol],
+				rightData[rightRow*right.cols+rightCol],
+			)
+		}
+	}
+
+	err = out.Write(result)
+	if err != nil {
+		return wrapError(err, "failed to write out")
+	}
+
+	return nil
 }
 
 func runBinaryElementwise(
@@ -442,63 +541,37 @@ func Add(left, right, out *Matrix) error {
 
 // Scale computes out = input * scalar.
 func Scale(input *Matrix, scalar float32, out *Matrix) error {
-	return runUnaryElementwise(input, out, func(value float32) float32 {
-		return value * scalar
-	})
+	return scale(input, scalar, out)
 }
 
 // Transp computes out = input^T.
 func Transp(input, out *Matrix) error {
-	err := validateMatrixInitialized("input", input)
-	if err != nil {
-		return err
-	}
-
-	err = validateMatrixInitialized("out", out)
-	if err != nil {
-		return err
-	}
-
-	err = validateSameContext(input, out)
-	if err != nil {
-		return err
-	}
-
-	err = validateOutputNotAliased(out, input)
-	if err != nil {
-		return err
-	}
-
-	err = validateTransposeShape(input, out)
-	if err != nil {
-		return err
-	}
-
-	inputData, err := input.Read()
-	if err != nil {
-		return wrapError(err, "failed to read input")
-	}
-
-	result := make([]float32, out.rows*out.cols)
-	for row := range input.rows {
-		for col := range input.cols {
-			result[col*out.cols+row] = inputData[row*input.cols+col]
-		}
-	}
-
-	err = out.Write(result)
-	if err != nil {
-		return wrapError(err, "failed to write out")
-	}
-
-	return nil
+	return transp(input, out)
 }
 
 // ReduceSum computes row-wise sum and stores the result in out.
 func ReduceSum(input, out *Matrix) error {
-	return runRowReduction(input, out, 0, func(accumulator, value float32) float32 {
-		return accumulator + value
-	})
+	return ReduceSumTo(input, out)
+}
+
+// Mul computes an elementwise product with 2D broadcasting.
+func Mul(left, right, out *Matrix) error {
+	return mul(left, right, out)
+}
+
+// ReduceSumTo sums input axes whose corresponding out dimension is 1.
+func ReduceSumTo(input, out *Matrix) error {
+	return reduceSumTo(input, out)
+}
+
+// BroadcastTo expands singleton input axes to the shape of out.
+func BroadcastTo(input, out *Matrix) error {
+	return broadcastTo(input, out)
+}
+
+// ReshapeTo copies row-major input data to an equal-length output shape.
+func ReshapeTo(input, out *Matrix) error {
+	return reshapeTo(input, out)
 }
 
 // ReduceMax computes row-wise max and stores the result in out.

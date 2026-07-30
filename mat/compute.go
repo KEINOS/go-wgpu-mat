@@ -12,6 +12,7 @@ type computeDispatch struct {
 	z uint32
 }
 
+//nolint:funlen // Backend construction stages keep cleanup adjacent to ownership.
 func createComputePipeline(
 	device *wgpu.Device,
 	bindGroupLayout *wgpu.BindGroupLayout,
@@ -25,7 +26,15 @@ func createComputePipeline(
 		SPIRV: nil,
 	})
 	if err != nil {
+		if shader != nil {
+			deps.releaseShaderModule(shader)
+		}
+
 		return nil, wrapError(err, "create %s shader", operation)
+	}
+
+	if shader == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create %s shader returned nil", operation)
 	}
 	defer deps.releaseShaderModule(shader)
 
@@ -34,7 +43,15 @@ func createComputePipeline(
 		BindGroupLayouts: []*wgpu.BindGroupLayout{bindGroupLayout},
 	})
 	if err != nil {
+		if pipelineLayout != nil {
+			deps.releasePipelineLayout(pipelineLayout)
+		}
+
 		return nil, wrapError(err, "create %s pipeline layout", operation)
+	}
+
+	if pipelineLayout == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create %s pipeline layout returned nil", operation)
 	}
 	defer deps.releasePipelineLayout(pipelineLayout)
 
@@ -47,30 +64,61 @@ func createComputePipeline(
 		ZeroInitializeWorkgroupMemory: nil,
 	})
 	if err != nil {
+		if pipeline != nil {
+			deps.releaseComputePipeline(pipeline)
+		}
+
 		return nil, wrapError(err, "create %s compute pipeline", operation)
+	}
+
+	if pipeline == nil {
+		return nil, sentinelError(ErrBackendUnavailable, "create %s compute pipeline returned nil", operation)
 	}
 
 	return pipeline, nil
 }
 
+//nolint:cyclop,funlen // Each backend stage has a distinct cleanup path.
 func encodeAndSubmitCompute(
-	device *wgpu.Device,
+	ctx *Context,
 	pipeline *wgpu.ComputePipeline,
 	bindGroup *wgpu.BindGroup,
 	dispatch computeDispatch,
 	operation string,
 	deps matMulWGPUDeps,
 ) error {
+	device := ctx.device
+
 	encoder, err := deps.createCommandEncoder(device, &wgpu.CommandEncoderDescriptor{
 		Label: fmt.Sprintf("go-wgpu-mat-%s-encoder", operation),
 	})
 	if err != nil {
+		if encoder != nil {
+			deps.discardCommandEncoder(encoder)
+		}
+
 		return wrapError(err, "create %s command encoder", operation)
+	}
+
+	if encoder == nil {
+		return sentinelError(ErrBackendUnavailable, "create %s command encoder returned nil", operation)
 	}
 
 	pass, err := deps.beginComputePass(encoder, nil)
 	if err != nil {
+		if pass != nil {
+			_ = deps.endComputePass(pass)
+		}
+
+		deps.discardCommandEncoder(encoder)
+
 		return wrapError(err, "begin %s compute pass", operation)
+	}
+
+	if pass == nil {
+		deps.discardCommandEncoder(encoder)
+
+		return sentinelError(ErrBackendUnavailable, "begin %s compute pass returned nil", operation)
 	}
 
 	deps.setPipeline(pass, pipeline)
@@ -79,19 +127,33 @@ func encodeAndSubmitCompute(
 
 	err = deps.endComputePass(pass)
 	if err != nil {
+		deps.discardCommandEncoder(encoder)
+
 		return wrapError(err, "end %s compute pass", operation)
 	}
 
 	commandBuffer, err := deps.finishCommandEncoder(encoder)
 	if err != nil {
+		if commandBuffer != nil {
+			deps.releaseCommandBuffer(commandBuffer)
+		}
+
 		return wrapError(err, "finish %s command encoder", operation)
+	}
+
+	if commandBuffer == nil {
+		return sentinelError(ErrBackendUnavailable, "finish %s command encoder returned nil", operation)
 	}
 	defer deps.releaseCommandBuffer(commandBuffer)
 
-	err = deps.submit(device, commandBuffer)
+	err = ctx.withQueue(func() error {
+		return deps.submit(device, commandBuffer)
+	})
 	if err != nil {
 		return wrapError(err, "submit %s command buffer", operation)
 	}
+
+	ctx.recordSubmission()
 
 	return nil
 }

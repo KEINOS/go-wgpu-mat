@@ -214,3 +214,22 @@ FFI crash cannot be mistaken for either selector's result.
 - Kernelizing `ReduceMax`, `Softmax`, or `RMSNorm`.
 - Mixed precision, shader micro-optimization, command fusion, or buffer pooling.
 - Pushes, tags, or releases.
+
+## Close-out
+
+- Both `CGO_ENABLED=0` and `CGO_ENABLED=1` builds pass.
+- Full `make test` passes with race detection and 100% statement coverage in
+  both CGO modes. The baseline Metal FFI failure did not reproduce after P4.
+- The mandatory software race selector and serialized Metal selector pass.
+- Go lint and Markdown lint report zero issues.
+- Both fuzz targets pass their 10-second smoke runs.
+- `BenchmarkMul256x256` and `BenchmarkP4DeviceResidentChain` execute
+  successfully on local Metal.
+- Final Hermes review result: `AGREED: no blocking findings.` An additional
+  medium observation about `source_index` was rejected after verification:
+  its `cols` argument is the source stride, and the reviewer's counterexamples
+  were invalid broadcast shapes. Valid row and column broadcasts are covered
+  by the serialized Metal test. Earlier unavailable reviewer attempts changed
+  no files.
+- No `go-nn` checkout, submodule pointer, remote branch, tag, or upstream state
+  was changed.

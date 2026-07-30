@@ -69,10 +69,12 @@ func successfulMatMulWGPUDeps() matMulWGPUDeps {
 		finishCommandEncoder: func(*wgpu.CommandEncoder) (*wgpu.CommandBuffer, error) {
 			return new(wgpu.CommandBuffer), nil
 		},
+		discardCommandEncoder:  func(*wgpu.CommandEncoder) {},
 		submit:                 func(*wgpu.Device, *wgpu.CommandBuffer) error { return nil },
 		releaseBindGroupLayout: func(*wgpu.BindGroupLayout) {},
 		releaseShaderModule:    func(*wgpu.ShaderModule) {},
 		releasePipelineLayout:  func(*wgpu.PipelineLayout) {},
+		releaseComputePipeline: func(*wgpu.ComputePipeline) {},
 		releaseBuffer:          func(*wgpu.Buffer) {},
 		releaseBindGroup:       func(*wgpu.BindGroup) {},
 		releaseCommandBuffer:   func(*wgpu.CommandBuffer) {},
@@ -223,7 +225,7 @@ func TestCreateMatMulUniformWriteError(t *testing.T) {
 		return io.EOF
 	}
 
-	_, err := createMatMulUniform(nil, left, right, deps)
+	_, err := createMatMulUniform(left.ctx, left, right, deps)
 	require.ErrorContains(t, err, "write matmul dimensions")
 }
 
@@ -294,7 +296,7 @@ func TestEncodeAndSubmitMatMulErrors(t *testing.T) { //nolint:dupl // MatMul err
 			testCase.mutate(&deps)
 
 			err := encodeAndSubmitMatMul(
-				nil,
+				out.ctx,
 				new(wgpu.ComputePipeline),
 				new(wgpu.BindGroup),
 				out,
