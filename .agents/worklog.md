@@ -181,3 +181,16 @@ Acceptance checksとして`rg`によるpin/drain記述の確認、`markdownlint-
 '.agents/*.md'`、`git diff --check 70299ca..7ba11af`、CodeGraph statusを再実行し、
 すべて成功した。未解決issueがないため`.agents/review.md`を削除し、完了済みreview
 taskの一時sectionを`tasks.md`から除去した。Reviewの経緯は本worklogへ保存する。
+
+## 2026-07-31 v0.0.3 releaseとSL-010開始(Maintainer、Kimi Code CLI)
+
+Maintainerはreview close-outをcommit `d203721`(`docs: close out review recheck
+in repo-local notes`)とし、tag `v0.0.3`(=`d203721`)をpushした。GitHub Actionsの
+`unit test`はv0.0.3 pushで成功した(run 30618892290、2026-07-31T09:09:32Z)。
+`origin/main`は`9949088`のままで、`main` branch自体のpushは未実施であるが、
+tag経由で全commit内容は公開済みであり、Go moduleとしては`v0.0.3`で取得可能
+である。
+
+これにより`SL-010`の前提条件(upstream修正がtestを通り、Maintainerがpush/tag
+した後)は満たされた。Kimi Code CLIは作業場所を`go-nn` repoへ移し、F2 WGPU統合の
+再開に着手する。

@@ -5,25 +5,28 @@
 - 更新日: 2026-07-31
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- Reviewed base: `7ba11af docs: resolve review issues RV-001 and RV-002 in repo-local notes`
-  (Codexが再検証したbase。正確な現HEADとahead数は`git status --short --branch`
-  と`git log --oneline --decorate`を正とする)
-- Remote: `origin/main`は`9949088`。Reviewed baseは4 commit aheadであり、権限境界により
-  pushしていない。
-- Release: tag `v0.0.2`は`9949088`を指す。
-- 現在のworking tree: review close-outの`.agents/`更新と`review.md`削除のみ。
-  最新の正確な状態は`git status --short --branch`を正とする。
+- Reviewed base: `d203721 docs: close out review recheck in repo-local notes`
+  (Codexが再検証し、Maintainerがtag `v0.0.3`を切ったcommit。正確な現HEADと
+  ahead数は`git status --short --branch`と`git log --oneline --decorate`を正とする)
+- Remote: `origin/main`は`9949088`のまま。Maintainerはtag `v0.0.3`(=`d203721`)を
+  push済みで、tag経由で全commit内容は公開済み。`main` branchのpushは未実施。
+- Release: tag `v0.0.3`は`d203721`を指す。CI(`unit test`)はv0.0.3 pushで成功
+  (2026-07-31T09:09:32Z、run 30618892290)。
+- 現在のworking tree: 本notes更新のみ。最新の正確な状態は
+  `git status --short --branch`を正とする。
 
 ## Active handover
 
-- Current executor: なし。Codexによるremediation再検証とclose-outは完了した。
-- Active task: なし。
-- Last completed: `7ba11af`の再検証。`RV-001`と`RV-002`の解消を確認し、review記録を
-  close-outした。
-- Next task: Maintainerが`.agents/`のclose-out変更をcommitし、push/tagを判断する。
-  Upstream公開後は`SL-010`(`go-nn`統合再開)へ進む。
-- Next command: `git diff --check && markdownlint-cli2 '.agents/*.md'`。
-- Blocker: なし。Push、tag、releaseはMaintainerの明示的な判断を待つ。
+- Current executor: なし。SL-010の前提条件(Maintainerのpush/tagとCI成功)は
+  満たされた。
+- Active task: `SL-010` `go-nn`のdependency更新と統合再開。作業場所は
+  `go-nn` repoへ移る。
+- Last completed: Maintainerによるtag `v0.0.3`のpushとCI成功の確認。
+- Next task: `go-nn`の`AGENTS.md`と`.agents/README.md`を入口にF2 WGPU統合の
+  現在地を確認し、dependencyをv0.0.3へ更新する。
+- Next command: `sed -n '1,240p' /path/to/go-nn/.agents/STATUS.md`(go-nn側の
+  正規pathで読む)。
+- Blocker: なし。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 
@@ -42,10 +45,10 @@ plan-submission-lifetime.md)を参照。
 
 ## Next handover point
 
-SL-001〜SL-009、Codex review、Kimi remediation、Codex再検証は完了した。
-次のagentは、Maintainerによるcommitとpush/tagの後に`SL-010`(`go-nn`のdependency
-更新と統合再開)へ進む。それまで`go-nn`のcheckout、dependency、統合状態は
-変更しない。
+SL-001〜SL-009、Codex review、Kimi remediation、Codex再検証は完了し、Maintainerが
+tag `v0.0.3`をpushしてCI成功を確認した。`SL-010`の前提条件は満たされ、作業は
+`go-nn` repoへ移る。go-nn側では`AGENTS.md`と`.agents/README.md`を入口に現在地を
+確認してからdependency更新と統合再開を行う。
 
 `go-nn`側で同じ破損が再発した場合は、[`findings.md`](findings.md)の副仮説
 (H2-H5)と[`plan-submission-lifetime.md`](plan-submission-lifetime.md)の
