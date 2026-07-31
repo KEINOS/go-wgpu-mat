@@ -165,3 +165,19 @@ baseline(v0.30.22、RED-before evidence)」へ分割し、現行pin v0.30.29と
 ".agents/*.md"`が0 issues(10 files)、`git diff --check`が成功することを確認した。
 結果は`.agents/review.md`の「Remediation」節へ記録した。Maintainer/Codexの
 再検証待ちであり、push/tagと`SL-010`へは進まない。
+
+## 2026-07-31 review close-out(Codex)
+
+Kimi Code CLIのremediation commit `7ba11af`(`docs: resolve review issues RV-001 and
+RV-002 in repo-local notes`)を再検証した。変更対象は`.agents/`の6 Markdown file
+だけで、Go code、test、dependency、generated indexの変更はない。
+
+`RV-001`はlive statusをreviewed-base方式へ変更し、正確な現HEAD/ahead数をGit
+commandへ委ねることで解消した。`RV-002`は現行v0.30.29の事実と旧v0.30.22の
+historical RED-before evidenceを分離し、現行drainが`wgpu.Device.Release`から
+transitiveに提供されることを明記して解消した。
+
+Acceptance checksとして`rg`によるpin/drain記述の確認、`markdownlint-cli2
+'.agents/*.md'`、`git diff --check 70299ca..7ba11af`、CodeGraph statusを再実行し、
+すべて成功した。未解決issueがないため`.agents/review.md`を削除し、完了済みreview
+taskの一時sectionを`tasks.md`から除去した。Reviewの経緯は本worklogへ保存する。

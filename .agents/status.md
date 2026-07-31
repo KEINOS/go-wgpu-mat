@@ -5,27 +5,25 @@
 - 更新日: 2026-07-31
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- Reviewed base: `70299ca chore: resync code indexes and record SL close-out`
-  (Codex reviewの対象base。正確な現HEADとahead数は`git status --short --branch`
+- Reviewed base: `7ba11af docs: resolve review issues RV-001 and RV-002 in repo-local notes`
+  (Codexが再検証したbase。正確な現HEADとahead数は`git status --short --branch`
   と`git log --oneline --decorate`を正とする)
-- Remote: `origin/main`は`9949088`。Reviewed baseは3 commit aheadであり、権限境界により
+- Remote: `origin/main`は`9949088`。Reviewed baseは4 commit aheadであり、権限境界により
   pushしていない。
 - Release: tag `v0.0.2`は`9949088`を指す。
-- Review remediation時点のworking tree: `.agents/`のnotes更新(`review.md`追加を
-  含む)のみ。最新の正確な状態は`git status --short --branch`を正とする。
+- 現在のworking tree: review close-outの`.agents/`更新と`review.md`削除のみ。
+  最新の正確な状態は`git status --short --branch`を正とする。
 
 ## Active handover
 
-- Current executor: なし。Kimi Code CLIによる`RV-001`〜`RV-003`のremediationは
-  完了し、Maintainer/Codexの再検証待ち。
+- Current executor: なし。Codexによるremediation再検証とclose-outは完了した。
 - Active task: なし。
-- Last completed: `RV-003` acceptance checksの再実行と結果記録。詳細は
-  [`review.md`](review.md)を参照。
-- Next task: Maintainerによるreview再検証。承認後にpush/tag判断、続いて`SL-010`
-  (`go-nn`統合再開)。
-- Next command: `git status --short --branch`と`git log -4 --oneline --decorate`で
-  現状態を確認する。
-- Blocker: なし。Review再検証待ちのため、push/tagと`SL-010`へは進まない。
+- Last completed: `7ba11af`の再検証。`RV-001`と`RV-002`の解消を確認し、review記録を
+  close-outした。
+- Next task: Maintainerが`.agents/`のclose-out変更をcommitし、push/tagを判断する。
+  Upstream公開後は`SL-010`(`go-nn`統合再開)へ進む。
+- Next command: `git diff --check && markdownlint-cli2 '.agents/*.md'`。
+- Blocker: なし。Push、tag、releaseはMaintainerの明示的な判断を待つ。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 
@@ -36,7 +34,7 @@ Maintainerがcommit、push、tag `v0.0.2`、CI成功を確認済みである。
 
 Downstream `go-nn`のF2 WGPU統合中に見つかった、readbackなしで`Backward`を
 繰り返すと2回目の累積gradientが非決定的に破損する問題について、SL-001〜SL-008を
-実施した。pin版`gogpu/wgpu v0.30.22`の`BindGroup.Release` use-after-free
+実施した。旧pin`gogpu/wgpu v0.30.22`の`BindGroup.Release` use-after-free
 (upstream ADR-056、v0.30.28で修正)が最有力原因と特定され、修正は
 `go.mod`のpinをv0.30.29へ上げることと確定した。詳細は[`findings.md`](findings.md)の
 「Reproduction and isolation evidence」と[`plan-submission-lifetime.md`](
@@ -44,10 +42,10 @@ plan-submission-lifetime.md)を参照。
 
 ## Next handover point
 
-SL-001〜SL-009と、Codex reviewのremediation(`RV-001`〜`RV-003`)は完了した。
-次のagentは、Maintainerのreview再検証とpush/tagの後に`SL-010`(`go-nn`の
-dependency更新と統合再開)へ進む。それまで`go-nn`のcheckout、dependency、
-統合状態は変更しない。
+SL-001〜SL-009、Codex review、Kimi remediation、Codex再検証は完了した。
+次のagentは、Maintainerによるcommitとpush/tagの後に`SL-010`(`go-nn`のdependency
+更新と統合再開)へ進む。それまで`go-nn`のcheckout、dependency、統合状態は
+変更しない。
 
 `go-nn`側で同じ破損が再発した場合は、[`findings.md`](findings.md)の副仮説
 (H2-H5)と[`plan-submission-lifetime.md`](plan-submission-lifetime.md)の
@@ -87,3 +85,6 @@ Handover indexは2026-07-31に初期化済みである。SL-003のtest追加を�
   LLMによるlabel refreshはhandover成立に不要なため未実行である。
 - `AGENTS.md`、`.agents/*.md`、`graphify-out/*.md`のMarkdown lintと
   `git diff --check`は成功した。
+- `7ba11af`のCodex再検証で、Kimi remediationの変更対象が`.agents/`だけであること、
+  `RV-001`と`RV-002`のacceptance checks、Markdown lint、`git diff --check`の成功を
+  確認した。

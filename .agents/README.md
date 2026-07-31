@@ -7,14 +7,13 @@
 
 1. [`status.md`](status.md): 現在地、blocker、権限、次の一手。
 2. [`findings.md`](findings.md): 確認済み事実、未確認仮説、未解決事項。
-3. [`review.md`](review.md): Codex reviewのissue記録、remediation結果、再検証条件。
-4. [`tasks.md`](tasks.md): 次の作業順と完了条件。
-5. [`decisions.md`](decisions.md): 採用済み判断と禁止事項。
-6. [`plan.md`](plan.md): 完了済みP4 device-resident kernel計画とclose-out。
-7. [`plan-submission-lifetime.md`](plan-submission-lifetime.md): SL-002で作成した
+3. [`tasks.md`](tasks.md): 次の作業順と完了条件。
+4. [`decisions.md`](decisions.md): 採用済み判断と禁止事項。
+5. [`plan.md`](plan.md): 完了済みP4 device-resident kernel計画とclose-out。
+6. [`plan-submission-lifetime.md`](plan-submission-lifetime.md): SL-002で作成した
    submission lifetimeの詳細計画。
-8. [`commands.md`](commands.md): 状態確認、index更新、検証command。
-9. [`worklog.md`](worklog.md): 作業経緯。
+7. [`commands.md`](commands.md): 状態確認、index更新、検証command。
+8. [`worklog.md`](worklog.md): 作業経緯。
 
 ## 情報の優先順位
 
@@ -42,14 +41,14 @@ Indexが古い場合は[`commands.md`](commands.md)の更新commandを実行す�
 
 作業を中断または完了する前に、同じターンで次を行う。
 
-1. `status.md`へ現在の担当、active task、last completed、次の一手、HEAD、dirty files、
-   blockerを記録する。
+1. `status.md`へ現在の担当、active task、last completed、次の一手、reviewed base、
+   dirty files、blockerを記録する。正確な現HEADとahead数はGit commandを正とする。
 2. `tasks.md`のcheckboxを実際の状態へ同期する。
 3. 新しい事実と仮説を`findings.md`で分離し、判断を`decisions.md`へ記録する。
 4. 実行commandと結果、失敗、revertした実験を`worklog.md`へ追記する。
 5. Code変更後は`graphify update .`と`codegraph sync .`を実行する。
 6. `git status --short`と検証結果を再確認する。Commitした場合はhashとtitleを
-   `status.md`へ記録する。
+   `worklog.md`へ記録する。
 
 以前の作業記録を削除して現在地を表現しない。履歴は`worklog.md`へ残し、
 最新状態だけを`status.md`で更新する。
