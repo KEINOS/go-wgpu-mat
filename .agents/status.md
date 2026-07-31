@@ -5,24 +5,27 @@
 - 更新日: 2026-07-31
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- HEAD: `ba3ea83 fix: bump gogpu/wgpu to v0.30.29 and add submission lifetime
-  regression tests`
-- Remote: `origin/main`は`9949088`。`main`は2 commit aheadであり、権限境界により
+- Reviewed base: `70299ca chore: resync code indexes and record SL close-out`
+  (Codex reviewの対象base。正確な現HEADとahead数は`git status --short --branch`
+  と`git log --oneline --decorate`を正とする)
+- Remote: `origin/main`は`9949088`。Reviewed baseは3 commit aheadであり、権限境界により
   pushしていない。
 - Release: tag `v0.0.2`は`9949088`を指す。
-- 現在のworking tree: index再同期(`graphify-out/`)と本hash記録のための
-  `.agents/`更新のみ。次のchore commitでcleanになる予定。
+- Review remediation時点のworking tree: `.agents/`のnotes更新(`review.md`追加を
+  含む)のみ。最新の正確な状態は`git status --short --branch`を正とする。
 
 ## Active handover
 
-- Current executor: Kimi Code CLI。2026-07-31にhandoverをintakeし、着手済み。
-- Active task: `SL-009` local commitとsession close-out(review consensus達成済み)。
-- Last completed: `SL-009`のread-only review。copilot、hermes、codexの3 reviewerが
-  iteration 2で全員AGREED。
-- Next task: 全task完了。Maintainerのpush/tagと`SL-010`(`go-nn`統合再開)は
-  Maintainer管理。
-- Next command: `git log -2 --oneline`でcommitを確認する。
-- Blocker: なし。
+- Current executor: なし。Kimi Code CLIによる`RV-001`〜`RV-003`のremediationは
+  完了し、Maintainer/Codexの再検証待ち。
+- Active task: なし。
+- Last completed: `RV-003` acceptance checksの再実行と結果記録。詳細は
+  [`review.md`](review.md)を参照。
+- Next task: Maintainerによるreview再検証。承認後にpush/tag判断、続いて`SL-010`
+  (`go-nn`統合再開)。
+- Next command: `git status --short --branch`と`git log -4 --oneline --decorate`で
+  現状態を確認する。
+- Blocker: なし。Review再検証待ちのため、push/tagと`SL-010`へは進まない。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 
@@ -41,9 +44,10 @@ plan-submission-lifetime.md)を参照。
 
 ## Next handover point
 
-SL-001〜SL-009は完了した。次のagentは、Maintainerがpush/tagした後に`SL-010`
-(`go-nn`のdependency更新と統合再開)へ進む。それまで`go-nn`のcheckout、
-dependency、統合状態は変更しない。
+SL-001〜SL-009と、Codex reviewのremediation(`RV-001`〜`RV-003`)は完了した。
+次のagentは、Maintainerのreview再検証とpush/tagの後に`SL-010`(`go-nn`の
+dependency更新と統合再開)へ進む。それまで`go-nn`のcheckout、dependency、
+統合状態は変更しない。
 
 `go-nn`側で同じ破損が再発した場合は、[`findings.md`](findings.md)の副仮説
 (H2-H5)と[`plan-submission-lifetime.md`](plan-submission-lifetime.md)の
@@ -61,9 +65,10 @@ dependency、統合状態は変更しない。
 
 ## Validation state
 
-- RED(pin v0.30.22): `TestSLMetalChainedCompute`が3/3回、同一PCでSIGSEGV。
-- GREEN(v0.30.29): 同一testが`-count=1`、`-count=10`(15,360 submission)、
-  `GO_WGPU_MAT_SL_ROUNDS=1024 -count=3`(18,432 submission)でPASS。
+- RED(旧pin v0.30.22、historical): `TestSLMetalChainedCompute`が3/3回、同一PCで
+  SIGSEGV。
+- GREEN(現行pin v0.30.29): 同一testが`-count=1`、`-count=10`(15,360
+  submission)、`GO_WGPU_MAT_SL_ROUNDS=1024 -count=3`(18,432 submission)でPASS。
   `TestSLMetalReleaseWithInflightWork`もPASS。
 - 既存gate: `TestP4MetalKernels` PASS、`make test`(CGO=0/1、race)GREEN
   (95.0% coverage)、`make lint` 0 issues、`make fuzz`両target PASS、

@@ -7,13 +7,14 @@
 
 1. [`status.md`](status.md): 現在地、blocker、権限、次の一手。
 2. [`findings.md`](findings.md): 確認済み事実、未確認仮説、未解決事項。
-3. [`tasks.md`](tasks.md): 次の作業順と完了条件。
-4. [`decisions.md`](decisions.md): 採用済み判断と禁止事項。
-5. [`plan.md`](plan.md): 完了済みP4 device-resident kernel計画とclose-out。
-6. [`plan-submission-lifetime.md`](plan-submission-lifetime.md): SL-002で作成した
+3. [`review.md`](review.md): Codex reviewのissue記録、remediation結果、再検証条件。
+4. [`tasks.md`](tasks.md): 次の作業順と完了条件。
+5. [`decisions.md`](decisions.md): 採用済み判断と禁止事項。
+6. [`plan.md`](plan.md): 完了済みP4 device-resident kernel計画とclose-out。
+7. [`plan-submission-lifetime.md`](plan-submission-lifetime.md): SL-002で作成した
    submission lifetimeの詳細計画。
-7. [`commands.md`](commands.md): 状態確認、index更新、検証command。
-8. [`worklog.md`](worklog.md): 作業経緯。
+8. [`commands.md`](commands.md): 状態確認、index更新、検証command。
+9. [`worklog.md`](worklog.md): 作業経緯。
 
 ## 情報の優先順位
 

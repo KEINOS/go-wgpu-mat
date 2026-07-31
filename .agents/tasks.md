@@ -33,6 +33,18 @@
   copilot、hermes、codexの3 reviewerが最終状態でAGREED。
 - [ ] `SL-010` Maintainerのpush/tag後、`go-nn`統合へ戻る。
 
+## Codex review remediation
+
+- [x] `RV-001` `.agents/status.md`をreviewed baseと現在のreview状態へ同期し、
+  commit直後に必ず偽になるHEAD表現を避ける。「Reviewed base」表現へ置き換え、
+  現HEAD/ahead数はgit commandを正とする注記を追加した。
+- [x] `RV-002` `.agents/findings.md`のcurrent factsとv0.30.22 historical baselineを
+  分離し、v0.30.29のtransitive drain contractを正確に記録する。
+  「Confirmed facts(現行状態)」と「Historical baseline(v0.30.22、RED-before
+  evidence)」へ分割した。
+- [x] `RV-003` 修正後に`.agents/review.md`のacceptance checks、Markdown lint、
+  `git diff --check`を再実行し、review結果を同ファイルと`worklog.md`へ記録する。
+
 ## Acceptance outline
 
 - v0.0.2でregression testがREDになり、修正後に十分な反復でGREENになる。

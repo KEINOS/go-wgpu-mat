@@ -134,3 +134,34 @@ and add submission lifetime regression tests`)として記録した。`codegraph
 へ更新された。Index再同期とhash記録は別のchore commitへ分けた。`main`は
 `origin/main`より2 commit aheadで、権限境界によりpushしていない。
 SL-010はMaintainerのpush/tag後に開始する。
+
+## 2026-07-31 independent review(Codex)
+
+Maintainerの依頼により、Kimi Code CLIが作成した`origin/main..70299ca`の3 commitを
+独立にreviewした。Production差分はdependency pin bumpのみで、追加された
+submission-lifetime test、pin済みv0.30.29のlifecycle実装、依存graphを照合した。
+
+Validationは`go mod tidy -diff`、`go build ./...`、`make test`、Metal selector
+`-count=10`、`go vet ./...`、`golangci-lint run`、Markdown lint、`make fuzz`、
+`git diff --check`がすべて成功した。Graphify queryが生成した未追跡の
+`graphify-out/cache/last_query_stamp`はreview副産物として削除した。
+
+Codeまたはdependencyのblocking issueは見つからなかった。一方、live handoverの
+`.agents/status.md`が`70299ca`適用前の状態を示し、`.agents/findings.md`のConfirmed
+factsが旧v0.30.22 baselineを現在形で示す不整合を確認した。`RV-001`と`RV-002`として
+`.agents/review.md`へ記録し、Kimi Code CLIによるremediation待ちとした。
+
+## 2026-07-31 review remediation(Kimi Code CLI)
+
+`RV-001`と`RV-002`に対応した。`status.md`は「Reviewed base」表現へ置き換え、
+commitすると必ず偽になる`HEAD`項目を廃止して、現HEAD/ahead数はgit commandを
+正とする注記を追加した。Active handoverはremediation完了・再検証待ちの状態へ
+同期した。`findings.md`は「Confirmed facts(現行状態)」と「Historical
+baseline(v0.30.22、RED-before evidence)」へ分割し、現行pin v0.30.29と
+`wgpu.Device.Release`によるtransitive drainを正確に記録した。
+
+`RV-003`としてacceptance checksを再実行した。`rg`による走査で`findings.md`の
+全`v0.30.22`言及が明示的にhistoricalであること、`markdownlint-cli2
+".agents/*.md"`が0 issues(10 files)、`git diff --check`が成功することを確認した。
+結果は`.agents/review.md`の「Remediation」節へ記録した。Maintainer/Codexの
+再検証待ちであり、push/tagと`SL-010`へは進まない。
