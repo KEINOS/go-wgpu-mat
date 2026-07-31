@@ -1,7 +1,7 @@
+//nolint:paralleltest // WGPU backend state is process-global; tests serialize explicitly.
 package mat_test
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -469,45 +469,31 @@ func serializeGPUTest(t *testing.T) {
 	})
 }
 
-// TestNewContext_smoke verifies NewContext returns a non-nil
-// context and Release does not panic.
+// TestNewContext_smoke verifies NewContext returns a non-nil CPU context and
+// Release does not panic. Hardware selection has a dedicated serialized gate.
 func TestNewContext_smoke(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err, "NewContext should succeed")
 	require.NotNil(t, ctx)
 	require.NotPanics(t, func() { ctx.Release() })
 }
 
-func TestNewContext_modes(t *testing.T) {
-	t.Parallel()
+func TestNewContext_cpuMode(t *testing.T) {
 	serializeGPUTest(t)
 
 	ctxCPU, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 	require.NotNil(t, ctxCPU)
 	require.NotPanics(t, func() { ctxCPU.Release() })
-
-	ctxGPU, err := mat.NewContext(mat.UseGPU)
-	if errors.Is(err, mat.ErrBackendUnavailable) {
-		assert.Nil(t, ctxGPU)
-
-		return
-	}
-
-	require.NoError(t, err)
-	require.NotNil(t, ctxGPU)
-	require.NotPanics(t, func() { ctxGPU.Release() })
 }
 
 // TestNewMatrix_dimensions verifies Rows and Cols are correct.
 func TestNewMatrix_dimensions(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -524,10 +510,9 @@ func TestNewMatrix_dimensions(t *testing.T) {
 // TestMatrix_Write_Read_roundtrip writes a known pattern and
 // reads it back, expecting byte-exact equality.
 func TestMatrix_Write_Read_roundtrip(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -554,10 +539,9 @@ func TestMatrix_Write_Read_roundtrip(t *testing.T) {
 // TestMatrix_Release_idempotent verifies that calling Release
 // twice does not panic.
 func TestMatrix_Release_idempotent(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -574,7 +558,6 @@ func TestMatrix_Release_idempotent(t *testing.T) {
 // TestContext_Release_nil verifies that calling Release on a nil
 // *Context pointer does not panic.
 func TestContext_Release_nil(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
 	var ctx *mat.Context
@@ -585,10 +568,9 @@ func TestContext_Release_nil(t *testing.T) {
 // TestMatrix_Write_length_mismatch verifies that Write returns an
 // error when given the wrong number of elements.
 func TestMatrix_Write_length_mismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -604,10 +586,9 @@ func TestMatrix_Write_length_mismatch(t *testing.T) {
 }
 
 func TestMatMul_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -642,7 +623,6 @@ func TestMatMul_success(t *testing.T) {
 }
 
 func TestMatMul_matchesCPUReference(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
 	tests := []struct {
@@ -722,10 +702,9 @@ func matMulReference(
 }
 
 func TestMatMul_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -751,10 +730,9 @@ func TestMatMul_dimensionMismatch(t *testing.T) {
 }
 
 func TestAdd_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -789,10 +767,9 @@ func TestAdd_success(t *testing.T) {
 }
 
 func TestAdd_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -818,10 +795,9 @@ func TestAdd_dimensionMismatch(t *testing.T) {
 }
 
 func TestScale_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -849,10 +825,9 @@ func TestScale_success(t *testing.T) {
 }
 
 func TestScale_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -873,10 +848,9 @@ func TestScale_dimensionMismatch(t *testing.T) {
 }
 
 func TestTransp_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -904,10 +878,9 @@ func TestTransp_success(t *testing.T) {
 }
 
 func TestTransp_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -928,10 +901,9 @@ func TestTransp_dimensionMismatch(t *testing.T) {
 }
 
 func TestReduceSum_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -959,10 +931,9 @@ func TestReduceSum_success(t *testing.T) {
 }
 
 func TestReduceMax_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -990,10 +961,9 @@ func TestReduceMax_success(t *testing.T) {
 }
 
 func TestReduce_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -1018,10 +988,9 @@ func TestReduce_dimensionMismatch(t *testing.T) {
 }
 
 func TestSoftmax_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -1057,10 +1026,9 @@ func TestSoftmax_success(t *testing.T) {
 }
 
 func TestSoftmax_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -1081,10 +1049,9 @@ func TestSoftmax_dimensionMismatch(t *testing.T) {
 }
 
 func TestRMSNorm_success(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()
@@ -1112,10 +1079,9 @@ func TestRMSNorm_success(t *testing.T) {
 }
 
 func TestRMSNorm_dimensionMismatch(t *testing.T) {
-	t.Parallel()
 	serializeGPUTest(t)
 
-	ctx, err := mat.NewContext()
+	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
 
 	defer ctx.Release()

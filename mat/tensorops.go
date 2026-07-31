@@ -428,7 +428,6 @@ func dispatchTensorOperationWithDeps(
 	}
 	defer func() {
 		deps.releaseBuffer(uniform)
-		ctx.recordBufferRelease()
 	}()
 
 	bindGroup, err := createTensorOpBindGroup(ctx.device, layout, uniform, left, right, out, deps)
@@ -520,8 +519,6 @@ func createTensorOpUniform(
 		return nil, sentinelError(ErrBackendUnavailable, "create tensor operation uniform buffer returned nil")
 	}
 
-	ctx.recordBufferAllocation()
-
 	params := make([]byte, tensorOpUniformSize)
 	binary.LittleEndian.PutUint32(params[0:4], uint32(operation))
 	binary.LittleEndian.PutUint32(params[4:8], dimensionU32(out.rows))
@@ -537,7 +534,6 @@ func createTensorOpUniform(
 	})
 	if err != nil {
 		deps.releaseBuffer(uniform)
-		ctx.recordBufferRelease()
 
 		return nil, wrapError(err, "write tensor operation parameters")
 	}

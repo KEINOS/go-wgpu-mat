@@ -222,12 +222,16 @@ func TestDispatchTensorOperationSuccessAndStats(t *testing.T) {
 	err := dispatchTensorOperationWithDeps(tensorOpMul, left, right, out, 0, deps)
 	require.NoError(t, err)
 	assert.Equal(t, Stats{
-		HostReads:          0,
-		HostWrites:         0,
-		CommandSubmissions: 1,
-		BufferAllocations:  1,
-		LiveBuffers:        0,
-		PeakLiveBuffers:    1,
+		HostReadCount:           0,
+		HostReadBytes:           0,
+		HostWriteCount:          0,
+		HostWriteBytes:          0,
+		ComputeSubmissionCount:  1,
+		ReadbackSubmissionCount: 0,
+		MatrixAllocationCount:   0,
+		MatrixReleaseCount:      0,
+		LiveMatrixBytes:         0,
+		PeakLiveMatrixBytes:     0,
 	}, left.ctx.Stats())
 }
 
@@ -252,16 +256,21 @@ func TestContextStatsNil(t *testing.T) {
 
 	var ctx *Context
 	assert.Equal(t, Stats{
-		HostReads:          0,
-		HostWrites:         0,
-		CommandSubmissions: 0,
-		BufferAllocations:  0,
-		LiveBuffers:        0,
-		PeakLiveBuffers:    0,
+		HostReadCount:           0,
+		HostReadBytes:           0,
+		HostWriteCount:          0,
+		HostWriteBytes:          0,
+		ComputeSubmissionCount:  0,
+		ReadbackSubmissionCount: 0,
+		MatrixAllocationCount:   0,
+		MatrixReleaseCount:      0,
+		LiveMatrixBytes:         0,
+		PeakLiveMatrixBytes:     0,
 	}, ctx.Stats())
-	ctx.recordBufferAllocation()
-	ctx.recordBufferRelease()
-	ctx.recordHostRead()
-	ctx.recordHostWrite()
-	ctx.recordSubmission()
+	ctx.recordMatrixAllocation(4)
+	ctx.recordMatrixRelease(4)
+	ctx.recordHostRead(4)
+	ctx.recordHostWrite(4)
+	ctx.recordComputeSubmission()
+	ctx.recordReadbackSubmission()
 }

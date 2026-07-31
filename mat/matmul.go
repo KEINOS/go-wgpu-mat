@@ -369,7 +369,6 @@ func dispatchMatMulWithDeps(left, right, out *Matrix, deps matMulWGPUDeps) error
 	}
 	defer func() {
 		deps.releaseBuffer(uniform)
-		ctx.recordBufferRelease()
 	}()
 
 	bindGroup, err := createMatMulBindGroup(device, bindGroupLayout, uniform, left, right, out, deps)
@@ -476,8 +475,6 @@ func createMatMulUniform(
 		return nil, sentinelError(ErrBackendUnavailable, "create matmul uniform buffer returned nil")
 	}
 
-	ctx.recordBufferAllocation()
-
 	dimensions := make([]byte, matMulUniformSize)
 	binary.LittleEndian.PutUint32(dimensions[0:4], dimensionU32(left.rows))
 	binary.LittleEndian.PutUint32(dimensions[4:8], dimensionU32(left.cols))
@@ -488,7 +485,6 @@ func createMatMulUniform(
 	})
 	if err != nil {
 		deps.releaseBuffer(uniform)
-		ctx.recordBufferRelease()
 
 		return nil, wrapError(err, "write matmul dimensions")
 	}

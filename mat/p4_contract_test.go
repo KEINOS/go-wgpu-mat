@@ -33,6 +33,41 @@ func readP4Matrix(t *testing.T, matrix *mat.Matrix) []float32 {
 	return data
 }
 
+func assertP4DeviceResidentStats(t *testing.T, start, computed mat.Stats) {
+	t.Helper()
+
+	assert.Equal(t, uint64(0), computed.HostReadCount-start.HostReadCount)
+	assert.Equal(t, uint64(0), computed.HostReadBytes-start.HostReadBytes)
+	assert.Equal(t, uint64(0), computed.HostWriteCount-start.HostWriteCount)
+	assert.Equal(t, uint64(0), computed.HostWriteBytes-start.HostWriteBytes)
+	assert.Equal(t, uint64(9), computed.ComputeSubmissionCount-start.ComputeSubmissionCount)
+	assert.Equal(t, uint64(0), computed.ReadbackSubmissionCount-start.ReadbackSubmissionCount)
+	assert.Equal(t, uint64(0), computed.MatrixAllocationCount-start.MatrixAllocationCount)
+	assert.Equal(t, uint64(0), computed.MatrixReleaseCount-start.MatrixReleaseCount)
+	assert.Equal(t, start.LiveMatrixBytes, computed.LiveMatrixBytes)
+}
+
+func assertP4FinalReadbackStats(t *testing.T, start, finished mat.Stats) {
+	t.Helper()
+
+	assert.Equal(t, uint64(1), finished.HostReadCount-start.HostReadCount)
+	assert.Equal(t, uint64(16), finished.HostReadBytes-start.HostReadBytes)
+	assert.Equal(t, uint64(0), finished.HostWriteCount-start.HostWriteCount)
+	assert.Equal(t, uint64(0), finished.HostWriteBytes-start.HostWriteBytes)
+	assert.Equal(t, uint64(9), finished.ComputeSubmissionCount-start.ComputeSubmissionCount)
+	assert.Equal(t, uint64(1), finished.ReadbackSubmissionCount-start.ReadbackSubmissionCount)
+	assert.Equal(t, uint64(0), finished.MatrixAllocationCount-start.MatrixAllocationCount)
+	assert.Equal(t, uint64(0), finished.MatrixReleaseCount-start.MatrixReleaseCount)
+}
+
+func assertP4ReleasedStats(t *testing.T, released mat.Stats) {
+	t.Helper()
+
+	assert.Equal(t, released.MatrixAllocationCount, released.MatrixReleaseCount)
+	assert.Equal(t, uint64(0), released.LiveMatrixBytes)
+	assert.GreaterOrEqual(t, released.PeakLiveMatrixBytes, uint64(236))
+}
+
 func TestP4SoftwareKernels(t *testing.T) {
 	ctx, err := mat.NewContext(mat.UseCPU)
 	require.NoError(t, err)
@@ -103,12 +138,16 @@ func TestP4SoftwareStatsSnapshot(t *testing.T) {
 	_ = readP4Matrix(t, out)
 	after := ctx.Stats()
 
-	assert.Equal(t, uint64(4), after.BufferAllocations-before.BufferAllocations)
-	assert.Equal(t, uint64(2), after.LiveBuffers-before.LiveBuffers)
-	assert.GreaterOrEqual(t, after.PeakLiveBuffers, after.LiveBuffers)
-	assert.Equal(t, uint64(2), after.HostReads-before.HostReads)
-	assert.Equal(t, uint64(2), after.HostWrites-before.HostWrites)
-	assert.Equal(t, uint64(2), after.CommandSubmissions-before.CommandSubmissions)
+	assert.Equal(t, uint64(2), after.MatrixAllocationCount-before.MatrixAllocationCount)
+	assert.Equal(t, uint64(0), after.MatrixReleaseCount-before.MatrixReleaseCount)
+	assert.Equal(t, uint64(16), after.LiveMatrixBytes-before.LiveMatrixBytes)
+	assert.GreaterOrEqual(t, after.PeakLiveMatrixBytes, after.LiveMatrixBytes)
+	assert.Equal(t, uint64(2), after.HostReadCount-before.HostReadCount)
+	assert.Equal(t, uint64(16), after.HostReadBytes-before.HostReadBytes)
+	assert.Equal(t, uint64(2), after.HostWriteCount-before.HostWriteCount)
+	assert.Equal(t, uint64(16), after.HostWriteBytes-before.HostWriteBytes)
+	assert.Equal(t, uint64(0), after.ComputeSubmissionCount-before.ComputeSubmissionCount)
+	assert.Equal(t, uint64(2), after.ReadbackSubmissionCount-before.ReadbackSubmissionCount)
 }
 
 func TestP4MetalKernels(t *testing.T) {
@@ -135,6 +174,7 @@ func TestP4MetalKernels(t *testing.T) {
 
 	start := ctx.Stats()
 
+	require.NoError(t, mat.Add(input, input, added))
 	require.NoError(t, mat.Add(input, row, added))
 	require.NoError(t, mat.Mul(added, column, multiplied))
 	require.NoError(t, mat.Scale(multiplied, 0.5, scaled))
@@ -146,18 +186,20 @@ func TestP4MetalKernels(t *testing.T) {
 
 	computed := ctx.Stats()
 
-	assert.Equal(t, uint64(0), computed.HostReads-start.HostReads)
-	assert.Equal(t, uint64(0), computed.HostWrites-start.HostWrites)
-	assert.Equal(t, uint64(8), computed.CommandSubmissions-start.CommandSubmissions)
-	assert.Equal(t, uint64(8), computed.BufferAllocations-start.BufferAllocations)
-	assert.Equal(t, start.LiveBuffers, computed.LiveBuffers)
+	assertP4DeviceResidentStats(t, start, computed)
 
 	result := readP4Matrix(t, product)
 	assert.InDeltaSlice(t, []float32{132, 178.5, 225, 178.5}, result, 1e-4)
 
 	finished := ctx.Stats()
-	assert.Equal(t, uint64(1), finished.HostReads-start.HostReads)
-	assert.Equal(t, uint64(0), finished.HostWrites-start.HostWrites)
-	assert.Equal(t, uint64(9), finished.CommandSubmissions-start.CommandSubmissions)
-	assert.Equal(t, uint64(9), finished.BufferAllocations-start.BufferAllocations)
+	assertP4FinalReadbackStats(t, start, finished)
+
+	for _, matrix := range []*mat.Matrix{
+		input, row, column, right, added, multiplied,
+		scaled, transposed, reduced, broadcast, reshaped, product,
+	} {
+		matrix.Release()
+	}
+
+	assertP4ReleasedStats(t, ctx.Stats())
 }

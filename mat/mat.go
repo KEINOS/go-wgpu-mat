@@ -60,12 +60,13 @@ func (s Shape) Len() int {
 // and host compatibility operations complete synchronously. Read waits for
 // pending device work before returning host data.
 type Matrix struct {
-	rows     int
-	cols     int
-	buf      *wgpu.Buffer
-	ctx      *Context
-	released atomic.Uint32
-	deps     matrixDeps
+	rows            int
+	cols            int
+	buf             *wgpu.Buffer
+	ctx             *Context
+	allocationBytes uint64
+	released        atomic.Uint32
+	deps            matrixDeps
 }
 
 // ----------------------------------------------------------------------------
@@ -122,13 +123,14 @@ func newMatrix(
 		)
 	}
 
-	ctx.recordBufferAllocation()
+	ctx.recordMatrixAllocation(size)
 
 	matrix := new(Matrix)
 	matrix.rows = rows
 	matrix.cols = cols
 	matrix.buf = buf
 	matrix.ctx = ctx
+	matrix.allocationBytes = size
 	matrix.deps = deps
 
 	return matrix, nil
@@ -306,7 +308,7 @@ func (m *Matrix) Write(data []float32) error {
 		return wrapError(err, "failed to write buffer")
 	}
 
-	m.ctx.recordHostWrite()
+	m.ctx.recordHostWrite(uint64(len(raw)))
 
 	return nil
 }
@@ -337,7 +339,7 @@ func (m *Matrix) Read() ([]float32, error) {
 		return nil, wrapError(err, "failed to read buffer")
 	}
 
-	m.ctx.recordHostRead()
+	m.ctx.recordHostRead(uint64(len(raw)))
 
 	result := make([]float32, elementCount)
 	for i := range result {
@@ -359,7 +361,7 @@ func (m *Matrix) Release() {
 
 	if m.buf != nil {
 		m.deps.releaseBuffer(m.buf)
-		m.ctx.recordBufferRelease()
+		m.ctx.recordMatrixRelease(m.allocationBytes)
 	}
 }
 
@@ -485,12 +487,7 @@ func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps
 		return sentinelError(ErrBackendUnavailable, "create readback buffer returned nil")
 	}
 
-	ctx.recordBufferAllocation()
-
-	defer func() {
-		deps.releaseBuffer(staging)
-		ctx.recordBufferRelease()
-	}()
+	defer deps.releaseBuffer(staging)
 
 	encoder, err := deps.createEncoder(ctx)
 	if err != nil {
@@ -510,7 +507,7 @@ func readBuffer(ctx *Context, src *wgpu.Buffer, data []byte, deps readBufferDeps
 		return wrapError(err, "submit readback")
 	}
 
-	ctx.recordSubmission()
+	ctx.recordReadbackSubmission()
 
 	err = deps.mapBuffer(staging, size)
 	if err != nil {

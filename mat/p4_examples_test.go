@@ -66,11 +66,15 @@ func ExampleContext_Stats() {
 
 	after := ctx.Stats()
 
-	fmt.Println(after.HostReads - before.HostReads)
-	fmt.Println(after.HostWrites - before.HostWrites)
+	fmt.Println(after.HostReadCount - before.HostReadCount)
+	fmt.Println(after.HostReadBytes - before.HostReadBytes)
+	fmt.Println(after.HostWriteCount - before.HostWriteCount)
+	fmt.Println(after.HostWriteBytes - before.HostWriteBytes)
 	// Output:
 	// 1
+	// 4
 	// 1
+	// 4
 }
 
 func ExampleMul() {

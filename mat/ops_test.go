@@ -52,12 +52,13 @@ func newMockMatrix(rows, cols int, values []float32) (*Matrix, *mockMatrixIO) {
 	}
 
 	matrix := &Matrix{
-		rows:     rows,
-		cols:     cols,
-		buf:      new(wgpu.Buffer),
-		ctx:      new(Context),
-		released: atomic.Uint32{},
-		deps:     deps,
+		rows:            rows,
+		cols:            cols,
+		buf:             new(wgpu.Buffer),
+		ctx:             new(Context),
+		allocationBytes: 0,
+		released:        atomic.Uint32{},
+		deps:            deps,
 	}
 
 	return matrix, storage
@@ -95,11 +96,12 @@ func TestValidateMatrixInitialized(t *testing.T) {
 	require.ErrorContains(t, err, "input is not initialized")
 
 	matrix := &Matrix{
-		rows:     0,
-		cols:     0,
-		buf:      nil,
-		ctx:      nil,
-		released: atomic.Uint32{},
+		rows:            0,
+		cols:            0,
+		buf:             nil,
+		ctx:             nil,
+		allocationBytes: 0,
+		released:        atomic.Uint32{},
 		deps: matrixDeps{
 			createBuffer:  nil,
 			releaseBuffer: nil,

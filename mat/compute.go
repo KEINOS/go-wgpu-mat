@@ -153,7 +153,7 @@ func encodeAndSubmitCompute(
 		return wrapError(err, "submit %s command buffer", operation)
 	}
 
-	ctx.recordSubmission()
+	ctx.recordComputeSubmission()
 
 	return nil
 }

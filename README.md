@@ -150,12 +150,16 @@ func (c *Context) Stats() Stats
 
 // Stats is a concurrency-safe snapshot of context activity.
 type Stats struct {
-  HostReads          uint64
-  HostWrites         uint64
-  CommandSubmissions uint64
-  BufferAllocations  uint64
-  LiveBuffers        uint64
-  PeakLiveBuffers    uint64
+  HostReadCount           uint64
+  HostReadBytes           uint64
+  HostWriteCount          uint64
+  HostWriteBytes          uint64
+  ComputeSubmissionCount  uint64
+  ReadbackSubmissionCount uint64
+  MatrixAllocationCount   uint64
+  MatrixReleaseCount      uint64
+  LiveMatrixBytes         uint64
+  PeakLiveMatrixBytes     uint64
 }
 
 // Shape is an immutable-by-copy matrix shape.
@@ -201,11 +205,12 @@ Matrix shapes are immutable. Every operation requires all operands to belong
 to the same `Context`, and `out` must be distinct from every input. These
 uniform rules keep execution predictable as more operations are kernelized.
 `Context.Stats` can verify that a sequence remains device-resident: compare
-snapshots around the sequence and check that `HostReads` and `HostWrites` did
-not change. Internal uniform uploads are not counted as host writes.
-`CommandSubmissions` includes compute and readback submissions. The buffer
-counters include `Matrix` buffers and transient internal buffers used for
-uniform data and readback.
+snapshots around the sequence and check that the host-transfer fields and
+`ReadbackSubmissionCount` did not change while `ComputeSubmissionCount`
+increased. Internal uniform uploads are not counted as host writes.
+Matrix allocation, release, current-live, and peak-live fields count public
+`Matrix` buffers and bytes only; transient uniform and readback staging buffers
+are excluded.
 
 Validation and lifecycle errors support `errors.Is`:
 
@@ -276,7 +281,20 @@ one final synchronization.
 
 The Go race detector requires CGO. `make test` runs the `CGO_ENABLED=0` suite
 first (without race instrumentation) and the `CGO_ENABLED=1` suite second
-(with race detection). Lint checks are independent and run once.
+(with race detection). These suites use the deterministic CPU adapter. Hardware
+Metal execution is kept out of the race-instrumented process because upstream
+Metal FFI can crash under race instrumentation. Lint checks are independent and
+run once.
+
+Run the required local hardware gate separately. It must not skip or fall back,
+and its coverage profile reaches 100% on a Metal-capable machine:
+
+```sh
+GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=1 -parallel=1 -cover ./...
+```
+
+CPU-only CI may report lower coverage because default hardware dependency
+wiring is intentionally exercised only by the hardware gate.
 
 Or run manually:
 

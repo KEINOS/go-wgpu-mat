@@ -35,26 +35,50 @@ type Context struct {
 }
 
 type contextStats struct {
-	hostReads          atomic.Uint64
-	hostWrites         atomic.Uint64
-	commandSubmissions atomic.Uint64
-	bufferAllocations  atomic.Uint64
-	liveBuffers        atomic.Uint64
-	peakLiveBuffers    atomic.Uint64
+	hostReadCount           atomic.Uint64
+	hostReadBytes           atomic.Uint64
+	hostWriteCount          atomic.Uint64
+	hostWriteBytes          atomic.Uint64
+	computeSubmissionCount  atomic.Uint64
+	readbackSubmissionCount atomic.Uint64
+	matrixAllocationCount   atomic.Uint64
+	matrixReleaseCount      atomic.Uint64
+	liveMatrixBytes         atomic.Uint64
+	peakLiveMatrixBytes     atomic.Uint64
+}
+
+func newContextStats() contextStats {
+	return contextStats{
+		hostReadCount:           atomic.Uint64{},
+		hostReadBytes:           atomic.Uint64{},
+		hostWriteCount:          atomic.Uint64{},
+		hostWriteBytes:          atomic.Uint64{},
+		computeSubmissionCount:  atomic.Uint64{},
+		readbackSubmissionCount: atomic.Uint64{},
+		matrixAllocationCount:   atomic.Uint64{},
+		matrixReleaseCount:      atomic.Uint64{},
+		liveMatrixBytes:         atomic.Uint64{},
+		peakLiveMatrixBytes:     atomic.Uint64{},
+	}
 }
 
 // Stats is an immutable-by-copy snapshot of Context activity.
 //
-// HostReads and HostWrites include only completed public Matrix.Read and
-// Matrix.Write payload transfers. Internal staging and uniform-buffer traffic
-// is excluded from those two counters.
+// Host transfer fields include only completed public Matrix.Read and
+// Matrix.Write payload transfers. Submission fields distinguish compute work
+// from readback copies. Matrix lifetime fields exclude internal staging and
+// uniform buffers.
 type Stats struct {
-	HostReads          uint64
-	HostWrites         uint64
-	CommandSubmissions uint64
-	BufferAllocations  uint64
-	LiveBuffers        uint64
-	PeakLiveBuffers    uint64
+	HostReadCount           uint64
+	HostReadBytes           uint64
+	HostWriteCount          uint64
+	HostWriteBytes          uint64
+	ComputeSubmissionCount  uint64
+	ReadbackSubmissionCount uint64
+	MatrixAllocationCount   uint64
+	MatrixReleaseCount      uint64
+	LiveMatrixBytes         uint64
+	PeakLiveMatrixBytes     uint64
 }
 
 // ContextMode specifies which adapter type NewContext should prefer.
@@ -209,14 +233,7 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 		infoSet:  true,
 		released: atomic.Uint32{},
 		queueMu:  sync.Mutex{},
-		stats: contextStats{
-			hostReads:          atomic.Uint64{},
-			hostWrites:         atomic.Uint64{},
-			commandSubmissions: atomic.Uint64{},
-			bufferAllocations:  atomic.Uint64{},
-			liveBuffers:        atomic.Uint64{},
-			peakLiveBuffers:    atomic.Uint64{},
-		},
+		stats:    newContextStats(),
 	}, nil
 }
 
@@ -350,22 +367,30 @@ func (c *Context) Released() bool {
 func (c *Context) Stats() Stats {
 	if c == nil {
 		return Stats{
-			HostReads:          0,
-			HostWrites:         0,
-			CommandSubmissions: 0,
-			BufferAllocations:  0,
-			LiveBuffers:        0,
-			PeakLiveBuffers:    0,
+			HostReadCount:           0,
+			HostReadBytes:           0,
+			HostWriteCount:          0,
+			HostWriteBytes:          0,
+			ComputeSubmissionCount:  0,
+			ReadbackSubmissionCount: 0,
+			MatrixAllocationCount:   0,
+			MatrixReleaseCount:      0,
+			LiveMatrixBytes:         0,
+			PeakLiveMatrixBytes:     0,
 		}
 	}
 
 	return Stats{
-		HostReads:          c.stats.hostReads.Load(),
-		HostWrites:         c.stats.hostWrites.Load(),
-		CommandSubmissions: c.stats.commandSubmissions.Load(),
-		BufferAllocations:  c.stats.bufferAllocations.Load(),
-		LiveBuffers:        c.stats.liveBuffers.Load(),
-		PeakLiveBuffers:    c.stats.peakLiveBuffers.Load(),
+		HostReadCount:           c.stats.hostReadCount.Load(),
+		HostReadBytes:           c.stats.hostReadBytes.Load(),
+		HostWriteCount:          c.stats.hostWriteCount.Load(),
+		HostWriteBytes:          c.stats.hostWriteBytes.Load(),
+		ComputeSubmissionCount:  c.stats.computeSubmissionCount.Load(),
+		ReadbackSubmissionCount: c.stats.readbackSubmissionCount.Load(),
+		MatrixAllocationCount:   c.stats.matrixAllocationCount.Load(),
+		MatrixReleaseCount:      c.stats.matrixReleaseCount.Load(),
+		LiveMatrixBytes:         c.stats.liveMatrixBytes.Load(),
+		PeakLiveMatrixBytes:     c.stats.peakLiveMatrixBytes.Load(),
 	}
 }
 
@@ -406,43 +431,52 @@ func (c *Context) Close() error {
 	return nil
 }
 
-func (c *Context) recordBufferAllocation() {
+func (c *Context) recordMatrixAllocation(size uint64) {
 	if c == nil {
 		return
 	}
 
-	c.stats.bufferAllocations.Add(1)
-	live := c.stats.liveBuffers.Add(1)
+	c.stats.matrixAllocationCount.Add(1)
+	live := c.stats.liveMatrixBytes.Add(size)
 
 	for {
-		peak := c.stats.peakLiveBuffers.Load()
-		if live <= peak || c.stats.peakLiveBuffers.CompareAndSwap(peak, live) {
+		peak := c.stats.peakLiveMatrixBytes.Load()
+		if live <= peak || c.stats.peakLiveMatrixBytes.CompareAndSwap(peak, live) {
 			return
 		}
 	}
 }
 
-func (c *Context) recordBufferRelease() {
-	if c != nil {
-		c.stats.liveBuffers.Add(^uint64(0))
+func (c *Context) recordMatrixRelease(size uint64) {
+	if c != nil && size > 0 {
+		c.stats.matrixReleaseCount.Add(1)
+		c.stats.liveMatrixBytes.Add(^(size - 1))
 	}
 }
 
-func (c *Context) recordHostRead() {
+func (c *Context) recordHostRead(size uint64) {
 	if c != nil {
-		c.stats.hostReads.Add(1)
+		c.stats.hostReadCount.Add(1)
+		c.stats.hostReadBytes.Add(size)
 	}
 }
 
-func (c *Context) recordHostWrite() {
+func (c *Context) recordHostWrite(size uint64) {
 	if c != nil {
-		c.stats.hostWrites.Add(1)
+		c.stats.hostWriteCount.Add(1)
+		c.stats.hostWriteBytes.Add(size)
 	}
 }
 
-func (c *Context) recordSubmission() {
+func (c *Context) recordComputeSubmission() {
 	if c != nil {
-		c.stats.commandSubmissions.Add(1)
+		c.stats.computeSubmissionCount.Add(1)
+	}
+}
+
+func (c *Context) recordReadbackSubmission() {
+	if c != nil {
+		c.stats.readbackSubmissionCount.Add(1)
 	}
 }
 

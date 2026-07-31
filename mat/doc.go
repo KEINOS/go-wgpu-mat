@@ -10,9 +10,9 @@
 // Matrix shapes are fixed at construction time. Every operation requires all
 // operands to belong to the same Context, and the output must not alias an
 // input. Add and Mul support 2D singleton-axis broadcasting. Context.Stats can
-// be used to observe host transfers, command submissions, and buffer lifetime.
-// Validation and lifecycle failures can be classified with errors.Is and the
-// exported Err* sentinel errors.
+// be used to observe host-transfer counts and bytes, compute and readback
+// submissions, and Matrix buffer lifetime. Validation and lifecycle failures
+// can be classified with errors.Is and the exported Err* sentinel errors.
 //
 // Both CGO modes are supported. Use CGO_ENABLED=0 when a C toolchain is not
 // available, or CGO_ENABLED=1 when combining mat with CGO dependencies:

@@ -496,7 +496,7 @@ func TestDefaultContextDepsReleaseHelpers(t *testing.T) {
 		deps.releaseAdapter(nil)
 	})
 
-	ctx, err := NewContext()
+	ctx, err := NewContext(UseCPU)
 	require.NoError(t, err)
 	require.NotNil(t, ctx)
 	require.NotNil(t, ctx.device)
