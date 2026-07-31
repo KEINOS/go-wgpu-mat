@@ -23,8 +23,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_add",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "add.go"
     },
     {
@@ -45,8 +45,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "mat_add_defaultadddeps",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 3,
+      "community_name": "newPipelineCache",
       "norm_label": "defaultadddeps()"
     },
     {
@@ -100,8 +100,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "mat_add_dispatchadd",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "dispatchadd()"
     },
     {
@@ -111,8 +111,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "mat_add_dispatchaddwithdeps",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "dispatchaddwithdeps()"
     },
     {
@@ -122,8 +122,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "mat_add_createaddbindgrouplayout",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "createaddbindgrouplayout()"
     },
     {
@@ -133,8 +133,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_go_device",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "device"
     },
     {
@@ -144,8 +144,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_go_bindgrouplayout",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "bindgrouplayout"
     },
     {
@@ -155,8 +155,8 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "mat_add_createaddpipeline",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "createaddpipeline()"
     },
     {
@@ -166,8 +166,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_go_computepipeline",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "computepipeline"
     },
     {
@@ -177,8 +177,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "mat_add_createaddbindgroup",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "createaddbindgroup()"
     },
     {
@@ -188,8 +188,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_go_bindgroup",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "bindgroup"
     },
     {
@@ -199,8 +199,8 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "mat_add_encodeandsubmitadd",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "encodeandsubmitadd()"
     },
     {
@@ -541,7 +541,7 @@
       "_origin": "ast",
       "id": "mat_stats",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "stats"
     },
     {
@@ -903,8 +903,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "mat_classifiederror",
-      "community": 23,
-      "community_name": "classifiedError",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "classifiederror"
     },
     {
@@ -914,8 +914,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "mat_classifiederror_error",
-      "community": 23,
-      "community_name": "classifiedError",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": ".error()"
     },
     {
@@ -925,8 +925,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "mat_classifiederror_unwrap",
-      "community": 23,
-      "community_name": "classifiedError",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": ".unwrap()"
     },
     {
@@ -1685,7 +1685,7 @@
       "_origin": "ast",
       "id": "mat_mat_bench_test_benchmarkp4deviceresidentchain",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "benchmarkp4deviceresidentchain()"
     },
     {
@@ -2927,8 +2927,8 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "mat_matmul_matmul",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "matmul()"
     },
     {
@@ -2938,8 +2938,8 @@
       "source_location": "L244",
       "_origin": "ast",
       "id": "mat_matmul_matmulcpu",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "matmulcpu()"
     },
     {
@@ -3059,8 +3059,8 @@
       "source_location": "L451",
       "_origin": "ast",
       "id": "mat_matmul_dimensionu32",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "dimensionu32()"
     },
     {
@@ -3246,8 +3246,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_ops",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "ops.go"
     },
     {
@@ -3290,8 +3290,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "mat_ops_broadcastdimension",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "broadcastdimension()"
     },
     {
@@ -3301,8 +3301,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "mat_ops_validatebroadcastshape",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "validatebroadcastshape()"
     },
     {
@@ -3433,8 +3433,8 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "mat_softmaxrowstats",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "softmaxrowstats"
     },
     {
@@ -3444,8 +3444,8 @@
       "source_location": "L359",
       "_origin": "ast",
       "id": "mat_ops_applysoftmaxrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "applysoftmaxrow()"
     },
     {
@@ -3455,8 +3455,8 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "mat_ops_inspectsoftmaxrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "inspectsoftmaxrow()"
     },
     {
@@ -3466,8 +3466,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "mat_ops_applyspecialsoftmaxrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "applyspecialsoftmaxrow()"
     },
     {
@@ -3477,8 +3477,8 @@
       "source_location": "L419",
       "_origin": "ast",
       "id": "mat_ops_applyfinitesoftmaxrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "applyfinitesoftmaxrow()"
     },
     {
@@ -3488,8 +3488,8 @@
       "source_location": "L433",
       "_origin": "ast",
       "id": "mat_ops_fillpositiveinfinitysoftmax",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "fillpositiveinfinitysoftmax()"
     },
     {
@@ -3499,8 +3499,8 @@
       "source_location": "L445",
       "_origin": "ast",
       "id": "mat_ops_filluniform",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "filluniform()"
     },
     {
@@ -3510,8 +3510,8 @@
       "source_location": "L452",
       "_origin": "ast",
       "id": "mat_ops_fillnan",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "fillnan()"
     },
     {
@@ -3521,8 +3521,8 @@
       "source_location": "L459",
       "_origin": "ast",
       "id": "mat_ops_applyrmsnormrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "applyrmsnormrow()"
     },
     {
@@ -3555,7 +3555,7 @@
       "_origin": "ast",
       "id": "mat_ops_add",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "add()"
     },
     {
@@ -3566,7 +3566,7 @@
       "_origin": "ast",
       "id": "mat_ops_scale",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "scale()"
     },
     {
@@ -3577,7 +3577,7 @@
       "_origin": "ast",
       "id": "mat_ops_transp",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "transp()"
     },
     {
@@ -3599,7 +3599,7 @@
       "_origin": "ast",
       "id": "mat_ops_mul",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "mul()"
     },
     {
@@ -3610,7 +3610,7 @@
       "_origin": "ast",
       "id": "mat_ops_reducesumto",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "reducesumto()"
     },
     {
@@ -3621,7 +3621,7 @@
       "_origin": "ast",
       "id": "mat_ops_broadcastto",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "broadcastto()"
     },
     {
@@ -3632,7 +3632,7 @@
       "_origin": "ast",
       "id": "mat_ops_reshapeto",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "reshapeto()"
     },
     {
@@ -4027,8 +4027,8 @@
       "source_location": "L702",
       "_origin": "ast",
       "id": "mat_ops_test_testapplysoftmaxrowandrmsnormrow",
-      "community": 7,
-      "community_name": "ops.go",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "testapplysoftmaxrowandrmsnormrow()"
     },
     {
@@ -4039,7 +4039,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "p4_contract_test.go"
     },
     {
@@ -4050,7 +4050,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_newp4matrix",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "newp4matrix()"
     },
     {
@@ -4061,7 +4061,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_go_t",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "t"
     },
     {
@@ -4072,7 +4072,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_readp4matrix",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "readp4matrix()"
     },
     {
@@ -4083,7 +4083,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_assertp4deviceresidentstats",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "assertp4deviceresidentstats()"
     },
     {
@@ -4094,7 +4094,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_assertp4finalreadbackstats",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "assertp4finalreadbackstats()"
     },
     {
@@ -4105,7 +4105,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_assertp4releasedstats",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "assertp4releasedstats()"
     },
     {
@@ -4116,7 +4116,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_testp4softwarekernels",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "testp4softwarekernels()"
     },
     {
@@ -4127,7 +4127,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_testp4softwareshapeerrors",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "testp4softwareshapeerrors()"
     },
     {
@@ -4138,7 +4138,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_testp4softwarestatssnapshot",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "testp4softwarestatssnapshot()"
     },
     {
@@ -4149,7 +4149,7 @@
       "_origin": "ast",
       "id": "mat_p4_contract_test_testp4metalkernels",
       "community": 7,
-      "community_name": "ops.go",
+      "community_name": "TestP4MetalKernels",
       "norm_label": "testp4metalkernels()"
     },
     {
@@ -5366,8 +5366,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_readme_repo_agent_notes",
-      "community": 21,
-      "community_name": "Repo Agent Notes",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "repo agent notes"
     },
     {
@@ -5377,8 +5377,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "agents_readme_\u8aad\u3080\u9806\u5e8f",
-      "community": 21,
-      "community_name": "Repo Agent Notes",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "\u8aad\u3080\u9806\u5e8f"
     },
     {
@@ -5388,8 +5388,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "agents_readme_\u60c5\u5831\u306e\u512a\u5148\u9806\u4f4d",
-      "community": 21,
-      "community_name": "Repo Agent Notes",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "\u60c5\u5831\u306e\u512a\u5148\u9806\u4f4d"
     },
     {
@@ -5399,9 +5399,31 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "agents_readme_index",
-      "community": 21,
-      "community_name": "Repo Agent Notes",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "index"
+    },
+    {
+      "label": "Session start",
+      "file_type": "document",
+      "source_file": ".agents/README.md",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "agents_readme_session_start",
+      "community": 13,
+      "community_name": ".agents/README.md",
+      "norm_label": "session start"
+    },
+    {
+      "label": "Session close-out",
+      "file_type": "document",
+      "source_file": ".agents/README.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "agents_readme_session_close_out",
+      "community": 13,
+      "community_name": ".agents/README.md",
+      "norm_label": "session close-out"
     },
     {
       "label": "commands.md",
@@ -5421,8 +5443,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_commands_commands",
-      "community": 20,
-      "community_name": "Commands",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "commands"
     },
     {
@@ -5432,8 +5454,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "agents_commands_resume",
-      "community": 20,
-      "community_name": "Commands",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "resume"
     },
     {
@@ -5443,19 +5465,19 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "agents_commands_index",
-      "community": 20,
-      "community_name": "Commands",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "index"
     },
     {
       "label": "Existing repository gates",
       "file_type": "document",
       "source_file": ".agents/commands.md",
-      "source_location": "L29",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "agents_commands_existing_repository_gates",
-      "community": 20,
-      "community_name": "Commands",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "existing repository gates"
     },
     {
@@ -5465,8 +5487,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_decisions",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "decisions.md"
     },
     {
@@ -5476,8 +5498,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_decisions_decisions",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "decisions"
     },
     {
@@ -5487,8 +5509,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_decisions_d_001_repo_local_handover",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "d-001 repo-local handover"
     },
     {
@@ -5498,8 +5520,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "agents_decisions_d_002_completed_p4_plan_location",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "d-002 completed p4 plan location"
     },
     {
@@ -5509,8 +5531,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "agents_decisions_d_003_no_readback_workaround",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "d-003 no readback workaround"
     },
     {
@@ -5520,8 +5542,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "agents_decisions_d_004_cause_labeling",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "d-004 cause labeling"
     },
     {
@@ -5531,8 +5553,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "agents_decisions_d_005_remote_authority",
-      "community": 14,
-      "community_name": "Decisions",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "d-005 remote authority"
     },
     {
@@ -5553,8 +5575,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_findings_findings",
-      "community": 16,
-      "community_name": "Findings",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "findings"
     },
     {
@@ -5564,8 +5586,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_findings_confirmed_facts",
-      "community": 16,
-      "community_name": "Findings",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "confirmed facts"
     },
     {
@@ -5575,8 +5597,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "agents_findings_working_hypothesis",
-      "community": 16,
-      "community_name": "Findings",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "working hypothesis"
     },
     {
@@ -5586,8 +5608,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "agents_findings_questions_to_resolve",
-      "community": 16,
-      "community_name": "Findings",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "questions to resolve"
     },
     {
@@ -5597,8 +5619,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "agents_findings_evidence_rules",
-      "community": 16,
-      "community_name": "Findings",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "evidence rules"
     },
     {
@@ -5652,8 +5674,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "agents_plan_public_contract",
-      "community": 17,
-      "community_name": "Public Contract",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "public contract"
     },
     {
@@ -5663,8 +5685,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "agents_plan_broadcasting",
-      "community": 17,
-      "community_name": "Public Contract",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "broadcasting"
     },
     {
@@ -5674,8 +5696,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_plan_unary_kernels",
-      "community": 17,
-      "community_name": "Public Contract",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "unary kernels"
     },
     {
@@ -5685,8 +5707,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "agents_plan_gradient_shape_primitives",
-      "community": 17,
-      "community_name": "Public Contract",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "gradient shape primitives"
     },
     {
@@ -5696,8 +5718,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "agents_plan_statistics",
-      "community": 17,
-      "community_name": "Public Contract",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "statistics"
     },
     {
@@ -5718,8 +5740,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "agents_plan_phases",
-      "community": 18,
-      "community_name": "Phases",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "phases"
     },
     {
@@ -5729,8 +5751,8 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "agents_plan_p4_0_plan_and_review",
-      "community": 18,
-      "community_name": "Phases",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "p4.0 plan and review"
     },
     {
@@ -5740,8 +5762,8 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "agents_plan_p4_1_red_contract_tests",
-      "community": 18,
-      "community_name": "Phases",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "p4.1 red contract tests"
     },
     {
@@ -5751,8 +5773,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "agents_plan_p4_2_green_kernels_and_statistics",
-      "community": 18,
-      "community_name": "Phases",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "p4.2 green kernels and statistics"
     },
     {
@@ -5762,8 +5784,8 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "agents_plan_p4_3_documentation_and_validation",
-      "community": 18,
-      "community_name": "Phases",
+      "community": 12,
+      "community_name": "P4 Device-resident Kernel Plan",
       "norm_label": "p4.3 documentation and validation"
     },
     {
@@ -5828,8 +5850,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_status_current_status",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "current status"
     },
     {
@@ -5839,52 +5861,63 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_status_repository",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "repository"
+    },
+    {
+      "label": "Active handover",
+      "file_type": "document",
+      "source_file": ".agents/status.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "agents_status_active_handover",
+      "community": 13,
+      "community_name": ".agents/README.md",
+      "norm_label": "active handover"
     },
     {
       "label": "Current phase",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L13",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "agents_status_current_phase",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "current phase"
     },
     {
       "label": "Next handover point",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L23",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "agents_status_next_handover_point",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "next handover point"
     },
     {
       "label": "Authority",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L34",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "agents_status_authority",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "authority"
     },
     {
       "label": "Validation state",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L41",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "agents_status_validation_state",
-      "community": 15,
-      "community_name": "Current Status",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "validation state"
     },
     {
@@ -5894,8 +5927,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_tasks",
-      "community": 19,
-      "community_name": "Tasks",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "tasks.md"
     },
     {
@@ -5905,8 +5938,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_tasks_tasks",
-      "community": 19,
-      "community_name": "Tasks",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "tasks"
     },
     {
@@ -5916,8 +5949,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_tasks_handover_setup",
-      "community": 19,
-      "community_name": "Tasks",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "handover setup"
     },
     {
@@ -5927,8 +5960,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "agents_tasks_next_implementation_candidate_submission_lifetime",
-      "community": 19,
-      "community_name": "Tasks",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "next implementation candidate: submission lifetime"
     },
     {
@@ -5938,8 +5971,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "agents_tasks_acceptance_outline",
-      "community": 19,
-      "community_name": "Tasks",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "acceptance outline"
     },
     {
@@ -5949,8 +5982,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_worklog",
-      "community": 22,
-      "community_name": "worklog.md",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "worklog.md"
     },
     {
@@ -5960,8 +5993,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_worklog_work_log",
-      "community": 22,
-      "community_name": "worklog.md",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "work log"
     },
     {
@@ -5971,8 +6004,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_worklog_2026_07_31_handover_initialization",
-      "community": 22,
-      "community_name": "worklog.md",
+      "community": 13,
+      "community_name": ".agents/README.md",
       "norm_label": "2026-07-31 handover initialization"
     },
     {
@@ -23851,6 +23884,28 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_readme_repo_agent_notes",
+      "target": "agents_readme_session_close_out",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/README.md",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_readme_repo_agent_notes",
+      "target": "agents_readme_session_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/README.md",
       "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
@@ -23884,7 +23939,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/commands.md",
-      "source_location": "L37",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_commands",
@@ -23895,7 +23950,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/commands.md",
-      "source_location": "L29",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_commands_commands",
@@ -24005,7 +24060,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L25",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -24071,7 +24126,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L15",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -24291,7 +24346,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L34",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_status_current_status",
+      "target": "agents_status_active_handover",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/status.md",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24302,7 +24368,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L13",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24313,7 +24379,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L23",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24335,7 +24401,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L41",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",

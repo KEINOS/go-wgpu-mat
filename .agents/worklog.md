@@ -127,3 +127,10 @@ trampolineでcheckptr fatalとなることを確認し、Makefileのcheckptr=0�
 
 最終gate: `make test`両mode GREEN(95.0% coverage)、P4+SL Metal selector GREEN、
 software race selector GREEN、lint 0 issues、fuzz両target PASS。
+
+Session close-out: 修正一式をcommit `ba3ea83`(`fix: bump gogpu/wgpu to v0.30.29
+and add submission lifetime regression tests`)として記録した。`codegraph sync .`と
+`graphify update .`を再実行し、Graphifyは591 nodes、1,639 edges、25 communities
+へ更新された。Index再同期とhash記録は別のchore commitへ分けた。`main`は
+`origin/main`より2 commit aheadで、権限境界によりpushしていない。
+SL-010はMaintainerのpush/tag後に開始する。

@@ -34,8 +34,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "mat_adddeps",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "adddeps"
     },
     {
@@ -45,8 +45,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "mat_add_defaultadddeps",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "defaultadddeps()"
     },
     {
@@ -78,8 +78,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "mat_add_validateaddkernelcontract",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "validateaddkernelcontract()"
     },
     {
@@ -210,8 +210,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_add_errors_test",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "add_errors_test.go"
     },
     {
@@ -221,8 +221,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "mat_add_errors_test_testdispatchaddwgpustages",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testdispatchaddwgpustages()"
     },
     {
@@ -232,8 +232,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_errors_test_go_t",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "t"
     },
     {
@@ -243,8 +243,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "mat_add_errors_test_testcreateaddpipelineerrors",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testcreateaddpipelineerrors()"
     },
     {
@@ -254,8 +254,8 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "mat_add_errors_test_testencodeandsubmitadderrors",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testencodeandsubmitadderrors()"
     },
     {
@@ -265,8 +265,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "mat_add_errors_test_testaddkernellimits",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testaddkernellimits()"
     },
     {
@@ -2927,8 +2927,8 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "mat_matmul_matmul",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matmul()"
     },
     {
@@ -2938,8 +2938,8 @@
       "source_location": "L244",
       "_origin": "ast",
       "id": "mat_matmul_matmulcpu",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matmulcpu()"
     },
     {
@@ -2971,8 +2971,8 @@
       "source_location": "L318",
       "_origin": "ast",
       "id": "mat_matmul_validatematmuldispatchlimits",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "validatematmuldispatchlimits()"
     },
     {
@@ -3037,8 +3037,8 @@
       "source_location": "L440",
       "_origin": "ast",
       "id": "mat_matmul_matrixbytesize",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "matrixbytesize()"
     },
     {
@@ -3048,8 +3048,8 @@
       "source_location": "L447",
       "_origin": "ast",
       "id": "mat_matmul_ceildiv",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "ceildiv()"
     },
     {
@@ -3147,8 +3147,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_matmul_errors_test",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "matmul_errors_test.go"
     },
     {
@@ -3158,8 +3158,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_successfulmatmulwgpudeps",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "successfulmatmulwgpudeps()"
     },
     {
@@ -3169,8 +3169,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_matmultestmatrices",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "matmultestmatrices()"
     },
     {
@@ -3180,8 +3180,8 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_testdispatchmatmulwgpuerrors",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testdispatchmatmulwgpuerrors()"
     },
     {
@@ -3191,8 +3191,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_go_t",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "t"
     },
     {
@@ -3202,8 +3202,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_testcreatematmulpipelineerrors",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testcreatematmulpipelineerrors()"
     },
     {
@@ -3213,8 +3213,8 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_testcreatematmuluniformwriteerror",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testcreatematmuluniformwriteerror()"
     },
     {
@@ -3224,8 +3224,8 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_testencodeandsubmitmatmulerrors",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testencodeandsubmitmatmulerrors()"
     },
     {
@@ -3235,8 +3235,8 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "mat_matmul_errors_test_testmatmuldescriptorhelpers",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testmatmuldescriptorhelpers()"
     },
     {
@@ -3279,8 +3279,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "mat_ops_validatesameshape",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "validatesameshape()"
     },
     {
@@ -3378,8 +3378,8 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "mat_ops_runbinaryelementwise",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "runbinaryelementwise()"
     },
     {
@@ -4027,8 +4027,8 @@
       "source_location": "L702",
       "_origin": "ast",
       "id": "mat_ops_test_testapplysoftmaxrowandrmsnormrow",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 5,
+      "community_name": "newMockMatrix",
       "norm_label": "testapplysoftmaxrowandrmsnormrow()"
     },
     {
@@ -4434,8 +4434,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_resource_failures_test",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "resource_failures_test.go"
     },
     {
@@ -4445,8 +4445,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testcreatecomputepipelinepartialandnilresources",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testcreatecomputepipelinepartialandnilresources()"
     },
     {
@@ -4456,8 +4456,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_resource_failures_test_go_t",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "t"
     },
     {
@@ -4467,8 +4467,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testencodecomputepartialandnilresources",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testencodecomputepartialandnilresources()"
     },
     {
@@ -4478,8 +4478,8 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testtensoroperationpartialandnilresources",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "testtensoroperationpartialandnilresources()"
     },
     {
@@ -4489,8 +4489,8 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testexistingkernelpartialandnilresources",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testexistingkernelpartialandnilresources()"
     },
     {
@@ -4500,8 +4500,8 @@
       "source_location": "L359",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testmatrixandreadbackpartialresources",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testmatrixandreadbackpartialresources()"
     },
     {
@@ -4802,14 +4802,113 @@
       "norm_label": "testreducemaxpreservesnegativeinfinity()"
     },
     {
+      "label": "sl_contract_test.go",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "sl_contract_test.go"
+    },
+    {
+      "label": "slRoundCount()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_slroundcount",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "slroundcount()"
+    },
+    {
+      "label": "T",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_go_t",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "t"
+    },
+    {
+      "label": "slReferenceAccumulate()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_slreferenceaccumulate",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "slreferenceaccumulate()"
+    },
+    {
+      "label": "runSLChainedRound()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_runslchainedround",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "runslchainedround()"
+    },
+    {
+      "label": "slInputData()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_slinputdata",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "slinputdata()"
+    },
+    {
+      "label": "TestSLSoftwareChainedCompute()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L136",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslsoftwarechainedcompute()"
+    },
+    {
+      "label": "TestSLMetalChainedCompute()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L161",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_testslmetalchainedcompute",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalchainedcompute()"
+    },
+    {
+      "label": "TestSLMetalReleaseWithInflightWork()",
+      "file_type": "code",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L209",
+      "_origin": "ast",
+      "id": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalreleasewithinflightwork()"
+    },
+    {
       "label": "stats_contract_test.go",
       "file_type": "code",
       "source_file": "mat/stats_contract_test.go",
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_stats_contract_test",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "stats_contract_test.go"
     },
     {
@@ -4819,8 +4918,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "mat_stats_contract_test_teststatsmatrixtransferandlifetimecontract",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "teststatsmatrixtransferandlifetimecontract()"
     },
     {
@@ -4830,8 +4929,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_stats_contract_test_go_t",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "t"
     },
     {
@@ -4841,8 +4940,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "mat_stats_contract_test_teststatssubmissioncontract",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "teststatssubmissioncontract()"
     },
     {
@@ -4852,8 +4951,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "mat_stats_contract_test_teststatsfailedmatrixoperationsarenotcounted",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "teststatsfailedmatrixoperationsarenotcounted()"
     },
     {
@@ -4863,8 +4962,8 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "mat_stats_contract_test_teststatsconcurrentaccounting",
-      "community": 8,
-      "community_name": "successfulMatMulWGPUDeps",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "teststatsconcurrentaccounting()"
     },
     {
@@ -5366,8 +5465,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_readme_repo_agent_notes",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "repo agent notes"
     },
     {
@@ -5377,52 +5476,52 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "agents_readme_\u8aad\u3080\u9806\u5e8f",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "\u8aad\u3080\u9806\u5e8f"
     },
     {
       "label": "\u60c5\u5831\u306e\u512a\u5148\u9806\u4f4d",
       "file_type": "document",
       "source_file": ".agents/README.md",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "agents_readme_\u60c5\u5831\u306e\u512a\u5148\u9806\u4f4d",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "\u60c5\u5831\u306e\u512a\u5148\u9806\u4f4d"
     },
     {
       "label": "Index",
       "file_type": "document",
       "source_file": ".agents/README.md",
-      "source_location": "L22",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "agents_readme_index",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "index"
     },
     {
       "label": "Session start",
       "file_type": "document",
       "source_file": ".agents/README.md",
-      "source_location": "L31",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "agents_readme_session_start",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "session start"
     },
     {
       "label": "Session close-out",
       "file_type": "document",
       "source_file": ".agents/README.md",
-      "source_location": "L38",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "agents_readme_session_close_out",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 18,
+      "community_name": "Repo Agent Notes",
       "norm_label": "session close-out"
     },
     {
@@ -5443,8 +5542,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_commands_commands",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 20,
+      "community_name": "Commands",
       "norm_label": "commands"
     },
     {
@@ -5454,8 +5553,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "agents_commands_resume",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 20,
+      "community_name": "Commands",
       "norm_label": "resume"
     },
     {
@@ -5465,8 +5564,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "agents_commands_index",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 20,
+      "community_name": "Commands",
       "norm_label": "index"
     },
     {
@@ -5476,8 +5575,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "agents_commands_existing_repository_gates",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 20,
+      "community_name": "Commands",
       "norm_label": "existing repository gates"
     },
     {
@@ -5487,8 +5586,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_decisions",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "decisions.md"
     },
     {
@@ -5498,8 +5597,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_decisions_decisions",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "decisions"
     },
     {
@@ -5509,8 +5608,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_decisions_d_001_repo_local_handover",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "d-001 repo-local handover"
     },
     {
@@ -5520,8 +5619,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "agents_decisions_d_002_completed_p4_plan_location",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "d-002 completed p4 plan location"
     },
     {
@@ -5531,8 +5630,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "agents_decisions_d_003_no_readback_workaround",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "d-003 no readback workaround"
     },
     {
@@ -5542,8 +5641,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "agents_decisions_d_004_cause_labeling",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "d-004 cause labeling"
     },
     {
@@ -5553,9 +5652,20 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "agents_decisions_d_005_remote_authority",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 8,
+      "community_name": "Decisions",
       "norm_label": "d-005 remote authority"
+    },
+    {
+      "label": "D-006 Fix by dependency pin bump",
+      "file_type": "document",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "agents_decisions_d_006_fix_by_dependency_pin_bump",
+      "community": 8,
+      "community_name": "Decisions",
+      "norm_label": "d-006 fix by dependency pin bump"
     },
     {
       "label": "findings.md",
@@ -5575,8 +5685,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_findings_findings",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 14,
+      "community_name": "Findings",
       "norm_label": "findings"
     },
     {
@@ -5586,42 +5696,229 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_findings_confirmed_facts",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 14,
+      "community_name": "Findings",
       "norm_label": "confirmed facts"
+    },
+    {
+      "label": "SL-001 inventory(2026-07-31\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "sl-001 inventory(2026-07-31\u3001kimi code cli)"
+    },
+    {
+      "label": "Module contract facts(SL-002\u30012026-07-31\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "agents_findings_module_contract_facts_sl_002_2026_07_31_kimi_code_cli",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "module contract facts(sl-002\u30012026-07-31\u3001kimi code cli)"
+    },
+    {
+      "label": "Reproduction and isolation evidence(SL-003/004\u30012026-07-31\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "agents_findings_reproduction_and_isolation_evidence_sl_003_004_2026_07_31_kimi_code_cli",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "reproduction and isolation evidence(sl-003/004\u30012026-07-31\u3001kimi code cli)"
     },
     {
       "label": "Working hypothesis",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L17",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "agents_findings_working_hypothesis",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 14,
+      "community_name": "Findings",
       "norm_label": "working hypothesis"
     },
     {
       "label": "Questions to resolve",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L25",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "agents_findings_questions_to_resolve",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 14,
+      "community_name": "Findings",
       "norm_label": "questions to resolve"
     },
     {
       "label": "Evidence rules",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L37",
+      "source_location": "L151",
       "_origin": "ast",
       "id": "agents_findings_evidence_rules",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "evidence rules"
+    },
+    {
+      "label": "plan-submission-lifetime.md",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime",
       "community": 13,
       "community_name": ".agents/README.md",
-      "norm_label": "evidence rules"
+      "norm_label": "plan-submission-lifetime.md"
+    },
+    {
+      "label": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "submission lifetime \u8a73\u7d30\u8a08\u753b(sl-002 \u6210\u679c\u7269)"
+    },
+    {
+      "label": "\u524d\u63d0: \u78ba\u8a8d\u6e08\u307fcontract\u4e8b\u5b9f",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_\u524d\u63d0_\u78ba\u8a8d\u6e08\u307fcontract\u4e8b\u5b9f",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "\u524d\u63d0: \u78ba\u8a8d\u6e08\u307fcontract\u4e8b\u5b9f"
+    },
+    {
+      "label": "\u4eee\u8aac\u306e\u72b6\u614b",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_\u4eee\u8aac\u306e\u72b6\u614b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "\u4eee\u8aac\u306e\u72b6\u614b"
+    },
+    {
+      "label": "\u5b9f\u884c\u8a08\u753b",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "\u5b9f\u884c\u8a08\u753b"
+    },
+    {
+      "label": "Phase 1: SL-003 RED regression test(production\u5909\u66f4\u306a\u3057)",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_phase_1_sl_003_red_regression_test_production\u5909\u66f4\u306a\u3057",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "phase 1: sl-003 red regression test(production\u5909\u66f4\u306a\u3057)"
+    },
+    {
+      "label": "Phase 2: SL-004 \u5207\u308a\u5206\u3051ladder(\u5b89\u3044\u9806)",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_phase_2_sl_004_\u5207\u308a\u5206\u3051ladder_\u5b89\u3044\u9806",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "phase 2: sl-004 \u5207\u308a\u5206\u3051ladder(\u5b89\u3044\u9806)"
+    },
+    {
+      "label": "Phase 3: SL-005 \u4fee\u6b63(\u8a3c\u62e0\u4f9d\u5b58)",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L82",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_phase_3_sl_005_\u4fee\u6b63_\u8a3c\u62e0\u4f9d\u5b58",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "phase 3: sl-005 \u4fee\u6b63(\u8a3c\u62e0\u4f9d\u5b58)"
+    },
+    {
+      "label": "Phase 4: SL-006 Context.Release drain",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L91",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_phase_4_sl_006_context_release_drain",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "phase 4: sl-006 context.release drain"
+    },
+    {
+      "label": "Phase 5: SL-007/SL-008 \u691c\u8a3c",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_phase_5_sl_007_sl_008_\u691c\u8a3c",
+      "community": 17,
+      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "norm_label": "phase 5: sl-007/sl-008 \u691c\u8a3c"
+    },
+    {
+      "label": "Rollback",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L106",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_rollback",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "rollback"
+    },
+    {
+      "label": "Acceptance gates",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L112",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_acceptance_gates",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "acceptance gates"
+    },
+    {
+      "label": "Test selectors",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L123",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_test_selectors",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "test selectors"
+    },
+    {
+      "label": "Non-goals",
+      "file_type": "document",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L136",
+      "_origin": "ast",
+      "id": "agents_plan_submission_lifetime_non_goals",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
+      "norm_label": "non-goals"
     },
     {
       "label": "plan.md",
@@ -5850,8 +6147,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_status_current_status",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "current status"
     },
     {
@@ -5861,63 +6158,63 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_status_repository",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "repository"
     },
     {
       "label": "Active handover",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "agents_status_active_handover",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "active handover"
     },
     {
       "label": "Current phase",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L26",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "agents_status_current_phase",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "current phase"
     },
     {
       "label": "Next handover point",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L36",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "agents_status_next_handover_point",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "next handover point"
     },
     {
       "label": "Authority",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L47",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "agents_status_authority",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "authority"
     },
     {
       "label": "Validation state",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L56",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "agents_status_validation_state",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 16,
+      "community_name": "Current Status",
       "norm_label": "validation state"
     },
     {
@@ -5938,8 +6235,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_tasks_tasks",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 21,
+      "community_name": "Tasks",
       "norm_label": "tasks"
     },
     {
@@ -5949,8 +6246,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_tasks_handover_setup",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 21,
+      "community_name": "Tasks",
       "norm_label": "handover setup"
     },
     {
@@ -5960,19 +6257,19 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "agents_tasks_next_implementation_candidate_submission_lifetime",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 21,
+      "community_name": "Tasks",
       "norm_label": "next implementation candidate: submission lifetime"
     },
     {
       "label": "Acceptance outline",
       "file_type": "document",
       "source_file": ".agents/tasks.md",
-      "source_location": "L25",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "agents_tasks_acceptance_outline",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 21,
+      "community_name": "Tasks",
       "norm_label": "acceptance outline"
     },
     {
@@ -5982,8 +6279,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_worklog",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 19,
+      "community_name": "Work Log",
       "norm_label": "worklog.md"
     },
     {
@@ -5993,8 +6290,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_worklog_work_log",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 19,
+      "community_name": "Work Log",
       "norm_label": "work log"
     },
     {
@@ -6004,9 +6301,42 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_worklog_2026_07_31_handover_initialization",
-      "community": 13,
-      "community_name": ".agents/README.md",
+      "community": 19,
+      "community_name": "Work Log",
       "norm_label": "2026-07-31 handover initialization"
+    },
+    {
+      "label": "2026-07-31 SL-001/SL-002(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_sl_001_sl_002_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 sl-001/sl-002(kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 SL-003\u301cSL-008(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_sl_003_sl_008_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 sl-003\u301csl-008(kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 SL-009 review\u3068commit(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_sl_009_review\u3068commit_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 sl-009 review\u3068commit(kimi code cli)"
     },
     {
       "label": "AGENTS.md",
@@ -8269,6 +8599,18 @@
     {
       "relation": "references",
       "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
       "source_file": "mat/tensorops.go",
       "source_location": "L497",
       "weight": 1.0,
@@ -9427,6 +9769,42 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_robustness_test_testvalidationerrorssupporterrorsis",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L166",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L214",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L137",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
       "target": "mat_context_newcontext"
     },
     {
@@ -11724,6 +12102,18 @@
     {
       "relation": "references",
       "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
       "source_file": "mat/tensorops.go",
       "source_location": "L14",
       "weight": 1.0,
@@ -12667,6 +13057,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_robustness_test_testvalidationerrorssupporterrorsis",
+      "target": "mat_mat_newmatrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
       "target": "mat_mat_newmatrix"
     },
     {
@@ -19044,6 +19446,18 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_ops_matmul"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "mat/p4_contract_test.go",
       "source_location": "L177",
       "weight": 1.0,
@@ -19085,6 +19499,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_robustness_test_testvalidationerrorssupporterrorsis",
+      "target": "mat_ops_add"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
       "target": "mat_ops_add"
     },
     {
@@ -19145,6 +19571,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_robustness_test_unarycontractcases",
+      "target": "mat_ops_scale"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
       "target": "mat_ops_scale"
     },
     {
@@ -19296,6 +19734,18 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L108",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_ops_mul"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "mat/ops.go",
       "source_location": "L564",
       "weight": 1.0,
@@ -19349,6 +19799,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_p4_examples_test_examplereducesumto",
+      "target": "mat_ops_reducesumto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
       "target": "mat_ops_reducesumto"
     },
     {
@@ -19421,6 +19883,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_p4_examples_test_examplebroadcastto",
+      "target": "mat_ops_broadcastto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
       "target": "mat_ops_broadcastto"
     },
     {
@@ -21100,6 +21574,42 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_p4_contract_test_newp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L219",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_p4_contract_test_newp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L142",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_p4_contract_test_newp4matrix"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mat/p4_contract_test.go",
@@ -21230,6 +21740,30 @@
       "source": "mat_p4_contract_test_testp4softwarestatssnapshot",
       "target": "mat_p4_contract_test_readp4matrix",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L199",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_p4_contract_test_readp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L158",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_p4_contract_test_readp4matrix"
     },
     {
       "relation": "calls",
@@ -22499,6 +23033,275 @@
       "_origin": "ast",
       "source": "mat_robustness_test_testunaryoperationsrejectcontextmismatchandaliasing",
       "target": "mat_robustness_test_assertunarycontract",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_runslchainedround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_slinputdata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_slreferenceaccumulate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_slroundcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_testslmetalchainedcompute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L209",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L136",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test",
+      "target": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_slroundcount",
+      "target": "mat_sl_contract_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L179",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_sl_contract_test_slroundcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L225",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_sl_contract_test_slroundcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L150",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_sl_contract_test_slroundcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_sl_contract_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L161",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_sl_contract_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L209",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_sl_contract_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L136",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_sl_contract_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L184",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_sl_contract_test_slreferenceaccumulate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L153",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_sl_contract_test_slreferenceaccumulate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L183",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_sl_contract_test_runslchainedround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L226",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_sl_contract_test_runslchainedround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L152",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_sl_contract_test_runslchainedround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L170",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalchainedcompute",
+      "target": "mat_sl_contract_test_slinputdata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L218",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslmetalreleasewithinflightwork",
+      "target": "mat_sl_contract_test_slinputdata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_contract_test.go",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_sl_contract_test_slinputdata",
       "confidence_score": 1.0
     },
     {
@@ -23785,7 +24588,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L13",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme",
@@ -23826,6 +24629,17 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/README.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_readme",
+      "target": "agents_plan_submission_lifetime",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
@@ -23862,7 +24676,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L14",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme",
@@ -23873,7 +24687,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L22",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme_repo_agent_notes",
@@ -23884,7 +24698,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L38",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme_repo_agent_notes",
@@ -23895,7 +24709,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme_repo_agent_notes",
@@ -23906,7 +24720,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/README.md",
-      "source_location": "L16",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_readme_repo_agent_notes",
@@ -23944,6 +24758,17 @@
       "_origin": "ast",
       "source": "agents_commands",
       "target": "agents_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/commands.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_commands",
+      "target": "agents_plan_submission_lifetime",
       "confidence_score": 1.0
     },
     {
@@ -24048,6 +24873,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_decisions_decisions",
+      "target": "agents_decisions_d_006_fix_by_dependency_pin_bump",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -24082,7 +24918,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L37",
+      "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24093,7 +24929,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L25",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
+      "target": "agents_findings_module_contract_facts_sl_002_2026_07_31_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
+      "source_location": "L134",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24104,11 +24951,198 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
+      "target": "agents_findings_reproduction_and_isolation_evidence_sl_003_004_2026_07_31_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
+      "target": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
       "target": "agents_findings_working_hypothesis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime",
+      "target": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/status.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_status",
+      "target": "agents_plan_submission_lifetime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/tasks.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_tasks",
+      "target": "agents_plan_submission_lifetime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_acceptance_gates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L136",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_non_goals",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L106",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_rollback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L123",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_test_selectors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_\u4eee\u8aac\u306e\u72b6\u614b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_\u524d\u63d0_\u78ba\u8a8d\u6e08\u307fcontract\u4e8b\u5b9f",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_submission_lifetime_\u8a73\u7d30\u8a08\u753b_sl_002_\u6210\u679c\u7269",
+      "target": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "target": "agents_plan_submission_lifetime_phase_1_sl_003_red_regression_test_production\u5909\u66f4\u306a\u3057",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "target": "agents_plan_submission_lifetime_phase_2_sl_004_\u5207\u308a\u5206\u3051ladder_\u5b89\u3044\u9806",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "target": "agents_plan_submission_lifetime_phase_3_sl_005_\u4fee\u6b63_\u8a3c\u62e0\u4f9d\u5b58",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "target": "agents_plan_submission_lifetime_phase_4_sl_006_context_release_drain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/plan-submission-lifetime.md",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
+      "target": "agents_plan_submission_lifetime_phase_5_sl_007_sl_008_\u691c\u8a3c",
       "confidence_score": 1.0
     },
     {
@@ -24126,7 +25160,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L28",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -24346,7 +25380,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24357,7 +25391,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L47",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24368,7 +25402,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24379,7 +25413,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L36",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24401,7 +25435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L56",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -24423,7 +25457,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/tasks.md",
-      "source_location": "L25",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_tasks_tasks",
@@ -24472,6 +25506,39 @@
       "_origin": "ast",
       "source": "agents_worklog_work_log",
       "target": "agents_worklog_2026_07_31_handover_initialization",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_sl_001_sl_002_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_sl_003_sl_008_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_sl_009_review\u3068commit_kimi_code_cli",
       "confidence_score": 1.0
     },
     {
@@ -24630,5 +25697,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "994908829958096a286765ae044506db8fd4b3cc"
+  "built_at_commit": "ba3ea83bfb854d13854819be7c761204eb256b87"
 }

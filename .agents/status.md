@@ -5,13 +5,13 @@
 - 更新日: 2026-07-31
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- HEAD: `7502d8e docs: add agent handover notes and code indexes`
-- Remote: `origin/main`は`9949088`。`main`は1 commit aheadであり、権限境界により
+- HEAD: `ba3ea83 fix: bump gogpu/wgpu to v0.30.29 and add submission lifetime
+  regression tests`
+- Remote: `origin/main`は`9949088`。`main`は2 commit aheadであり、権限境界により
   pushしていない。
 - Release: tag `v0.0.2`は`9949088`を指す。
-- 現在のworking tree: SL-003〜SL-008の変更(`go.mod`/`go.sum`のpin bump、
-  `mat/sl_contract_test.go`追加、`.agents/`更新)が未commit。これらを誤って
-  破棄しないこと。
+- 現在のworking tree: index再同期(`graphify-out/`)と本hash記録のための
+  `.agents/`更新のみ。次のchore commitでcleanになる予定。
 
 ## Active handover
 
@@ -72,10 +72,10 @@ dependency、統合状態は変更しない。
   test追加、`.agents/` notesのみである。
 
 Handover indexは2026-07-31に初期化済みである。SL-003のtest追加を反映する
-再同期はsession close-out時に実施する。
+再同期をsession close-outで実施した。
 
-- Graphify: 561 nodes、1,575 edges、17 communities。
-- CodeGraph: 32 files、575 nodes、2,419 edges。`codegraph status .`はup to date。
+- Graphify: 591 nodes、1,639 edges、25 communities。
+- CodeGraph: `codegraph sync .`完了。
 - Graphifyは`.vscode/launch.json`と`.vscode/settings.json`がzero-nodeだったと警告した。
   Go code graphの生成は成功しており、この警告は非blockingである。
 - Graphify再同期でcommunity setが変わり、一部labelをhub名へ自動更新した。

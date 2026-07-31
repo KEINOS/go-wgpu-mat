@@ -2,12 +2,12 @@
 
 ## Corpus Check
 
-- 43 files · ~30,005 words
+- 43 files · ~30,221 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 
-- 558 nodes · 1572 edges · 27 communities (22 shown, 5 thin omitted)
+- 561 nodes · 1575 edges · 17 communities (15 shown, 2 thin omitted)
 - Extraction: 71% EXTRACTED · 29% INFERRED · 0% AMBIGUOUS · INFERRED: 450 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -26,23 +26,13 @@
 - matMulWGPUDeps
 - newMockMatrix
 - Context
-- ops.go
+- TestP4MetalKernels
 - successfulMatMulWGPUDeps
 - robustness_test.go
 - go-wgpu-mat
 - mat_bench_test.go
 - P4 Device-resident Kernel Plan
 - .agents/README.md
-- Decisions
-- Current Status
-- Findings
-- Public Contract
-- Phases
-- Tasks
-- Commands
-- Repo Agent Notes
-- worklog.md
-- classifiedError
 - bench-isolated.sh
 - github.com/KEINOS/go-wgpu-mat
 
@@ -61,8 +51,6 @@
 
 ## Surprising Connections (you probably didn't know these)
 
-- `TestAdd_cpuFallback()` --calls--> `defaultAddDeps()`  [INFERRED]
-  mat/add_stub_test.go → mat/add.go
 - `Add()` --calls--> `defaultAddDeps()`  [INFERRED]
   mat/ops.go → mat/add.go
 - `add()` --calls--> `wrapError()`  [INFERRED]
@@ -71,17 +59,19 @@
   mat/add.go → mat/ops.go
 - `TestAdd_cpuFallback()` --calls--> `add()`  [INFERRED]
   mat/add_stub_test.go → mat/add.go
+- `Add()` --calls--> `add()`  [INFERRED]
+  mat/ops.go → mat/add.go
 
 ## Import Cycles
 
 - None detected.
 
-## Communities (27 total, 5 thin omitted)
+## Communities (17 total, 2 thin omitted)
 
 ### Community 0 - "Matrix"
 
-Cohesion: 0.08
-Nodes (72): createAddBindGroup(), createAddBindGroupLayout(), createAddPipeline(), defaultAddDeps(), dispatchAdd(), dispatchAddWithDeps(), encodeAndSubmitAdd(), BindGroup (+64 more)
+Cohesion: 0.07
+Nodes (71): validateAdd(), validateAddKernelContract(), addDeps, classifiedError, sentinelError(), wrapError(), Uint32, ceilDiv() (+63 more)
 
 ### Community 1 - "mat_unit_test.go"
 
@@ -96,12 +86,12 @@ Nodes (53): F, NewContext(), Example(), ExampleAdd(), ExampleMatMul(), ExampleNe
 ### Community 3 - "newPipelineCache"
 
 Cohesion: 0.07
-Nodes (35): isCPUAdapter(), T, stubContext(), TestAdd_cpuFallback(), TestIsCPUAdapter_realAdapter(), TestIsCPUAdapter_stubContext(), ComputePipeline, newError() (+27 more)
+Nodes (36): defaultAddDeps(), isCPUAdapter(), T, stubContext(), TestAdd_cpuFallback(), TestIsCPUAdapter_realAdapter(), TestIsCPUAdapter_stubContext(), ComputePipeline (+28 more)
 
 ### Community 4 - "matMulWGPUDeps"
 
-Cohesion: 0.08
-Nodes (44): BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BufferBindingType, CommandEncoderDescriptor, ComputePassDescriptor, ComputePassEncoder (+36 more)
+Cohesion: 0.07
+Nodes (57): BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BufferBindingType, CommandEncoderDescriptor, ComputePassDescriptor, ComputePassEncoder (+49 more)
 
 ### Community 5 - "newMockMatrix"
 
@@ -113,10 +103,10 @@ Nodes (43): add(), mockMatrixIO, runBinaryElementwise(), decodeFloat32(), encode
 Cohesion: 0.08
 Nodes (26): Adapter, AdapterInfo, DeviceDescriptor, Instance, InstanceDescriptor, Limits, Context, contextAdapterOptions() (+18 more)
 
-### Community 7 - "ops.go"
+### Community 7 - "TestP4MetalKernels"
 
-Cohesion: 0.17
-Nodes (31): BenchmarkP4DeviceResidentChain(), Add(), applyFiniteSoftmaxRow(), applyRMSNormRow(), applySoftmaxRow(), applySpecialSoftmaxRow(), broadcastDimension(), BroadcastTo() (+23 more)
+Cohesion: 0.32
+Nodes (19): BenchmarkP4DeviceResidentChain(), Add(), BroadcastTo(), Mul(), ReduceSumTo(), ReshapeTo(), Scale(), Transp() (+11 more)
 
 ### Community 8 - "successfulMatMulWGPUDeps"
 
@@ -140,65 +130,30 @@ Nodes (12): B, binaryOperation, BenchmarkAdd256x256(), benchmarkBinaryOperation(
 
 ### Community 12 - "P4 Device-resident Kernel Plan"
 
-Cohesion: 0.25
-Nodes (8): Acceptance Gates, Baseline, Close-out, Goal, Internal Design, Non-goals, P4 Device-resident Kernel Plan, Plan Review
+Cohesion: 0.11
+Nodes (18): Acceptance Gates, Baseline, Broadcasting, Close-out, Goal, Gradient shape primitives, Internal Design, Non-goals (+10 more)
 
-### Community 14 - "Decisions"
+### Community 13 - ".agents/README.md"
 
-Cohesion: 0.29
-Nodes (6): D-001 Repo-local handover, D-002 Completed P4 plan location, D-003 No readback workaround, D-004 Cause labeling, D-005 Remote authority, Decisions
-
-### Community 15 - "Current Status"
-
-Cohesion: 0.33
-Nodes (6): Authority, Current phase, Current Status, Next handover point, Repository, Validation state
-
-### Community 16 - "Findings"
-
-Cohesion: 0.40
-Nodes (5): Confirmed facts, Evidence rules, Findings, Questions to resolve, Working hypothesis
-
-### Community 17 - "Public Contract"
-
-Cohesion: 0.40
-Nodes (5): Broadcasting, Gradient shape primitives, Public Contract, Statistics, Unary kernels
-
-### Community 18 - "Phases"
-
-Cohesion: 0.40
-Nodes (5): P4.0 Plan and review, P4.1 RED contract tests, P4.2 GREEN kernels and statistics, P4.3 Documentation and validation, Phases
-
-### Community 19 - "Tasks"
-
-Cohesion: 0.40
-Nodes (4): Acceptance outline, Handover setup, Next implementation candidate: submission lifetime, Tasks
-
-### Community 20 - "Commands"
-
-Cohesion: 0.50
-Nodes (4): Commands, Existing repository gates, Index, Resume
-
-### Community 21 - "Repo Agent Notes"
-
-Cohesion: 0.50
-Nodes (4): Index, Repo Agent Notes, 情報の優先順位, 読む順序
+Cohesion: 0.05
+Nodes (35): Commands, Existing repository gates, Index, Resume, D-001 Repo-local handover, D-002 Completed P4 plan location, D-003 No readback workaround, D-004 Cause labeling (+27 more)
 
 ## Knowledge Gaps
 
-- **53 isolated node(s):** `github.com/KEINOS/go-wgpu-mat`, `bench-isolated.sh script`, `読む順序`, `情報の優先順位`, `Index` (+48 more)
+- **56 isolated node(s):** `github.com/KEINOS/go-wgpu-mat`, `bench-isolated.sh script`, `読む順序`, `情報の優先順位`, `Index` (+51 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Matrix` connect `Matrix` to `mat_unit_test.go`, `NewContext`, `matMulWGPUDeps`, `newMockMatrix`, `Context`, `ops.go`, `successfulMatMulWGPUDeps`, `robustness_test.go`?**
-  _High betweenness centrality (0.201) - this node is a cross-community bridge._
-- **Why does `Context` connect `Context` to `Matrix`, `mat_unit_test.go`, `NewContext`, `newPipelineCache`, `matMulWGPUDeps`, `ops.go`?**
-  _High betweenness centrality (0.160) - this node is a cross-community bridge._
-- **Why does `NewContext()` connect `NewContext` to `Matrix`, `mat_unit_test.go`, `newPipelineCache`, `Context`, `ops.go`, `robustness_test.go`, `mat_bench_test.go`?**
-  _High betweenness centrality (0.117) - this node is a cross-community bridge._
+- **Why does `Matrix` connect `Matrix` to `mat_unit_test.go`, `NewContext`, `matMulWGPUDeps`, `newMockMatrix`, `Context`, `TestP4MetalKernels`, `successfulMatMulWGPUDeps`, `robustness_test.go`?**
+  _High betweenness centrality (0.199) - this node is a cross-community bridge._
+- **Why does `Context` connect `Context` to `Matrix`, `mat_unit_test.go`, `NewContext`, `newPipelineCache`, `matMulWGPUDeps`, `TestP4MetalKernels`?**
+  _High betweenness centrality (0.158) - this node is a cross-community bridge._
+- **Why does `NewContext()` connect `NewContext` to `Matrix`, `mat_unit_test.go`, `newPipelineCache`, `Context`, `TestP4MetalKernels`, `robustness_test.go`, `mat_bench_test.go`?**
+  _High betweenness centrality (0.116) - this node is a cross-community bridge._
 - **Are the 53 inferred relationships involving `NewContext()` (e.g. with `sentinelError()` and `sentinelWrapError()`) actually correct?**
   _`NewContext()` has 53 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 47 inferred relationships involving `NewMatrix()` (e.g. with `benchmarkBinaryOperation()` and `benchmarkMatMulOperation()`) actually correct?**
@@ -206,4 +161,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 18 inferred relationships involving `newMockMatrix()` (e.g. with `TestAddKernelLimits()` and `TestAdd_cpuFallback()`) actually correct?**
   _`newMockMatrix()` has 18 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `github.com/KEINOS/go-wgpu-mat`, `bench-isolated.sh script`, `読む順序` to the rest of the system?**
-  _53 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _56 weakly-connected nodes found - possible documentation gaps or missing edges._
