@@ -43,5 +43,25 @@ make lint
 make fuzz
 ```
 
-P4のmandatory selectorとlocal Metal gateは[`plan.md`](plan.md)を参照する。新しい
-submission lifetime作業の追加selector、反復回数、coverage gateは詳細計画で確定する。
+P4のmandatory selectorとlocal Metal gateは[`plan.md`](plan.md)を参照する。
+
+Submission lifetime作業のselectorは次のとおり(詳細は
+[`plan-submission-lifetime.md`](plan-submission-lifetime.md))。
+
+```sh
+CGO_ENABLED=1 go test -race -gcflags=all=-d=checkptr=0 -cover -count=1 \
+  -run '^(TestP4Software|TestSLSoftware)' ./mat
+GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=1 -parallel=1 \
+  -run '^(TestP4Metal|TestSLMetal)' ./mat
+```
+
+Metal stressはround数と反復を上げて実行する。
+
+```sh
+GO_WGPU_MAT_SL_ROUNDS=1024 GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 \
+  go test -count=3 -parallel=1 -run '^TestSLMetal' ./mat
+```
+
+`TestSLSoftware*`は`UseCPU`のみを使い、hardware adapterを要求しない。
+`TestSLMetal*`は`UseGPU`を要求し、`GO_WGPU_MAT_GPU=1`でadapter不在をskipでは
+なくfailureとする。反復回数の目安は`-count=10`以上およびstress実行である。

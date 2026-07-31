@@ -45,3 +45,85 @@ Session close-out規約に従いGraphifyとCodeGraphを再同期した。Graphif
 1,575 edges、17 communitiesとなり、community set変更により一部labelをhub名へ
 自動更新した。LLM label refreshは必須でないため実行していない。CodeGraphは変更を
 検出せず、32 files、575 nodes、2,419 edgesのup-to-date状態を維持した。
+
+## 2026-07-31 SL-001/SL-002(Kimi Code CLI)
+
+Maintainer指示によりKimi Code CLIがhandoverをintakeした。Handover一式
+(`AGENTS.md`、`.agents/`、index、`plan.md`移動)をlocal commit `7502d8e`として
+記録した(push禁止のため`main`は`origin/main`より1 ahead)。
+
+SL-001としてsubmission pathをread-only inventoryした。Submission pointは
+`encodeAndSubmitCompute`、readbackの`readBuffer`、`WriteBuffer`の3系統で、
+完了追跡機構はcodebaseに存在しないことを確認した。Inventoryは`findings.md`へ
+記録した。
+
+SL-002として、pin済み`gogpu/wgpu v0.30.22`のmodule sourceを直接読み、ownership
+contractを確認した(read-only sub-agent調査のload-bearing claimはすべてprimary
+sourceで再検証)。Submit後の`CommandBuffer.Release`はno-op、buffer類は
+ResourceRef refcountでGPU完了まで生存することが確認できた。一方、v0.30.22の
+`BindGroup.Release`はResourceRefをbypassし、upstreamがuse-after-freeとして
+v0.30.28で修正したpatternに合致すること、pin版の`Device.Release`内部drainが
+released flagによりno-opであること(v0.30.23で修正)を確認した。これらを
+`findings.md`の「Module contract facts」にfile/line証拠付きで記録し、詳細計画を
+`.agents/plan-submission-lifetime.md`として作成した。旧SL-004の「command buffer
+だけ保持する切り分け」はmodule挙動を変えないため対象外とし、SL-004の第1 rungを
+v0.30.29 upgrade仮説testへ置き換えた。
+
+変更前baselineとして`CGO_ENABLED=0 go test -timeout=60s -parallel=1 -cover ./...`
+がGREEN(95.0% coverage)であることを確認した。Production codeは未変更である。
+
+## 2026-07-31 SL-003〜SL-008(Kimi Code CLI)
+
+SL-003として`mat/sl_contract_test.go`を追加した。`TestSLMetalChainedCompute`は
+go-nnのdevice-resident backward形状を模倣し、256 round×6 opの依存chainを
+中間readbackなしで回して最後に1回だけReadする。accumulationはping-pong buffer、
+中間matrixはroundごとに生成・解放する。`TestSLSoftwareChainedCompute`はUseCPUの
+参照controlとして常にGREENである。
+
+Pin版(v0.30.22)でのRED確認: 3/3回、同一PCでSIGSEGVを再現した。crash siteは
+`hal/metal.(*AutoreleasePool).Drain`←`CommandEncoder.BeginEncoding`←
+`Device.CreateCommandEncoder`で、後続opのencoder作成がFFI経由で落ちる。
+
+SL-004第1 rungとして`go.mod`をv0.30.29へ上げて再実行したところ、`-count=1`、
+`-count=10`、`GO_WGPU_MAT_SL_ROUNDS=1024 -count=3`のすべてでGREENとなった。
+RED-before/GREEN-afterと十分な反復が揃い、H1(pin版`BindGroup.Release`の
+use-after-free、upstream ADR-056)を有力な原因候補として採用した。
+
+SL-005の修正はpin bump(`github.com/gogpu/wgpu` v0.30.22→v0.30.29、伴ってgoffi
+v0.6.2、gpucontext v0.23.0、naga v0.17.16、webgpu v0.5.4)とし、production
+codeの変更は無い。SL-006は`TestSLMetalReleaseWithInflightWork`を追加し、
+in-flight work下でのmatrix/context解放と二重Releaseのidempotencyを検証した。
+
+SL-007/008の検証結果: `TestP4MetalKernels` PASS、`make test`(CGO=0/1、race、
+checkptr=0)GREEN(95.0% coverage)、`make lint` 0 issues、`make fuzz`両target
+PASS、software race selector GREEN、Metal `-count=10`と1024 round×3のstress
+GREEN。lint指摘2件(G115、nonamedreturns)は`slRoundCount`を`uint64`返しへ変更し、
+`slInputData`のnamed returnを除去して解消した。`golangci-lint run --fix`は
+整形のみを変更した。
+
+## 2026-07-31 SL-009 reviewとcommit(Kimi Code CLI)
+
+Read-only reviewをcopilot、hermes、codexの3 reviewerで実施した(claude、agy、
+piはpingで利用不可)。codexの初回呼び出しはCLI引数形状の不整合で失敗したため、
+packet modeへ切り替えた。
+
+Iteration 1: hermesとcodexはAGREED。copilotは2件のBLOCKINGを報告した。
+検証の結果、(1)`runSLChainedRound`の中間matrixが`newP4Matrix`の`t.Cleanup`と
+`defer`で二重releaseされる点は、`Matrix.Release`がCASでidempotentと確認済みの
+ため実害はないが、直接`mat.NewMatrix`+`defer`へ変更してroundごとexactly onceと
+した(採用)。(2)inflight testのcleanupがreleased contextへ発火するという指摘は、
+LIFO順とidempotent no-opにより発火しないことを確認し却下した。あわせて、
+Q4の従属論点としてmatrixの二重releaseと`Released()`を明示assertへ変更した
+(部分採用)。
+
+修正後にSL software(CGO=0)、SL Metal `-count=3`、lintを再実行しGREEN。
+Iteration 2で3 reviewer全員がAGREEDし、consensusに達した。Review後のmutation
+checkではworktreeにreviewer由来の変更はなかった。
+
+追加検証: `TestSLMetal*`は`-race -gcflags=all=-d=checkptr=0`でGREEN。
+checkptr有効の`-race`ではv0.30.29でも`hal/metal.newGPUCompletionBlock`の
+trampolineでcheckptr fatalとなることを確認し、Makefileのcheckptr=0は維持とした
+(findings.mdに記録)。`go mod verify`は全module verified。
+
+最終gate: `make test`両mode GREEN(95.0% coverage)、P4+SL Metal selector GREEN、
+software race selector GREEN、lint 0 issues、fuzz両target PASS。

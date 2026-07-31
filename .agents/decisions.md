@@ -31,3 +31,13 @@
 
 - 状態: 採用
 - 判断: Push、tag、releaseはMaintainerの明示的な許可がある場合だけ行う。
+
+## D-006 Fix by dependency pin bump
+
+- 状態: 採用
+- 判断: Submission lifetime問題の修正は、production codeを変更せず
+  `gogpu/wgpu`のpinをv0.30.22からv0.30.29へ上げることとする。
+- 理由: RED testがpin版で3/3 SIGSEGVを再現し、v0.30.29で十分な反復GREENと
+  なった。upstreamがuse-after-free(ADR-056、v0.30.28)とteardown drain
+  (#264、v0.30.23)を修正済みであり、pin bumpが最小侵襲の修正である。
+  Regression testは両versionで同じ挙動を期待するため、将来の退化を検出できる。

@@ -5,21 +5,24 @@
 - 更新日: 2026-07-31
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- HEAD: `9949088 feat: add detailed matrix and submission statistics`
-- Remote: `origin/main`は`9949088`と一致する。
+- HEAD: `7502d8e docs: add agent handover notes and code indexes`
+- Remote: `origin/main`は`9949088`。`main`は1 commit aheadであり、権限境界により
+  pushしていない。
 - Release: tag `v0.0.2`は`9949088`を指す。
-- Handover開始時のworking tree: clean。
-- 現在のworking tree: Handover用の`AGENTS.md`、`.agents/`、`graphify-out/`、
-  `.codegraph/`と`plan.md`移動が未commit。これらを誤って破棄しないこと。
+- 現在のworking tree: SL-003〜SL-008の変更(`go.mod`/`go.sum`のpin bump、
+  `mat/sl_contract_test.go`追加、`.agents/`更新)が未commit。これらを誤って
+  破棄しないこと。
 
 ## Active handover
 
 - Current executor: Kimi Code CLI。2026-07-31にhandoverをintakeし、着手済み。
-- Active task: `SL-001` submission pathとresource ownershipのread-only inventory。
-- Last completed: `H-005` Handover notes、Graphify、CodeGraph初期化。
-- Next task: `SL-002` `gogpu/wgpu v0.30.22`のownership contract確認と詳細計画。
-- Next command: `codegraph explore "Trace compute submission resource ownership"`
-- Blocker: なし。原因仮説は未確認のため、`SL-003` RED testより前に修正を断定しない。
+- Active task: `SL-009` local commitとsession close-out(review consensus達成済み)。
+- Last completed: `SL-009`のread-only review。copilot、hermes、codexの3 reviewerが
+  iteration 2で全員AGREED。
+- Next task: 全task完了。Maintainerのpush/tagと`SL-010`(`go-nn`統合再開)は
+  Maintainer管理。
+- Next command: `git log -2 --oneline`でcommitを確認する。
+- Blocker: なし。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 
@@ -28,21 +31,24 @@
 P4 device-resident kernelsとstatisticsは[`plan.md`](plan.md)のclose-outまで完了し、
 Maintainerがcommit、push、tag `v0.0.2`、CI成功を確認済みである。
 
-Downstream `go-nn`のF2 WGPU統合中に、device-resident graphで中間readbackを挟まず
-`Backward`を繰り返すと、Metalで2回目の累積gradientが非決定的に破損する問題が
-見つかった。1回目は正しい。中間`Matrix.Read`は同期して症状を隠すが、
-no-host-transfer contractに違反するため修正として採用しない。
+Downstream `go-nn`のF2 WGPU統合中に見つかった、readbackなしで`Backward`を
+繰り返すと2回目の累積gradientが非決定的に破損する問題について、SL-001〜SL-008を
+実施した。pin版`gogpu/wgpu v0.30.22`の`BindGroup.Release` use-after-free
+(upstream ADR-056、v0.30.28で修正)が最有力原因と特定され、修正は
+`go.mod`のpinをv0.30.29へ上げることと確定した。詳細は[`findings.md`](findings.md)の
+「Reproduction and isolation evidence」と[`plan-submission-lifetime.md`](
+plan-submission-lifetime.md)を参照。
 
 ## Next handover point
 
-次のagentは[`findings.md`](findings.md)を確認し、submission resource lifecycleの
-read-only reviewと詳細計画から始める。最初の実装gateは、中間readbackなしで複数の
-compute submissionを連鎖させ、最終readだけで結果を検証するRED regression testで
-ある。
+SL-001〜SL-009は完了した。次のagentは、Maintainerがpush/tagした後に`SL-010`
+(`go-nn`のdependency更新と統合再開)へ進む。それまで`go-nn`のcheckout、
+dependency、統合状態は変更しない。
 
-原因は未確定である。command buffer、bind group、uniform bufferなどをsubmit直後に
-解放している現行lifecycleは確認済みだが、それが破損原因かはtestで証明する必要が
-ある。
+`go-nn`側で同じ破損が再発した場合は、[`findings.md`](findings.md)の副仮説
+(H2-H5)と[`plan-submission-lifetime.md`](plan-submission-lifetime.md)の
+切り分けladder rung 3-5(WaitIdle挿入、zero-init、単一op family chain)から
+再開する。
 
 ## Authority
 
@@ -55,11 +61,18 @@ compute submissionを連鎖させ、最終readだけで結果を検証するRED 
 
 ## Validation state
 
-このhandover作業ではproduction codeやtestを変更していない。新しいsubmission
-lifecycle regression testとMetal検証は未実施であり、過去P4の検証結果を新問題の
-合格根拠として扱わない。
+- RED(pin v0.30.22): `TestSLMetalChainedCompute`が3/3回、同一PCでSIGSEGV。
+- GREEN(v0.30.29): 同一testが`-count=1`、`-count=10`(15,360 submission)、
+  `GO_WGPU_MAT_SL_ROUNDS=1024 -count=3`(18,432 submission)でPASS。
+  `TestSLMetalReleaseWithInflightWork`もPASS。
+- 既存gate: `TestP4MetalKernels` PASS、`make test`(CGO=0/1、race)GREEN
+  (95.0% coverage)、`make lint` 0 issues、`make fuzz`両target PASS、
+  software race selector GREEN。
+- Production codeは変更していない。変更は`go.mod`/`go.sum`のpin bumpと
+  test追加、`.agents/` notesのみである。
 
-Handover indexは2026-07-31に初期化済みである。
+Handover indexは2026-07-31に初期化済みである。SL-003のtest追加を反映する
+再同期はsession close-out時に実施する。
 
 - Graphify: 561 nodes、1,575 edges、17 communities。
 - CodeGraph: 32 files、575 nodes、2,419 edges。`codegraph status .`はup to date。
