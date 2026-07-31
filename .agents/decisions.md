@@ -41,3 +41,14 @@
   なった。upstreamがuse-after-free(ADR-056、v0.30.28)とteardown drain
   (#264、v0.30.23)を修正済みであり、pin bumpが最小侵襲の修正である。
   Regression testは両versionで同じ挙動を期待するため、将来の退化を検出できる。
+
+## D-007 Fail-fast newest upstream during investigation
+
+- 状態: 採用
+- 判断: 切り分け継続中のworking pinは最新の`gogpu/wgpu v0.30.30`とする。
+- 理由: go-nn形状の破損はv0.30.29とv0.30.30で同一にREDであり、版を戻しても
+  利益がない。最新版で再現確認できることがupstream issueやmodule調査の
+  信頼性を高める。v0.30.30は`make test`両mode、P4/SL Metal selector、software
+  race selector、lint、vet、fuzz、`go mod verify`の全gateを通過した。
+  tag `v0.0.3`(= v0.30.29 pin)はそのまま維持し、go-nn側の参照は新しいtagを
+  Maintainerが切るまで変えない。

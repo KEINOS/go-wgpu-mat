@@ -194,3 +194,36 @@ tag経由で全commit内容は公開済みであり、Go moduleとしては`v0.0
 これにより`SL-010`の前提条件(upstream修正がtestを通り、Maintainerがpush/tag
 した後)は満たされた。Kimi Code CLIは作業場所を`go-nn` repoへ移し、F2 WGPU統合の
 再開に着手する。
+
+## 2026-07-31 SL-010: go-nn統合再開とupstream再発の切り分け(Kimi Code CLI)
+
+`go-nn`の依存を`go-wgpu-mat v0.0.3`へ更新し(`go-nn`側commit `c046e79`)、Metal
+gateを再開したが、`TestWGPUTensorMatMulBackwardStaysDeviceResident`は5/5で
+異なる不定値により失敗した。v0.0.3は正規repoのSIGSEGV再現には有効だったが、
+go-nnの破損は残存した。
+
+切り分けのため、go-nnのbackward-2と同一op列を再現する診断test
+(`mat/sl_gradaccum_test.go`、`mat/sl_waitidle_test.go`)を追加した。結果、
+(1)buffer再利用と(2)中間readbackが独立した2つのtriggerであること、fresh
+bufferでreadを挟まないchainは健全であること、`Device.WaitIdle`全op同期でも
+破損すること(完了/timing競合ではない)、readbackは正直でkernel出力そのものが
+誤ること、`gogpu/wgpu v0.30.30`(最新)でも未修正であることを確認した。go-nnの
+pool無効化(診断)でも中間readback triggerが残るため破損が継続した(差分は
+revert済み)。詳細は`findings.md`の「Isolation ladder results」を参照。
+
+診断test 2 fileは証拠として未commitのまま保持し、`go.mod`/`go.sum`はv0.30.29の
+commit状態へ戻した。次の一手(upstream issue作成か`hal/metal`内部調査か)は
+Maintainerの判断を求めた。
+
+## 2026-07-31 fail-fastでv0.30.30を採用(Kimi Code CLI)
+
+Maintainerのfail-fast方針(v0.30.29とv0.30.30で破損挙動が同一なら最新版で進める)
+に従い、working pinを`gogpu/wgpu v0.30.30`へ更新した(D-007)。v0.30.30の修正は
+validation mapのmemory leakであり本破損の原因ではないが、全gate(`make test`
+両mode、P4/SL Metal selector、software race selector、lint、vet、fuzz、
+`go mod verify`)がGREENであることを確認した。
+
+診断testは`TestRepro`prefixへrenameしてquarantineし(既定の`^TestSLMetal`
+gateは引き続き3/3 PASS)、funlenのlint指摘2件をnolintで解消した。tag `v0.0.3`
+(v0.30.29 pin)とgo-nn側の参照は変更していない。repro suiteの実行は
+`GO_WGPU_MAT_GPU=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat`。

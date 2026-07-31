@@ -137,6 +137,48 @@ CHANGELOGのpost-pin修正履歴に基づく。現行pinはv0.30.29であり、�
   して扱う。なお最終的な原因確定には、version bisectまたはupstream issue #287の
   照合が残るが、実務上の修正(pin bump)は確定した。
 
+## Isolation ladder results(SL-004続、2026-07-31、Kimi Code CLI)
+
+`go-wgpu-mat v0.0.3`がgo-nnのrepeated-backward破損を解消しなかったため、go-nnの
+backward-2と同一op列(seed=BroadcastTo(one,1x1)、dP=BroadcastTo(seed,2x2)、
+Transp×2、MatMul×2、commit Add×2、commit直後に旧gradをclose)をmat-levelで再現する
+診断testを追加した(`mat/sl_gradaccum_test.go`、`mat/sl_waitidle_test.go`、
+本項執筆時点で未commit)。結果:
+
+- 再現matrix(-count=10): fresh+中間readなしは10/10 GREEN。pooled+read、
+  fresh+read、pooled+readなしはすべて10/10 RED。temps-only reuseは1/10、
+  grads-only reuseは2/10 RED。**buffer再利用と中間readbackは独立した2つの
+  trigger**であり、go-nnがpoolを無効化しても中間readback triggerが残るため
+  破損が解消しないことを説明する。
+- Forensics(pooled): round-1は全buffer正しい。round-2ではBroadcastTo/Transp
+  (tensorop pipeline)の出力は正しく着弾するが、MatMul/Addの出力が誤り
+  (例: deltaLがdProductの内容、deltaRがrightTの内容。process内では決定的、
+  run間で非決定)。
+- `Device.WaitIdle()`をround-2の全op間に挟んでもRED。**完了/timing競合では
+  ない**。
+- `ReshapeTo`でfresh matrixへcopyしてからreadしてもdirect readと一致。
+  **readbackは正直であり、kernel出力そのものが誤り**。
+- go-nnのpoolを診断的に無効化(v0.0.3)しても`TestWGPUTensorMatMulBackward`
+  は3/3 RED(差分はrevert済み)。
+- `gogpu/wgpu v0.30.30`(2026-07-31時点の最新)でも同一の失敗matrix。
+  最新upstreamでも未修正。なおgo-nnの破損はv0.30.22でも観測されており、
+  0.30.28の書き換え由来のregressionではない。
+
+結論: `gogpu/wgpu`のMetal backendは、(a)submissionをまたいで以前使われた
+bufferへ書き込む場合、または(b)中間readbackの後のsubmissionで、kernel出力を
+誤ることがある。fresh bufferでreadを挟まないchain(= `TestSLMetalChainedCompute`
+の形状)は影響を受けない。upstream issueとして報告できる最小再現は
+`mat/sl_gradaccum_test.go`である。次はMaintainer判断: upstream issue作成か、
+`hal/metal`のencoder/binder/completion周辺のmodule内部調査か。
+
+追記(2026-07-31): Maintainerのfail-fast方針によりworking pinを`v0.30.30`へ
+更新した(D-007)。v0.30.30のCHANGELOGの修正はvalidation mapのmemory leak
+(SetBindGroupがencoder mapへbound resourceを蓄積しBindGroupをpinし続ける問題)
+であり、本破損の原因ではない。v0.30.30で全gate(`make test`両mode、P4/SL Metal
+selector、software race selector、lint、vet、fuzz、`go mod verify`)がGREENで、
+repro診断testは`TestRepro`prefixへquarantineし、既定の`^TestSLMetal`gateから
+除外した。tag `v0.0.3`はv0.30.29 pinのまま変更しない。
+
 ## Working hypothesis(v0.30.22 baselineに関する仮説)
 
 主仮説(H1): 旧pin v0.30.22の`BindGroup.Release` use-after-free(upstream

@@ -17,16 +17,19 @@
 
 ## Active handover
 
-- Current executor: なし。SL-010の前提条件(Maintainerのpush/tagとCI成功)は
-  満たされた。
-- Active task: `SL-010` `go-nn`のdependency更新と統合再開。作業場所は
-  `go-nn` repoへ移る。
-- Last completed: Maintainerによるtag `v0.0.3`のpushとCI成功の確認。
-- Next task: `go-nn`の`AGENTS.md`と`.agents/README.md`を入口にF2 WGPU統合の
-  現在地を確認し、dependencyをv0.0.3へ更新する。
-- Next command: `sed -n '1,240p' /path/to/go-nn/.agents/STATUS.md`(go-nn側の
-  正規pathで読む)。
-- Blocker: なし。
+- Current executor: Kimi Code CLI。`SL-010`でgo-nnの破損がv0.0.3でも残存することを
+  確認し、切り分けladderを実行中。
+- Active task: upstream Metal corruptionの切り分け完了。Maintainerの方針判断待ち
+  (upstream issue作成 vs module内部調査)。
+- Last completed: isolation ladder。結果は[`findings.md`](findings.md)の
+  「Isolation ladder results」を参照。
+- Last completed: fail-fast方針による`gogpu/wgpu v0.30.30`採用(D-007)と全gate
+  再検証。repro診断testを`TestRepro`prefixでquarantineしcommit。
+- Next task: Maintainer判断後、upstream issueの最小再現整理、または`hal/metal`
+  内部調査。
+- Next command: `GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat`
+  (quarantined repro。reuse/read variantはupstream bugが残る間FAILが期待値)
+- Blocker: go-nn F2-009はupstream module側の新たな破損で再blocked。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 
