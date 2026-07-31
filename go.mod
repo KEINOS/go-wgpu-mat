@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/gogpu/gputypes v0.5.1
-	github.com/gogpu/wgpu v0.30.29
+	github.com/gogpu/wgpu v0.30.30
 	github.com/stretchr/testify v1.11.1
 )
 
