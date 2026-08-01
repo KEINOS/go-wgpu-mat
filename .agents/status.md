@@ -18,15 +18,12 @@
 ## Active handover
 
 - Current executor: Kimi Code CLI。`SL-010`でgo-nnの破損がv0.0.3でも残存することを
-  確認し、切り分けladderを実行中。
-- Active task: upstream Metal corruptionの切り分け完了。Maintainerの方針判断待ち
-  (upstream issue作成 vs module内部調査)。
-- Last completed: isolation ladder。結果は[`findings.md`](findings.md)の
-  「Isolation ladder results」を参照。
+  確認し、切り分けladderを完了した。
+- Active task: `gogpu/wgpu` Metal backendの破損mechanism特定(module内部調査、
+  Maintainer判断で先行)。go-nn側もv0.30.30へ揃え済み(`go-nn` commit `09c12ed`)。
 - Last completed: fail-fast方針による`gogpu/wgpu v0.30.30`採用(D-007)と全gate
-  再検証。repro診断testを`TestRepro`prefixでquarantineしcommit。
-- Next task: Maintainer判断後、upstream issueの最小再現整理、または`hal/metal`
-  内部調査。
+  再検証。repro診断testを`TestRepro`prefixでquarantineしcommit `cfff431`。
+- Next task: module調査でmechanismを特定し、最小patch案と検証をnotesへ記録する。
 - Next command: `GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat`
   (quarantined repro。reuse/read variantはupstream bugが残る間FAILが期待値)
 - Blocker: go-nn F2-009はupstream module側の新たな破損で再blocked。

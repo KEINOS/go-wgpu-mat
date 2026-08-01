@@ -179,6 +179,17 @@ selector、software race selector、lint、vet、fuzz、`go mod verify`)がGREEN
 repro診断testは`TestRepro`prefixへquarantineし、既定の`^TestSLMetal`gateから
 除外した。tag `v0.0.3`はv0.30.29 pinのまま変更しない。
 
+追記2(2026-07-31): upstream issue調査。`gogpu/wgpu`の既存issueに本破損
+(buffer再利用/中間readback後のcompute出力破損)に該当するものは**存在しない**
+(`readback`、`corrupt OR garbage OR wrong results OR nondeterministic`で検索)。
+隣接issueは、1つ目のbugを修正した#287(BindGroup use-after-free、v0.30.28)と、
+Metal block callbackのcheckptr crashを扱う#280(不十分だった)と#293である。
+#293はcompletion block trampolineの`uintptr→unsafe.Pointer`変換が原因で、
+修正は**v0.30.31**(2026-08-01リリース)に入った。working pinをv0.30.31へ
+一時的に上げてrepro suiteを実行したが、**v0.30.31でも同一signatureでRED**
+(gradL[0]=6、gradR[0]=9など)であり、completion-block修正は本破損の原因では
+ない。pinはv0.30.30へ戻した。
+
 ## Working hypothesis(v0.30.22 baselineに関する仮説)
 
 主仮説(H1): 旧pin v0.30.22の`BindGroup.Release` use-after-free(upstream
