@@ -52,3 +52,15 @@
   race selector、lint、vet、fuzz、`go mod verify`の全gateを通過した。
   tag `v0.0.3`(= v0.30.29 pin)はそのまま維持し、go-nn側の参照は新しいtagを
   Maintainerが切るまで変えない。
+
+## D-008 Upstream contribution boundary
+
+- 状態: 採用
+- 判断: 第三者管理のrepository(`github.com/gogpu/wgpu`を含む)へは、commit、
+  push、branch、PR作成を一切行わない。commit可能なのはKEINOS管理下の
+  repository(`go-wgpu-mat`、`go-nn`)だけであり、それらのpush、tag、releaseも
+  D-005どおりMaintainerの明示的な許可を必要とする。
+- 理由: Maintainerが2026-07-31に明示した境界。Module調査でpatch候補が出た
+  場合は、diffと検証結果を報告するだけにとどめ、upstreamへの届け方(issue
+  起票、patch添付、PRの要否)はMaintainerが決める。調査用のprobe copyは
+  `/tmp`などrepo外に置き、`replace`は検証後に必ずrevertする。
