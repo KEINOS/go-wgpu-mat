@@ -81,3 +81,15 @@
   信頼を無くす」と明示した最優先の安全境界。警戒に頼らず構造的に防ぐ。
 - 補足: D-008の「commit可能なrepository」には、Maintainerが作成した
   `KEINOS/wgpu` forkを含む(D-008の列挙をMaintainer判断で拡張)。
+
+## D-010 Upstream PR timing
+
+- 状態: 採用
+- 判断: 本家`github.com/gogpu/wgpu`へのPRは、`go-wgpu-mat`と`go-nn`および
+  `go-tf`が完成し、しばらく動作を見て問題ないと確認できてからタイミングを
+  計る。それまでは本家にPRしない。issue起票についても、Maintainerの明示的な
+  指示があるまで行わない。
+- 理由: Maintainerが2026-08-01に明示した方針。修正はKEINOS/wgpu forkの
+  branch `fix/metal-msl-buffer-sizes`(`aa07c1d`)で維持し、両repoはversioned
+  replace(`v0.0.0-20260801164035-aa07c1da9a5b`)で利用する。本家mergeが
+  なくても進行をblockedしない。
