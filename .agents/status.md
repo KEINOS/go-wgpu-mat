@@ -17,21 +17,19 @@
 
 ## Active handover
 
-- Current executor: Kimi Code CLI。Module調査でroot causeを特定し、patch検証まで
-  完了した。Upstreamへの届け方はMaintainer判断待ち。
-- Active task: なし(Maintainerの判断待ち: upstream issue/patch添付/PR、forkの
-  要否、go-nn側暫定対応)。
-- Last completed: `gogpu/wgpu` Metal backendのroot cause特定(naga
-  `_mslBufferSizes`未bindによるOOB write)とpatch検証(repro 80/80、go-nn
-  Metal test 10/10 GREEN)。詳細は[`findings.md`](findings.md)の「Root cause
-  identified」、patchは`.agents/wgpu-sizes-buffer-fix.patch`。
-- Next task: Maintainer判断後、(a)upstream release取り込み時に両repoのpin更新と
-  gate再開、(b)選ばれた届け方の支援。
-- Next command: `GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat`
-  (upstream未修正の間はreuse/read variantがFAIL=期待値)
-- Blocker: go-nn F2-009は、upstream(`gogpu/wgpu`)の`_mslBufferSizes`未bind修正が
-  releaseされるまでblocked。暫定選択肢はfindingsの「Root cause identified」節を
-  参照。
+- Current executor: Kimi Code CLI。Module調査でroot causeを特定し、KEINOS/wgpu
+  forkのbranchで修正を確定、両repoの検証まで完了した。
+- Active task: なし(Maintainerの判断待ち: fork branchのpush、commit可能な
+  replace形、upstream issue/PRの要否と時期)。
+- Last completed: fork `fix/metal-msl-buffer-sizes`のcommit `aa07c1d`で修正確定。
+  両repoからlocal path replaceで全gate GREEN(`go-nn`の`make check-all`は
+  hardware含む)。**local path replaceは両repoとも未commitのまま**。push未実施。
+- Next task: Maintainerがfork branchをpushした後、versioned replaceの形を決め、
+  必要ならupstream issue draftを用意する。
+- Next command: `git -C /Users/keinos/GitHub/PublicRepos/wgpu remote -v`で
+  `origin`=KEINOS/wgpuと`upstream`=DISABLED(push)を確認する(D-009)。
+- Blocker: なし。go-nn F2-009はfork修正でlocalではGREEN。upstream本家修正の
+  届け方はMaintainer決定(D-008/D-009)。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
   稼働していない。VS Code内蔵Copilot processはsub-agentではない。
 

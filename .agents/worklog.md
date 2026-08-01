@@ -245,3 +245,24 @@ repro suite 8 test×10で80/80 PASS、released Metal gate×3 PASS、`make test`
 10/10 PASSとなりdownstreamの元症状も解消した。検証後の`replace`は両repoで
 drop済み。Patchは`/tmp`の揮発を避け`.agents/wgpu-sizes-buffer-fix.patch`に
 保存した。Upstreamへの届け方(issue/patch添付/PR)はMaintainer判断(D-008)。
+
+## 2026-08-01 KEINOS/wgpu forkでの修正確定と両repo検証(Maintainer、Kimi Code CLI)
+
+Maintainerは`gogpu/wgpu`を`github.com/KEINOS/wgpu`へforkし(`upstream`は本家)、
+local clone `/Users/keinos/GitHub/PublicRepos/wgpu`で修正を進める方針を示した。
+Forkの`main`は`aedc829`(tag `v0.30.32`)だった。branch
+`fix/metal-msl-buffer-sizes`で`.agents/wgpu-sizes-buffer-fix.patch`を
+`git apply`し(conflictなし)、`go build ./...`と`go test ./hal/metal/`の成功を
+確認してcommit `aa07c1d`(`fix(metal): bind naga _mslBufferSizes for
+runtime-sized arrays`)とした。**pushは未実施**。Maintainerの指示により、
+wgpu関連push時はremote/refspecをtriple checkし、本家へのpush/PRは恒久禁止と
+する(D-009)。誤push防止のためlocal cloneの`upstream` push URLを`DISABLED`に
+設定した。
+
+両repoからlocal path replace(`/Users/keinos/GitHub/PublicRepos/wgpu`宛)で
+検証した。本repoはrepro suite 8 test×10とreleased Metal gateがGREEN。`go-nn`は
+repeated-backward testが10/10 PASS、`make check`、`make check-all-no-gpu`、
+`GO_NN_WGPU_GPU=1 make check-all`(hardware含む)がすべてGREEN。`go-nn`側は
+`_example`のnested moduleにも同じreplaceが必要だった。local path replaceは
+machine固有のため両repoとも**未commitのまま**とし、commit可能なreplace形は
+fork branchのpush後に決める。

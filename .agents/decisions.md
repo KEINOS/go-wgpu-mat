@@ -64,3 +64,20 @@
   場合は、diffと検証結果を報告するだけにとどめ、upstreamへの届け方(issue
   起票、patch添付、PRの要否)はMaintainerが決める。調査用のprobe copyは
   `/tmp`などrepo外に置き、`replace`は検証後に必ずrevertする。
+
+## D-009 Fork workflow and upstream push prohibition
+
+- 状態: 採用
+- 判断: `gogpu/wgpu`の修正はKEINOS管理fork(`github.com/KEINOS/wgpu`、
+  local clone `/Users/keinos/GitHub/PublicRepos/wgpu`)のbranchで行う。
+  **本家`github.com/gogpu/wgpu`へのpushとPRは恒久禁止**であり、wgpu
+  module関連のpushを行うときはremoteとrefspecをtriple checkする。
+  ForkへのpushもMaintainerの都度明示許可とし、実行前に
+  `git remote -v`で`origin`が`KEINOS/wgpu`を指すことを確認する。
+  誤push防止のため、local cloneでは`upstream`のpush URLを`DISABLED`に
+  設定してある(2026-08-01適用。`git remote set-url --push upstream DISABLED`。
+  復旧は`git remote set-url --push upstream https://github.com/gogpu/wgpu.git`)。
+- 理由: Maintainerが2026-08-01に「間違えるとやり直しが効かず、相手からの
+  信頼を無くす」と明示した最優先の安全境界。警戒に頼らず構造的に防ぐ。
+- 補足: D-008の「commit可能なrepository」には、Maintainerが作成した
+  `KEINOS/wgpu` forkを含む(D-008の列挙をMaintainer判断で拡張)。
