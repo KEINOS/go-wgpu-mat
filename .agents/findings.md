@@ -184,7 +184,7 @@ repro診断testは`TestRepro`prefixへquarantineし、既定の`^TestSLMetal`gat
 (`readback`、`corrupt OR garbage OR wrong results OR nondeterministic`で検索)。
 隣接issueは、1つ目のbugを修正した#287(BindGroup use-after-free、v0.30.28)と、
 Metal block callbackのcheckptr crashを扱う#280(不十分だった)と#293である。
-#293はcompletion block trampolineの`uintptr→unsafe.Pointer`変換が原因で、
+issue #293はcompletion block trampolineの`uintptr→unsafe.Pointer`変換が原因で、
 修正は**v0.30.31**(2026-08-01リリース)に入った。working pinをv0.30.31へ
 一時的に上げてrepro suiteを実行したが、**v0.30.31でも同一signatureでRED**
 (gradL[0]=6、gradR[0]=9など)であり、completion-block修正は本破損の原因では
