@@ -19,13 +19,13 @@
 
 - Current executor: Kimi Code CLI。Module調査でroot causeを特定し、KEINOS/wgpu
   forkのbranchで修正を確定、両repoの検証まで完了した。
-- Active task: なし(Maintainerの判断待ち: fork branchのpush、commit可能な
-  replace形、upstream issue/PRの要否と時期)。
-- Last completed: fork `fix/metal-msl-buffer-sizes`のcommit `aa07c1d`で修正確定。
-  両repoからlocal path replaceで全gate GREEN(`go-nn`の`make check-all`は
-  hardware含む)。**local path replaceは両repoとも未commitのまま**。push未実施。
-- Next task: Maintainerがfork branchをpushした後、versioned replaceの形を決め、
-  必要ならupstream issue draftを用意する。
+- Active task: なし(Maintainerの判断待ち: upstream issue/PRの要否と時期、
+  本家merge後のpin戻し、go-nn F2-010以降の再開)。
+- Last completed: fork branch `fix/metal-msl-buffer-sizes`(`aa07c1d`)をpushし、
+  versioned replace(`v0.0.0-20260801164035-aa07c1da9a5b`)で両repoの全gateが
+  GREEN。replaceはcommit済み。`gomoddirectives`のallow-listも調整済み。
+- Next task: upstream issue draftが必要なら用意する。本家に修正がmergeされたら
+  replaceを外してpin更新する。
 - Next command: `git -C /Users/keinos/GitHub/PublicRepos/wgpu remote -v`で
   `origin`=KEINOS/wgpuと`upstream`=DISABLED(push)を確認する(D-009)。
 - Blocker: なし。go-nn F2-009はfork修正でlocalではGREEN。upstream本家修正の

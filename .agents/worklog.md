@@ -266,3 +266,22 @@ repeated-backward testが10/10 PASS、`make check`、`make check-all-no-gpu`、
 `_example`のnested moduleにも同じreplaceが必要だった。local path replaceは
 machine固有のため両repoとも**未commitのまま**とし、commit可能なreplace形は
 fork branchのpush後に決める。
+
+## 2026-08-01 fork branch pushとversioned replace確定(Kimi Code CLI)
+
+Maintainerの明示指示で、triple-check protocolに従いfork branchをpushした。
+`git remote -v`で`origin`=KEINOS/wgpu、`upstream`=DISABLED(push)を確認し、
+dry-runでpush先とnew branch 1本のみを確認後、`git push origin
+fix/metal-msl-buffer-sizes`を実行。`git ls-remote`で`aa07c1d`を検証した。
+
+forkがtagを持たない(GitHub forkはtagを引き継がない)ため、replaceのversionは
+pseudo-versionのtag派生形(`v0.30.33-0....`)ではなく
+`v0.0.0-20260801164035-aa07c1da9a5b`を使う。この形で
+`replace github.com/gogpu/wgpu => github.com/KEINOS/wgpu
+v0.0.0-20260801164035-aa07c1da9a5b`が解決し、**fork側go.modのmodule path
+変更は不要**だった。versioned replaceで両repoの全gateがGREEN。
+
+`gomoddirectives` linterがreplaceを拒否したため、両repoの`.golangci.yml`の
+allow-listに`github.com/gogpu/wgpu`を正当性コメント付きで追加した
+(go-nn側はrootのみ。`_example`は既にdisabled)。本repoでは`make test`
+6/6、`make lint` 0 issues、`make fuzz` 2/2、Metal selectorを再確認した。
