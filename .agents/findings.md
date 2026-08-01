@@ -190,6 +190,60 @@ issue #293はcompletion block trampolineの`uintptr→unsafe.Pointer`変換が�
 (gradL[0]=6、gradR[0]=9など)であり、completion-block修正は本破損の原因では
 ない。pinはv0.30.30へ戻した。
 
+## Root cause identified(2026-08-01、coder subagent + Kimi Code CLI検証)
+
+**`gogpu/wgpu`のMetal backendは、nagaがemitする`_mslBufferSizes` kernel引数を
+一切bindしていない。** runtime-sized storage arrayを使うWGSL(例: `Add` kernelの
+`arrayLength()` guard)は、nagaがbounds checkを隠れstruct経由で生成する
+(`RequiresSizesBuffer: true`)。Metalは未bindのauto-assigned indexをそのまま
+読むためbounds checkがgarbage(実測で巨大値)となり、guardを通過した全thread
+(例: 4要素出力に256 thread)が**出力bufferの末尾から最大1KB先まで書き込む**。
+Apple Siliconのdriverは小さいShared bufferを256-byte slotに副割当するため、
+はみ出し分が隣接する最大3つのlive bufferを破壊する。
+
+これですべての観測が説明できる:
+
+- MatMulの「出力」が壊れたのは、後続のAddのovershootがそのbufferを踏んだから
+  (MatMul/BroadcastTo/Transpはdimsを明示uniformで取るため自身の書き込みは正確)。
+- `Device.WaitIdle`でも消えない(record時点で決定的)。
+- fresh+readなしがGREEN(出力がslot上端に配置され、overshootは空きslotへ)。
+- reuse/中間readbackがtrigger(slot配置を撹乱し、出力が中位slotへ移る)。
+- `TestSLMetalChainedCompute`がGREENのまま(persistent bufferが低位slotを
+  占有し、overshootは当該roundの一時bufferしか踏まない)。
+- bufferが1KB以上ならspanを吸収して不発(大きいmatrixでは不可視)。
+
+Subagentのinstrumented probe(per-submission snapshot、全commit同期実行)で、
+Add submissionが正しい出力に加えて隣接3 slotを破壊する瞬間を直接観測した。
+
+**Fix案**: `RequiresSizesBuffer`時に、各runtime-array bindingのbyte sizeを
+`setBytes:length:atIndex:`で宣言slotの次にbindする(compute path、
+`Dispatch`/`DispatchIndirect`)。Patchは
+[`.agents/wgpu-sizes-buffer-fix.patch`](wgpu-sizes-buffer-fix.patch)
+(214行、3 file: `hal/metal/device.go`、`hal/metal/encoder.go`、
+`hal/metal/resource.go`)。Render pathにも同じlatent gapがある(未検証)。
+
+**Patch検証(Kimi Code CLIが`/tmp/wgpu-clean`への`replace`で独立実施)**: repro
+suite 8 test×`-count=10`で80/80 PASS(全quadrantがGREEN化)、released Metal gate
+(`TestP4MetalKernels`、`TestSLMetalChainedCompute`、`TestSLMetalReleaseWithInflightWork`)
+×3 PASS、`make test` 6/6 ok。さらにgo-nnの
+`TestWGPUTensorMatMulBackwardStaysDeviceResident`が**10/10 PASS**となり、
+downstreamの元症状も解消することを確認した。検証後の`replace`は両repoで
+drop済み(`git status`clean、go.mod/go.sumはcommit状態と一致)。
+
+**除外された仮説(subagentが証拠付きで排除)**: completion/timing race(強制同期でも
+RED)、encoder pool recycling/stale binder(record引数は全て正しい)、readbackの虚偽
+(CPU側dumpでも破損)、staging beltのWriteBuffer misrouting(uniform内容は正しい)、
+DestroyQueue/PollCompletedのtriage(破棄はslot配置にしか影響しない)、Metal
+completion block(#280/#293、v0.30.31でもREDをMaintainer側で確認)、Metal driver bug
+(naga contractを守ればdriverは正確)。
+
+**残る判断**: upstreamへの届け方(issue起票、patch添付、PRの要否)はMaintainer
+決定(D-008)。go-nnのMetal gateは、修正入りのupstream releaseを取り込むまで
+再開できない。暫定選択肢: (1)upstream issueとpatchで公式修正を待つ、
+(2)KEINOS管理forkへのpatch適用と一時`replace`(fork作成はoutward actionのため
+Maintainer判断)、(3)matrixを1KB以上へpadするgo-nn側workaround(性能・設計
+コストあり)。
+
 ## Working hypothesis(v0.30.22 baselineに関する仮説)
 
 主仮説(H1): 旧pin v0.30.22の`BindGroup.Release` use-after-free(upstream

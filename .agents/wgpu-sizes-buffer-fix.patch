@@ -1,0 +1,214 @@
+--- a/hal/metal/device.go	2026-07-31 21:40:49
++++ b/hal/metal/device.go	2026-08-01 19:27:39
+@@ -536,6 +536,16 @@
+ 			return nil, fmt.Errorf("metal: failed to compile to MSL: %w", err)
+ 		}
+ 
++		// If the translated kernel references runtime-sized arrays
++		// (arrayLength / bounds checks), naga emits a _mslBufferSizes
++		// argument that must receive the byte size of each such buffer
++		// binding at dispatch time. Record the bindings in naga's
++		// struct-field order (IR global declaration order).
++		var sizesBindings []ir.ResourceBinding
++		if info.RequiresSizesBuffer {
++			sizesBindings = runtimeArrayBindings(irModule)
++		}
++
+ 		hal.Logger().Debug("metal: WGSL→MSL compilation",
+ 			"elapsed", time.Since(start),
+ 			"mslBytes", len(mslSource),
+@@ -572,6 +582,7 @@
+ 			device:          d,
+ 			workgroupSizes:  workgroupSizes,
+ 			entrypointNames: info.EntryPointNames,
++			sizesBindings:   sizesBindings,
+ 		}, nil
+ 	}
+ 
+@@ -952,6 +963,7 @@
+ 		device:        d,
+ 		layout:        pipeLayout,
+ 		workgroupSize: workgroupSize,
++		sizesBindings: computeModule.sizesBindings,
+ 	}, nil
+ }
+ 
+@@ -1305,3 +1317,46 @@
+ 	}
+ 	return result
+ }
++
++// runtimeArrayBindings returns the resource bindings of global variables whose
++// type contains a runtime-sized array, in IR global declaration order.
++//
++// This mirrors naga's MSL codegen (scanBufferSizeGlobals): the generated
++// _mslBufferSizes struct has one uint32 field per such global in this exact
++// order, and each field must carry the bound buffer's byte size. Without this
++// the MSL kernel reads an unbound sizes argument, producing a garbage
++// arrayLength() and out-of-bounds storage writes.
++func runtimeArrayBindings(module *ir.Module) []ir.ResourceBinding {
++	if module == nil {
++		return nil
++	}
++	var out []ir.ResourceBinding
++	for _, global := range module.GlobalVariables {
++		if global.Binding == nil {
++			continue
++		}
++		if typeNeedsArrayLength(module, global.Type) {
++			out = append(out, *global.Binding)
++		}
++	}
++	return out
++}
++
++// typeNeedsArrayLength reports whether the given type is or contains (as its
++// last struct member) a runtime-sized array, matching naga's needsArrayLength.
++func typeNeedsArrayLength(module *ir.Module, handle ir.TypeHandle) bool {
++	if int(handle) >= len(module.Types) {
++		return false
++	}
++	switch inner := module.Types[handle].Inner.(type) {
++	case ir.ArrayType:
++		return inner.Size.Constant == nil // runtime-sized array
++	case ir.StructType:
++		if len(inner.Members) == 0 {
++			return false
++		}
++		return typeNeedsArrayLength(module, inner.Members[len(inner.Members)-1].Type)
++	default:
++		return false
++	}
++}
+--- a/hal/metal/encoder.go	2026-07-31 21:40:49
++++ b/hal/metal/encoder.go	2026-08-01 19:28:25
+@@ -8,6 +8,7 @@
+ import (
+ 	"fmt"
+ 	"sync"
++	"unsafe"
+ 
+ 	"github.com/gogpu/gputypes"
+ 	"github.com/gogpu/wgpu/hal"
+@@ -928,6 +929,15 @@
+ 	device        *Device
+ 	pipeline      *ComputePipeline
+ 	currentLayout *PipelineLayout // set by SetPipeline for SetBindGroup slot offsets
++
++	// bufferSlotMax tracks the highest flattened buffer slot index bound so
++	// far (naga MSL numbers buffers sequentially across bind groups). The
++	// translated kernel's implicit _mslBufferSizes argument sits right after
++	// the declared buffer bindings, at index bufferSlotMax.
++	bufferSlotMax int
++	// bindingSizes holds the effective byte size of each bound buffer, keyed
++	// by (group, binding), used to fill _mslBufferSizes at dispatch time.
++	bindingSizes map[[2]uint32]uint64
+ }
+ 
+ // End finishes the compute pass.
+@@ -986,6 +996,20 @@
+ 			_ = MsgSend(e.raw, Sel("setBuffer:offset:atIndex:"), res.Buffer, offset, bufferSlot)
+ 			bufferSlot++
+ 
++			// Record the binding's effective byte size for _mslBufferSizes.
++			if e.pipeline != nil && len(e.pipeline.sizesBindings) > 0 {
++				size := res.Size
++				if size == 0 {
++					if l := uint64(MsgSend(ID(res.Buffer), Sel("length"))); l > res.Offset {
++						size = l - res.Offset
++					}
++				}
++				if e.bindingSizes == nil {
++					e.bindingSizes = make(map[[2]uint32]uint64)
++				}
++				e.bindingSizes[[2]uint32{index, entry.Binding}] = size
++			}
++
+ 		case gputypes.TextureViewBinding:
+ 			_ = MsgSend(e.raw, Sel("setTexture:atIndex:"), res.TextureView, textureSlot)
+ 			textureSlot++
+@@ -995,13 +1019,43 @@
+ 			samplerSlot++
+ 		}
+ 	}
++	if int(bufferSlot) > e.bufferSlotMax {
++		e.bufferSlotMax = int(bufferSlot)
++	}
+ }
+ 
++// bindBufferSizes binds naga's implicit _mslBufferSizes argument for kernels
++// that reference runtime-sized arrays (WGSL arrayLength and naga's storage
++// bounds checks). The translated MSL kernel takes an extra
++// `constant _mslBufferSizes&` parameter — one uint32 byte-size per
++// runtime-sized-array global, in IR declaration order — with no explicit
++// [[buffer(N)]] attribute, so Metal assigns it the buffer index directly
++// after the declared buffer bindings (bufferSlotMax).
++//
++// Binding this is mandatory: left unbound, the kernel reads a garbage sizes
++// struct, arrayLength() returns a huge value, the thread bounds guard stops
++// working, and the kernel reads/writes past the end of its buffers. On Apple
++// Silicon the Metal driver suballocates small Shared buffers into 256-byte
++// slots, so such out-of-bounds writes corrupt neighbouring buffers.
++func (e *ComputePassEncoder) bindBufferSizes() {
++	p := e.pipeline
++	if p == nil || len(p.sizesBindings) == 0 {
++		return
++	}
++	sizes := make([]uint32, len(p.sizesBindings))
++	for i, rb := range p.sizesBindings {
++		sizes[i] = uint32(e.bindingSizes[[2]uint32{rb.Group, rb.Binding}])
++	}
++	_ = MsgSend(e.raw, Sel("setBytes:length:atIndex:"),
++		uintptr(unsafe.Pointer(&sizes[0])), uintptr(4*len(sizes)), uintptr(e.bufferSlotMax))
++}
++
+ // Dispatch dispatches compute workgroups.
+ func (e *ComputePassEncoder) Dispatch(x, y, z uint32) {
+ 	if e.pipeline == nil {
+ 		return // No pipeline set
+ 	}
++	e.bindBufferSizes()
+ 
+ 	threadgroupsPerGrid := MTLSize{Width: NSUInteger(x), Height: NSUInteger(y), Depth: NSUInteger(z)}
+ 	// Use pipeline's workgroup size instead of hardcoded value
+@@ -1023,6 +1077,7 @@
+ 	if !ok || buf == nil {
+ 		return
+ 	}
++	e.bindBufferSizes()
+ 	// Use pipeline's workgroup size instead of hardcoded value
+ 	threadsPerThreadgroup := e.pipeline.workgroupSize
+ 	msgSendVoid(e.raw, Sel("dispatchThreadgroupsWithIndirectBuffer:indirectBufferOffset:threadsPerThreadgroup:"),
+--- a/hal/metal/resource.go	2026-07-31 21:40:49
++++ b/hal/metal/resource.go	2026-08-01 19:26:59
+@@ -9,6 +9,7 @@
+ 	"unsafe"
+ 
+ 	"github.com/gogpu/gputypes"
++	"github.com/gogpu/naga/ir"
+ 	"github.com/gogpu/wgpu/hal"
+ )
+ 
+@@ -120,6 +121,11 @@
+ 	device          *Device
+ 	workgroupSizes  map[string][3]uint32 // entry point name -> workgroup size
+ 	entrypointNames map[string]string
++	// sizesBindings lists, in naga IR global-declaration order, the resource
++	// bindings whose WGSL type contains a runtime-sized array. When non-empty,
++	// the translated MSL kernel takes an extra `_mslBufferSizes` argument that
++	// must be bound (see ComputePassEncoder.bindBufferSizes).
++	sizesBindings []ir.ResourceBinding
+ }
+ 
+ // Destroy releases the shader module.
+@@ -224,6 +230,10 @@
+ 	device        *Device
+ 	layout        *PipelineLayout // for SetBindGroup slot offset lookup
+ 	workgroupSize MTLSize         // workgroup size from shader
++	// sizesBindings mirrors ShaderModule.sizesBindings for the compute entry
++	// point: runtime-sized-array globals whose byte sizes must be supplied via
++	// the MSL _mslBufferSizes argument at dispatch time.
++	sizesBindings []ir.ResourceBinding
+ }
+ 
+ // Destroy releases the compute pipeline.

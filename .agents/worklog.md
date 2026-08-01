@@ -227,3 +227,21 @@ validation mapのmemory leakであり本破損の原因ではないが、全gate
 gateは引き続き3/3 PASS)、funlenのlint指摘2件をnolintで解消した。tag `v0.0.3`
 (v0.30.29 pin)とgo-nn側の参照は変更していない。repro suiteの実行は
 `GO_WGPU_MAT_GPU=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat`。
+
+## 2026-08-01 Root cause特定とpatch検証(coder subagent、Kimi Code CLI)
+
+Coder subagentによるmodule内部調査で、root causeを**`gogpu/wgpu` Metal backendが
+nagaの`_mslBufferSizes` kernel引数を一切bindしていないこと**と特定した。
+runtime-sized storage arrayのbounds check(`arrayLength()`を含む)がgarbageを
+読み、小さい出力buffer(Apple Silicon driverの256-byte slot配置)の末尾から最大
+1KB先の隣接bufferへ書き込むOOB writeが全症状の原因だった。完了/timing競合、
+encoder recycling、readback、staging belt、DestroyQueue triage、completion
+block、driver bugは証拠付きで除外された。
+
+Subagent作成のpatch(`RequiresSizesBuffer`時にbyte sizesを`setBytes`でbind、
+3 file 214行)を`/tmp/wgpu-clean`への`replace`でKimi Code CLIが独立検証した。
+repro suite 8 test×10で80/80 PASS、released Metal gate×3 PASS、`make test`
+6/6 ok、さらにgo-nnの`TestWGPUTensorMatMulBackwardStaysDeviceResident`が
+10/10 PASSとなりdownstreamの元症状も解消した。検証後の`replace`は両repoで
+drop済み。Patchは`/tmp`の揮発を避け`.agents/wgpu-sizes-buffer-fix.patch`に
+保存した。Upstreamへの届け方(issue/patch添付/PR)はMaintainer判断(D-008)。
