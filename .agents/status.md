@@ -2,32 +2,29 @@
 
 ## Repository
 
-- 更新日: 2026-07-31
+- 更新日: 2026-08-02
 - Repository: `github.com/KEINOS/go-wgpu-mat`
 - Branch: `main`
-- Reviewed base: `d203721 docs: close out review recheck in repo-local notes`
-  (Codexが再検証し、Maintainerがtag `v0.0.3`を切ったcommit。正確な現HEADと
-  ahead数は`git status --short --branch`と`git log --oneline --decorate`を正とする)
+- Reviewed base: `313ac51 docs: defer upstream PR until KEINOS packages are complete
+  (D-010)`。正確な現HEADとahead数は`git status --short --branch`と
+  `git log --oneline --decorate`を正とする。
 - Remote: `origin/main`は`9949088`のまま。Maintainerはtag `v0.0.3`(=`d203721`)を
   push済みで、tag経由で全commit内容は公開済み。`main` branchのpushは未実施。
 - Release: tag `v0.0.3`は`d203721`を指す。CI(`unit test`)はv0.0.3 pushで成功
   (2026-07-31T09:09:32Z、run 30618892290)。
-- 現在のworking tree: 本notes更新のみ。最新の正確な状態は
+- 現在のworking tree: review済み`SL-011` close-out変更(commit待ち)。最新の正確な状態は
   `git status --short --branch`を正とする。
 
 ## Active handover
 
-- Current executor: Kimi Code CLI。Module調査でroot causeを特定し、KEINOS/wgpu
-  forkのbranchで修正を確定、両repoの検証まで完了した。
-- Active task: なし(Maintainerの判断待ち: upstream issue/PRの要否と時期、
-  本家merge後のpin戻し、go-nn F2-010以降の再開)。
-- Last completed: fork branch `fix/metal-msl-buffer-sizes`(`aa07c1d`)をpushし、
-  versioned replace(`v0.0.0-20260801164035-aa07c1da9a5b`)で両repoの全gateが
-  GREEN。replaceはcommit済み。`gomoddirectives`のallow-listも調整済み。
-- Next task: upstream issue draftが必要なら用意する。本家に修正がmergeされたら
-  replaceを外してpin更新する。
-- Next command: `git -C /Users/keinos/GitHub/PublicRepos/wgpu remote -v`で
-  `origin`=KEINOS/wgpuと`upstream`=DISABLED(push)を確認する(D-009)。
+- Current executor: Codex。Kimiが特定したroot causeとfork修正を引き継ぎ、正式な
+  regression gate、checkptr有効race、文書、indexをclose-outした。
+- Active task: なし。`SL-011`はfull gateとHermes read-only reviewまでGREEN。
+- Last completed: `SL-011`。`TestSLMetalGradAccum*`を正式Metal gateへ昇格し、
+  checkptr有効race、software/Metal gate、文書、index、reviewを完了した。
+- Next task: close-out変更をcommit/push後、`go-nn` F2-010へ戻る。
+- Next command: `git diff --cached --check`を確認してcommitし、KEINOSの`origin/main`
+  だけをdry-run後にpushする。
 - Blocker: なし。go-nn F2-009はfork修正でlocalではGREEN。upstream本家修正の
   届け方はMaintainer決定(D-008/D-009)。
 - Background workers: managed sub-agent、Kimi、Hermes、Claude、Agy、Copilot CLIは
@@ -38,20 +35,17 @@
 P4 device-resident kernelsとstatisticsは[`plan.md`](plan.md)のclose-outまで完了し、
 Maintainerがcommit、push、tag `v0.0.2`、CI成功を確認済みである。
 
-Downstream `go-nn`のF2 WGPU統合中に見つかった、readbackなしで`Backward`を
-繰り返すと2回目の累積gradientが非決定的に破損する問題について、SL-001〜SL-008を
-実施した。旧pin`gogpu/wgpu v0.30.22`の`BindGroup.Release` use-after-free
-(upstream ADR-056、v0.30.28で修正)が最有力原因と特定され、修正は
-`go.mod`のpinをv0.30.29へ上げることと確定した。詳細は[`findings.md`](findings.md)の
-「Reproduction and isolation evidence」と[`plan-submission-lifetime.md`](
-plan-submission-lifetime.md)を参照。
+Downstream `go-nn`のF2 WGPU統合中に見つかったgradient破損は、Metal backendが
+Nagaの`_mslBufferSizes`をbindせずruntime-sized storage arrayのbounds checkを
+壊していたことがroot causeである。`KEINOS/wgpu`のbranch
+`fix/metal-msl-buffer-sizes`(`aa07c1d`)をversioned replaceし、再利用、readback、
+WaitIdleを含む全再現形状がGREENになった。詳細は[`findings.md`](findings.md)を参照。
 
 ## Next handover point
 
-SL-001〜SL-009、Codex review、Kimi remediation、Codex再検証は完了し、Maintainerが
-tag `v0.0.3`をpushしてCI成功を確認した。`SL-010`の前提条件は満たされ、作業は
-`go-nn` repoへ移る。go-nn側では`AGENTS.md`と`.agents/README.md`を入口に現在地を
-確認してからdependency更新と統合再開を行う。
+`SL-011`まで完了し、修正済み再現testを正式Metal gateへ昇格した。
+`make test-metal`はrace/checkptr有効でP4、submission lifetime、gradient accumulationを
+3反復する。全gateとHermes reviewはGREEN。commit/push後は`go-nn` F2-010へ戻る。
 
 `go-nn`側で同じ破損が再発した場合は、[`findings.md`](findings.md)の副仮説
 (H2-H5)と[`plan-submission-lifetime.md`](plan-submission-lifetime.md)の
@@ -63,7 +57,8 @@ tag `v0.0.3`をpushしてCI成功を確認した。`SL-010`の前提条件は満
 - Maintainerは次のAI Agentが残作業を進めることを2026-07-31に指示した。
 - Read-only調査、詳細計画、test-firstのlocal実装、Metal検証、phaseごとのlocal
   commitは許可済みである。
-- Push、tag作成、releaseは禁止。必要な場合はMaintainerの明示的な許可を得る。
+- Maintainerは2026-08-02にKEINOS管理repositoryへのcommitとpushを許可した。
+  Tagとreleaseは明示許可がないため行わない。本家`gogpu/wgpu`へのpush/PRは禁止。
 - `go-nn`のdependency更新と統合再開は、upstream修正がtestを通り、Maintainerが
   push/tagした後に行う。
 
@@ -71,14 +66,10 @@ tag `v0.0.3`をpushしてCI成功を確認した。`SL-010`の前提条件は満
 
 - RED(旧pin v0.30.22、historical): `TestSLMetalChainedCompute`が3/3回、同一PCで
   SIGSEGV。
-- GREEN(現行pin v0.30.29): 同一testが`-count=1`、`-count=10`(15,360
-  submission)、`GO_WGPU_MAT_SL_ROUNDS=1024 -count=3`(18,432 submission)でPASS。
-  `TestSLMetalReleaseWithInflightWork`もPASS。
-- 既存gate: `TestP4MetalKernels` PASS、`make test`(CGO=0/1、race)GREEN
-  (95.0% coverage)、`make lint` 0 issues、`make fuzz`両target PASS、
-  software race selector GREEN。
-- Production codeは変更していない。変更は`go.mod`/`go.sum`のpin bumpと
-  test追加、`.agents/` notesのみである。
+- GREEN(現行fork replace): `make test`はCGO 0/1とcheckptr有効raceでGREEN
+  (`mat` 95.0%、`pipelinecache` 100.0%)。`make test-metal`は正式化した
+  `TestSLMetalGradAccum*`を含め3反復GREEN。`make lint` 0 issues、`make fuzz`両target、
+  `go vet ./...`、`go mod tidy -diff`、`git diff --check`もGREEN。
 
 Handover indexは2026-07-31に初期化済みである。SL-003のtest追加を反映する
 再同期をsession close-outで実施した。

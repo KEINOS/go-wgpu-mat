@@ -248,6 +248,24 @@ Other sentinels include `ErrNilContext`, `ErrContextNotInitialized`,
 
 ## Development
 
+Run the software and Metal gates separately. `make test` is suitable for CI and
+does not require a hardware adapter. `make test-metal` requires the local GPU,
+runs the P4 kernels and submission-lifetime/gradient-accumulation regressions,
+and keeps the Go race detector and checkptr enabled.
+
+```sh
+make test
+make test-metal
+make lint
+make fuzz
+```
+
+The module currently replaces `github.com/gogpu/wgpu` with the
+`github.com/KEINOS/wgpu` fork commit that binds Naga's Metal
+`_mslBufferSizes` argument. Removing that replacement before the corresponding
+upstream fix is available reintroduces out-of-bounds writes for runtime-sized
+storage arrays.
+
 ### VS Code Setup
 
 The repository includes a `.vscode/` configuration directory that

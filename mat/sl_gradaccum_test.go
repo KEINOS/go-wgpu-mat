@@ -10,14 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Isolation repro for the go-nn repeated-backward corruption that persists on
-// go-wgpu-mat v0.0.3 (gogpu/wgpu v0.30.29) and on v0.30.30, while
-// TestSLMetalChainedCompute stays GREEN. These tests document an UNFIXED
-// upstream bug: the reuse/read variants are EXPECTED TO FAIL while it stands,
-// so they are quarantined under the TestRepro prefix and excluded from the
-// default ^TestSLMetal gate. Run them explicitly with:
+// Regression coverage for the go-nn repeated-backward corruption reproduced on
+// go-wgpu-mat v0.0.3 and gogpu/wgpu v0.30.30. The KEINOS/wgpu replacement fixes
+// the missing Metal _mslBufferSizes binding, so every reuse/read variant must
+// remain GREEN. Run the regression set explicitly with:
 //
-//	GO_WGPU_MAT_GPU=1 go test -count=10 -parallel=1 -run '^TestReproMetal' ./mat
+//	GO_WGPU_MAT_GPU=1 go test -count=10 -parallel=1 -run '^TestSLMetalGradAccum' ./mat
 //
 // It replicates the exact op sequence of go-nn's TensorNode backward commit
 // phase:
@@ -173,36 +171,37 @@ func runSLGradAccumMetal(t *testing.T, reuseTemps, reuseGrads, intermediateRead 
 	assert.InDeltaSlice(t, []float32{8, 8, 12, 12}, readP4Matrix(t, gradR), 1e-4)
 }
 
-func TestReproMetalGradAccumPooledSequence(t *testing.T) {
+func TestSLMetalGradAccumPooledSequence(t *testing.T) {
 	runSLGradAccumMetal(t, true, true, true)
 }
 
-func TestReproMetalGradAccumFreshSequence(t *testing.T) {
+func TestSLMetalGradAccumFreshSequence(t *testing.T) {
 	runSLGradAccumMetal(t, false, false, true)
 }
 
-func TestReproMetalGradAccumPooledSequenceNoRead(t *testing.T) {
+func TestSLMetalGradAccumPooledSequenceNoRead(t *testing.T) {
 	runSLGradAccumMetal(t, true, true, false)
 }
 
-func TestReproMetalGradAccumFreshSequenceNoRead(t *testing.T) {
+func TestSLMetalGradAccumFreshSequenceNoRead(t *testing.T) {
 	runSLGradAccumMetal(t, false, false, false)
 }
 
-func TestReproMetalGradAccumTempsOnlyNoRead(t *testing.T) {
+func TestSLMetalGradAccumTempsOnlyNoRead(t *testing.T) {
 	runSLGradAccumMetal(t, true, false, false)
 }
 
-func TestReproMetalGradAccumGradsOnlyNoRead(t *testing.T) {
+func TestSLMetalGradAccumGradsOnlyNoRead(t *testing.T) {
 	runSLGradAccumMetal(t, false, true, false)
 }
 
-// TestReproMetalGradAccumPooledForensics is a diagnostic variant of the pooled
+// TestDiagnosticMetalGradAccumPooledForensics is a diagnostic variant of the pooled
 // no-read repro: after the second round it reads every intermediate buffer to
 // identify the first op whose output diverges. Round temporaries are still
 // pooled (never destroyed), so their final content is observable.
+//
 //nolint:funlen // Forensic reads stay adjacent to the op sequence they diagnose.
-func TestReproMetalGradAccumPooledForensics(t *testing.T) {
+func TestDiagnosticMetalGradAccumPooledForensics(t *testing.T) {
 	if os.Getenv("GO_WGPU_MAT_GPU") != "1" {
 		t.Skip("set GO_WGPU_MAT_GPU=1 to require the local Metal gate")
 	}

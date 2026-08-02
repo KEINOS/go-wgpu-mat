@@ -23,8 +23,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_add",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "add.go"
     },
     {
@@ -34,8 +34,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "mat_adddeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "adddeps"
     },
     {
@@ -45,8 +45,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "mat_add_defaultadddeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "defaultadddeps()"
     },
     {
@@ -56,8 +56,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "mat_add_add",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "add()"
     },
     {
@@ -67,8 +67,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "mat_add_validateadd",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "validateadd()"
     },
     {
@@ -78,8 +78,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "mat_add_validateaddkernelcontract",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "validateaddkernelcontract()"
     },
     {
@@ -89,8 +89,8 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "mat_add_iscpuadapter",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "iscpuadapter()"
     },
     {
@@ -100,8 +100,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "mat_add_dispatchadd",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "dispatchadd()"
     },
     {
@@ -177,8 +177,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "mat_add_createaddbindgroup",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "createaddbindgroup()"
     },
     {
@@ -276,8 +276,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_add_stub_test",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "add_stub_test.go"
     },
     {
@@ -287,8 +287,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "mat_add_stub_test_stubcontext",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "stubcontext()"
     },
     {
@@ -298,8 +298,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "mat_add_stub_test_testiscpuadapter_stubcontext",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "testiscpuadapter_stubcontext()"
     },
     {
@@ -309,8 +309,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_add_stub_test_go_t",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "t"
     },
     {
@@ -320,8 +320,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "mat_add_stub_test_testiscpuadapter_realadapter",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "testiscpuadapter_realadapter()"
     },
     {
@@ -331,8 +331,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "mat_add_stub_test_testadd_cpufallback",
-      "community": 3,
-      "community_name": "newPipelineCache",
+      "community": 22,
+      "community_name": "add",
       "norm_label": "testadd_cpufallback()"
     },
     {
@@ -551,8 +551,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "mat_contextmode",
-      "community": 6,
-      "community_name": "Context",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": "contextmode"
     },
     {
@@ -562,8 +562,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "mat_contextmode_string",
-      "community": 6,
-      "community_name": "Context",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": ".string()"
     },
     {
@@ -650,8 +650,8 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "mat_context_contextadapteroptions",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "contextadapteroptions()"
     },
     {
@@ -672,8 +672,8 @@
       "source_location": "L330",
       "_origin": "ast",
       "id": "mat_context_resolvecontextmode",
-      "community": 6,
-      "community_name": "Context",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": "resolvecontextmode()"
     },
     {
@@ -683,8 +683,8 @@
       "source_location": "L352",
       "_origin": "ast",
       "id": "mat_context_mode",
-      "community": 6,
-      "community_name": "Context",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": ".mode()"
     },
     {
@@ -848,8 +848,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_errors",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 3,
+      "community_name": "newPipelineCache",
       "norm_label": "errors.go"
     },
     {
@@ -903,8 +903,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "mat_classifiederror",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 3,
+      "community_name": "newPipelineCache",
       "norm_label": "classifiederror"
     },
     {
@@ -914,8 +914,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "mat_classifiederror_error",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 3,
+      "community_name": "newPipelineCache",
       "norm_label": ".error()"
     },
     {
@@ -925,8 +925,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "mat_classifiederror_unwrap",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 3,
+      "community_name": "newPipelineCache",
       "norm_label": ".unwrap()"
     },
     {
@@ -936,8 +936,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_internal_backends_register",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "register.go"
     },
     {
@@ -947,8 +947,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "mat_internal_backends_register_usegpu",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "usegpu()"
     },
     {
@@ -958,8 +958,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "mat_internal_backends_register_usecpu",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "usecpu()"
     },
     {
@@ -969,8 +969,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_internal_backends_register_test",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "register_test.go"
     },
     {
@@ -980,8 +980,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "mat_internal_backends_register_test_testusegpu",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "testusegpu()"
     },
     {
@@ -991,8 +991,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_internal_backends_register_test_go_t",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "t"
     },
     {
@@ -1002,8 +1002,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "mat_internal_backends_register_test_testusecpu",
-      "community": 6,
-      "community_name": "Context",
+      "community": 23,
+      "community_name": "contextAdapterOptions",
       "norm_label": "testusecpu()"
     },
     {
@@ -1211,8 +1211,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_mat",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "mat.go"
     },
     {
@@ -1222,8 +1222,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "mat_shape",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 28,
+      "community_name": "Shape",
       "norm_label": "shape"
     },
     {
@@ -1233,8 +1233,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "mat_shape_string",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 28,
+      "community_name": "Shape",
       "norm_label": ".string()"
     },
     {
@@ -1244,8 +1244,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "mat_shape_rows",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 28,
+      "community_name": "Shape",
       "norm_label": ".rows()"
     },
     {
@@ -1255,8 +1255,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "mat_shape_cols",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 28,
+      "community_name": "Shape",
       "norm_label": ".cols()"
     },
     {
@@ -1266,8 +1266,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "mat_shape_len",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 28,
+      "community_name": "Shape",
       "norm_label": ".len()"
     },
     {
@@ -1288,8 +1288,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_mat_go_buffer",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "buffer"
     },
     {
@@ -1321,8 +1321,8 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "mat_mat_validatecontextformatrix",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "validatecontextformatrix()"
     },
     {
@@ -1332,8 +1332,8 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "mat_mat_matrixbuffersize",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "matrixbuffersize()"
     },
     {
@@ -1343,8 +1343,8 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "mat_mat_validatedevicebuffersize",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "validatedevicebuffersize()"
     },
     {
@@ -1442,8 +1442,8 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "mat_matrix_release",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": ".release()"
     },
     {
@@ -1453,8 +1453,8 @@
       "source_location": "L370",
       "_origin": "ast",
       "id": "mat_matrix_close",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": ".close()"
     },
     {
@@ -1464,8 +1464,8 @@
       "source_location": "L380",
       "_origin": "ast",
       "id": "mat_matrixdeps",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "matrixdeps"
     },
     {
@@ -1475,8 +1475,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_mat_go_bufferdescriptor",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "bufferdescriptor"
     },
     {
@@ -1486,8 +1486,8 @@
       "source_location": "L387",
       "_origin": "ast",
       "id": "mat_readbufferdeps",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "readbufferdeps"
     },
     {
@@ -1497,8 +1497,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_mat_go_commandencoder",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "commandencoder"
     },
     {
@@ -1508,8 +1508,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mat_mat_go_commandbuffer",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "commandbuffer"
     },
     {
@@ -1519,8 +1519,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "mappedrange",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "mappedrange"
     },
     {
@@ -1541,8 +1541,8 @@
       "source_location": "L425",
       "_origin": "ast",
       "id": "mat_mat_defaultreadbufferdeps",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "defaultreadbufferdeps()"
     },
     {
@@ -1552,8 +1552,8 @@
       "source_location": "L474",
       "_origin": "ast",
       "id": "mat_mat_readbuffer",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "readbuffer()"
     },
     {
@@ -2223,8 +2223,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "mat_mat_unit_test_newtestreadbufferdeps",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "newtestreadbufferdeps()"
     },
     {
@@ -2267,8 +2267,8 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testreadbuffercopiesmappeddataandreleasesresources",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "testreadbuffercopiesmappeddataandreleasesresources()"
     },
     {
@@ -2278,8 +2278,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testreadbufferreleasescommandbufferwhensubmitfails",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "testreadbufferreleasescommandbufferwhensubmitfails()"
     },
     {
@@ -2289,8 +2289,8 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testreadbuffererrors",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "testreadbuffererrors()"
     },
     {
@@ -2300,8 +2300,8 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testdefaultreadbufferdepsreleasenilcommandbuffer",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 17,
+      "community_name": "readBuffer",
       "norm_label": "testdefaultreadbufferdepsreleasenilcommandbuffer()"
     },
     {
@@ -2410,8 +2410,8 @@
       "source_location": "L488",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testdefaultcontextdepsreleasehelpers",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 6,
+      "community_name": "Context",
       "norm_label": "testdefaultcontextdepsreleasehelpers()"
     },
     {
@@ -2421,8 +2421,8 @@
       "source_location": "L518",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testresolvecontextmode",
-      "community": 6,
-      "community_name": "Context",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": "testresolvecontextmode()"
     },
     {
@@ -2432,8 +2432,8 @@
       "source_location": "L538",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testnewcontext_invalidmodes",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": "testnewcontext_invalidmodes()"
     },
     {
@@ -2443,8 +2443,8 @@
       "source_location": "L550",
       "_origin": "ast",
       "id": "mat_mat_unit_test_testnewcontext_internalinvalidmode",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 27,
+      "community_name": "ContextMode",
       "norm_label": "testnewcontext_internalinvalidmode()"
     },
     {
@@ -2641,8 +2641,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "mat_matmul",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matmul.go"
     },
     {
@@ -2652,8 +2652,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "mat_matmuldeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matmuldeps"
     },
     {
@@ -2872,8 +2872,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "mat_matmul_defaultmatmuldeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "defaultmatmuldeps()"
     },
     {
@@ -2883,8 +2883,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "mat_matmul_defaultmatmulwgpudeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "defaultmatmulwgpudeps()"
     },
     {
@@ -2894,8 +2894,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "mat_matmul_setmatmulresourcedeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "setmatmulresourcedeps()"
     },
     {
@@ -2905,8 +2905,8 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "mat_matmul_setmatmulcommanddeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "setmatmulcommanddeps()"
     },
     {
@@ -2916,8 +2916,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "mat_matmul_setmatmulreleasedeps",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "setmatmulreleasedeps()"
     },
     {
@@ -2971,8 +2971,8 @@
       "source_location": "L318",
       "_origin": "ast",
       "id": "mat_matmul_validatematmuldispatchlimits",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "validatematmuldispatchlimits()"
     },
     {
@@ -2982,8 +2982,8 @@
       "source_location": "L337",
       "_origin": "ast",
       "id": "mat_matmul_dispatchmatmul",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "dispatchmatmul()"
     },
     {
@@ -3037,8 +3037,8 @@
       "source_location": "L440",
       "_origin": "ast",
       "id": "mat_matmul_matrixbytesize",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matrixbytesize()"
     },
     {
@@ -3048,8 +3048,8 @@
       "source_location": "L447",
       "_origin": "ast",
       "id": "mat_matmul_ceildiv",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "ceildiv()"
     },
     {
@@ -3059,8 +3059,8 @@
       "source_location": "L451",
       "_origin": "ast",
       "id": "mat_matmul_dimensionu32",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "dimensionu32()"
     },
     {
@@ -3070,8 +3070,8 @@
       "source_location": "L455",
       "_origin": "ast",
       "id": "mat_matmul_creatematmuluniform",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "creatematmuluniform()"
     },
     {
@@ -3092,8 +3092,8 @@
       "source_location": "L527",
       "_origin": "ast",
       "id": "mat_matmul_matmulbufferentry",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "matmulbufferentry()"
     },
     {
@@ -3103,8 +3103,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "bindgroupentry",
-      "community": 4,
-      "community_name": "matMulWGPUDeps",
+      "community": 0,
+      "community_name": "Matrix",
       "norm_label": "bindgroupentry"
     },
     {
@@ -4478,8 +4478,8 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "mat_resource_failures_test_testtensoroperationpartialandnilresources",
-      "community": 0,
-      "community_name": "Matrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testtensoroperationpartialandnilresources()"
     },
     {
@@ -4632,8 +4632,8 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "mat_robustness_test_testaddreturnskernelvalidationerror",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 9,
+      "community_name": "robustness_test.go",
       "norm_label": "testaddreturnskernelvalidationerror()"
     },
     {
@@ -4742,8 +4742,8 @@
       "source_location": "L510",
       "_origin": "ast",
       "id": "mat_robustness_test_testreadbufferalwaysreleasesfinishedcommandbuffer",
-      "community": 1,
-      "community_name": "mat_unit_test.go",
+      "community": 9,
+      "community_name": "robustness_test.go",
       "norm_label": "testreadbufferalwaysreleasesfinishedcommandbuffer()"
     },
     {
@@ -4899,6 +4899,237 @@
       "community": 7,
       "community_name": "TestP4MetalKernels",
       "norm_label": "testslmetalreleasewithinflightwork()"
+    },
+    {
+      "label": "sl_gradaccum_test.go",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "sl_gradaccum_test.go"
+    },
+    {
+      "label": "slGradPool",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "mat_slgradpool",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "slgradpool"
+    },
+    {
+      "label": "newSLGradPool()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_newslgradpool",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "newslgradpool()"
+    },
+    {
+      "label": ".acquire()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "mat_slgradpool_acquire",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": ".acquire()"
+    },
+    {
+      "label": "T",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_go_t",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "t"
+    },
+    {
+      "label": ".releaseTemp()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L73",
+      "_origin": "ast",
+      "id": "mat_slgradpool_releasetemp",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": ".releasetemp()"
+    },
+    {
+      "label": ".releaseGrad()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "mat_slgradpool_releasegrad",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": ".releasegrad()"
+    },
+    {
+      "label": ".releaseWith()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L81",
+      "_origin": "ast",
+      "id": "mat_slgradpool_releasewith",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": ".releasewith()"
+    },
+    {
+      "label": ".releaseAll()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "mat_slgradpool_releaseall",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": ".releaseall()"
+    },
+    {
+      "label": "runSLGradAccumRound()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_runslgradaccumround",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "runslgradaccumround()"
+    },
+    {
+      "label": "runSLGradAccumMetal()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L137",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "runslgradaccummetal()"
+    },
+    {
+      "label": "TestSLMetalGradAccumPooledSequence()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L174",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequence",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumpooledsequence()"
+    },
+    {
+      "label": "TestSLMetalGradAccumFreshSequence()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L178",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequence",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumfreshsequence()"
+    },
+    {
+      "label": "TestSLMetalGradAccumPooledSequenceNoRead()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L182",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequencenoread",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumpooledsequencenoread()"
+    },
+    {
+      "label": "TestSLMetalGradAccumFreshSequenceNoRead()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L186",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequencenoread",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumfreshsequencenoread()"
+    },
+    {
+      "label": "TestSLMetalGradAccumTempsOnlyNoRead()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L190",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumtempsonlynoread",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumtempsonlynoread()"
+    },
+    {
+      "label": "TestSLMetalGradAccumGradsOnlyNoRead()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L194",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testslmetalgradaccumgradsonlynoread",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumgradsonlynoread()"
+    },
+    {
+      "label": "TestDiagnosticMetalGradAccumPooledForensics()",
+      "file_type": "code",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L204",
+      "_origin": "ast",
+      "id": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testdiagnosticmetalgradaccumpooledforensics()"
+    },
+    {
+      "label": "sl_waitidle_test.go",
+      "file_type": "code",
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "mat_sl_waitidle_test",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "sl_waitidle_test.go"
+    },
+    {
+      "label": "TestSLMetalGradAccumPooledWaitIdle()",
+      "file_type": "code",
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "testslmetalgradaccumpooledwaitidle()"
+    },
+    {
+      "label": "T",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "mat_sl_waitidle_test_go_t",
+      "community": 7,
+      "community_name": "TestP4MetalKernels",
+      "norm_label": "t"
     },
     {
       "label": "stats_contract_test.go",
@@ -5325,8 +5556,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "mat_tensorops_unit_test_markhardwaremock",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "markhardwaremock()"
     },
     {
@@ -5391,8 +5622,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "mat_tensorops_unit_test_testdispatchtensoroperationsuccessandstats",
-      "community": 5,
-      "community_name": "newMockMatrix",
+      "community": 4,
+      "community_name": "matMulWGPUDeps",
       "norm_label": "testdispatchtensoroperationsuccessandstats()"
     },
     {
@@ -5668,6 +5899,50 @@
       "norm_label": "d-006 fix by dependency pin bump"
     },
     {
+      "label": "D-007 Fail-fast newest upstream during investigation",
+      "file_type": "document",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "agents_decisions_d_007_fail_fast_newest_upstream_during_investigation",
+      "community": 8,
+      "community_name": "Decisions",
+      "norm_label": "d-007 fail-fast newest upstream during investigation"
+    },
+    {
+      "label": "D-008 Upstream contribution boundary",
+      "file_type": "document",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "agents_decisions_d_008_upstream_contribution_boundary",
+      "community": 8,
+      "community_name": "Decisions",
+      "norm_label": "d-008 upstream contribution boundary"
+    },
+    {
+      "label": "D-009 Fork workflow and upstream push prohibition",
+      "file_type": "document",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "agents_decisions_d_009_fork_workflow_and_upstream_push_prohibition",
+      "community": 8,
+      "community_name": "Decisions",
+      "norm_label": "d-009 fork workflow and upstream push prohibition"
+    },
+    {
+      "label": "D-010 Upstream PR timing",
+      "file_type": "document",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "agents_decisions_d_010_upstream_pr_timing",
+      "community": 8,
+      "community_name": "Decisions",
+      "norm_label": "d-010 upstream pr timing"
+    },
+    {
       "label": "findings.md",
       "file_type": "document",
       "source_file": ".agents/findings.md",
@@ -5690,32 +5965,43 @@
       "norm_label": "findings"
     },
     {
-      "label": "Confirmed facts",
+      "label": "Confirmed facts(\u73fe\u884c\u72b6\u614b)",
       "file_type": "document",
       "source_file": ".agents/findings.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "agents_findings_confirmed_facts",
+      "id": "agents_findings_confirmed_facts_\u73fe\u884c\u72b6\u614b",
       "community": 14,
       "community_name": "Findings",
-      "norm_label": "confirmed facts"
+      "norm_label": "confirmed facts(\u73fe\u884c\u72b6\u614b)"
     },
     {
-      "label": "SL-001 inventory(2026-07-31\u3001Kimi Code CLI)",
+      "label": "Historical baseline(v0.30.22\u3001RED-before evidence)",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L17",
+      "source_location": "L20",
       "_origin": "ast",
-      "id": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli",
+      "id": "agents_findings_historical_baseline_v0_30_22_red_before_evidence",
       "community": 14,
       "community_name": "Findings",
-      "norm_label": "sl-001 inventory(2026-07-31\u3001kimi code cli)"
+      "norm_label": "historical baseline(v0.30.22\u3001red-before evidence)"
+    },
+    {
+      "label": "SL-001 inventory(2026-07-31\u3001Kimi Code CLI\u3001v0.30.22\u5f53\u6642\u306ecode\u8abf\u67fb)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli_v0_30_22\u5f53\u6642\u306ecode\u8abf\u67fb",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "sl-001 inventory(2026-07-31\u3001kimi code cli\u3001v0.30.22\u5f53\u6642\u306ecode\u8abf\u67fb)"
     },
     {
       "label": "Module contract facts(SL-002\u30012026-07-31\u3001Kimi Code CLI)",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L52",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "agents_findings_module_contract_facts_sl_002_2026_07_31_kimi_code_cli",
       "community": 14,
@@ -5726,7 +6012,7 @@
       "label": "Reproduction and isolation evidence(SL-003/004\u30012026-07-31\u3001Kimi Code CLI)",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L92",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "agents_findings_reproduction_and_isolation_evidence_sl_003_004_2026_07_31_kimi_code_cli",
       "community": 14,
@@ -5734,21 +6020,43 @@
       "norm_label": "reproduction and isolation evidence(sl-003/004\u30012026-07-31\u3001kimi code cli)"
     },
     {
-      "label": "Working hypothesis",
+      "label": "Isolation ladder results(SL-004\u7d9a\u30012026-07-31\u3001Kimi Code CLI)",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L117",
+      "source_location": "L140",
       "_origin": "ast",
-      "id": "agents_findings_working_hypothesis",
+      "id": "agents_findings_isolation_ladder_results_sl_004\u7d9a_2026_07_31_kimi_code_cli",
       "community": 14,
       "community_name": "Findings",
-      "norm_label": "working hypothesis"
+      "norm_label": "isolation ladder results(sl-004\u7d9a\u30012026-07-31\u3001kimi code cli)"
+    },
+    {
+      "label": "Root cause identified(2026-08-01\u3001coder subagent + Kimi Code CLI\u691c\u8a3c)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L193",
+      "_origin": "ast",
+      "id": "agents_findings_root_cause_identified_2026_08_01_coder_subagent_kimi_code_cli\u691c\u8a3c",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "root cause identified(2026-08-01\u3001coder subagent + kimi code cli\u691c\u8a3c)"
+    },
+    {
+      "label": "Working hypothesis(v0.30.22 baseline\u306b\u95a2\u3059\u308b\u4eee\u8aac)",
+      "file_type": "document",
+      "source_file": ".agents/findings.md",
+      "source_location": "L247",
+      "_origin": "ast",
+      "id": "agents_findings_working_hypothesis_v0_30_22_baseline\u306b\u95a2\u3059\u308b\u4eee\u8aac",
+      "community": 14,
+      "community_name": "Findings",
+      "norm_label": "working hypothesis(v0.30.22 baseline\u306b\u95a2\u3059\u308b\u4eee\u8aac)"
     },
     {
       "label": "Questions to resolve",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L134",
+      "source_location": "L264",
       "_origin": "ast",
       "id": "agents_findings_questions_to_resolve",
       "community": 14,
@@ -5759,7 +6067,7 @@
       "label": "Evidence rules",
       "file_type": "document",
       "source_file": ".agents/findings.md",
-      "source_location": "L151",
+      "source_location": "L280",
       "_origin": "ast",
       "id": "agents_findings_evidence_rules",
       "community": 14,
@@ -5817,8 +6125,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_\u5b9f\u884c\u8a08\u753b",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "\u5b9f\u884c\u8a08\u753b"
     },
     {
@@ -5828,8 +6136,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_phase_1_sl_003_red_regression_test_production\u5909\u66f4\u306a\u3057",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "phase 1: sl-003 red regression test(production\u5909\u66f4\u306a\u3057)"
     },
     {
@@ -5839,8 +6147,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_phase_2_sl_004_\u5207\u308a\u5206\u3051ladder_\u5b89\u3044\u9806",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "phase 2: sl-004 \u5207\u308a\u5206\u3051ladder(\u5b89\u3044\u9806)"
     },
     {
@@ -5850,8 +6158,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_phase_3_sl_005_\u4fee\u6b63_\u8a3c\u62e0\u4f9d\u5b58",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "phase 3: sl-005 \u4fee\u6b63(\u8a3c\u62e0\u4f9d\u5b58)"
     },
     {
@@ -5861,8 +6169,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_phase_4_sl_006_context_release_drain",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "phase 4: sl-006 context.release drain"
     },
     {
@@ -5872,8 +6180,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "agents_plan_submission_lifetime_phase_5_sl_007_sl_008_\u691c\u8a3c",
-      "community": 17,
-      "community_name": "\u5b9f\u884c\u8a08\u753b",
+      "community": 15,
+      "community_name": "Submission Lifetime \u8a73\u7d30\u8a08\u753b(SL-002 \u6210\u679c\u7269)",
       "norm_label": "phase 5: sl-007/sl-008 \u691c\u8a3c"
     },
     {
@@ -6166,7 +6474,7 @@
       "label": "Active handover",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "agents_status_active_handover",
       "community": 16,
@@ -6177,7 +6485,7 @@
       "label": "Current phase",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L29",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "agents_status_current_phase",
       "community": 16,
@@ -6188,7 +6496,7 @@
       "label": "Next handover point",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L42",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "agents_status_next_handover_point",
       "community": 16,
@@ -6199,7 +6507,7 @@
       "label": "Authority",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L53",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "agents_status_authority",
       "community": 16,
@@ -6210,7 +6518,7 @@
       "label": "Validation state",
       "file_type": "document",
       "source_file": ".agents/status.md",
-      "source_location": "L62",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "agents_status_validation_state",
       "community": 16,
@@ -6265,7 +6573,7 @@
       "label": "Acceptance outline",
       "file_type": "document",
       "source_file": ".agents/tasks.md",
-      "source_location": "L36",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "agents_tasks_acceptance_outline",
       "community": 21,
@@ -6337,6 +6645,116 @@
       "community": 19,
       "community_name": "Work Log",
       "norm_label": "2026-07-31 sl-009 review\u3068commit(kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 independent review(Codex)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L138",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_independent_review_codex",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 independent review(codex)"
+    },
+    {
+      "label": "2026-07-31 review remediation(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L154",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_review_remediation_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 review remediation(kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 review close-out(Codex)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L169",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_review_close_out_codex",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 review close-out(codex)"
+    },
+    {
+      "label": "2026-07-31 v0.0.3 release\u3068SL-010\u958b\u59cb(Maintainer\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L185",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_v0_0_3_release\u3068sl_010\u958b\u59cb_maintainer_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 v0.0.3 release\u3068sl-010\u958b\u59cb(maintainer\u3001kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 SL-010: go-nn\u7d71\u5408\u518d\u958b\u3068upstream\u518d\u767a\u306e\u5207\u308a\u5206\u3051(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L198",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_sl_010_go_nn\u7d71\u5408\u518d\u958b\u3068upstream\u518d\u767a\u306e\u5207\u308a\u5206\u3051_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 sl-010: go-nn\u7d71\u5408\u518d\u958b\u3068upstream\u518d\u767a\u306e\u5207\u308a\u5206\u3051(kimi code cli)"
+    },
+    {
+      "label": "2026-07-31 fail-fast\u3067v0.30.30\u3092\u63a1\u7528(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L218",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_07_31_fail_fast\u3067v0_30_30\u3092\u63a1\u7528_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-07-31 fail-fast\u3066v0.30.30\u3092\u63a1\u7528(kimi code cli)"
+    },
+    {
+      "label": "2026-08-01 Root cause\u7279\u5b9a\u3068patch\u691c\u8a3c(coder subagent\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L231",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_08_01_root_cause\u7279\u5b9a\u3068patch\u691c\u8a3c_coder_subagent_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-08-01 root cause\u7279\u5b9a\u3068patch\u691c\u8a3c(coder subagent\u3001kimi code cli)"
+    },
+    {
+      "label": "2026-08-01 KEINOS/wgpu fork\u3067\u306e\u4fee\u6b63\u78ba\u5b9a\u3068\u4e21repo\u691c\u8a3c(Maintainer\u3001Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L249",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_08_01_keinos_wgpu_fork\u3067\u306e\u4fee\u6b63\u78ba\u5b9a\u3068\u4e21repo\u691c\u8a3c_maintainer_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-08-01 keinos/wgpu fork\u3066\u306e\u4fee\u6b63\u78ba\u5b9a\u3068\u4e21repo\u691c\u8a3c(maintainer\u3001kimi code cli)"
+    },
+    {
+      "label": "2026-08-01 fork branch push\u3068versioned replace\u78ba\u5b9a(Kimi Code CLI)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L270",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_08_01_fork_branch_push\u3068versioned_replace\u78ba\u5b9a_kimi_code_cli",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-08-01 fork branch push\u3068versioned replace\u78ba\u5b9a(kimi code cli)"
+    },
+    {
+      "label": "2026-08-02 SL-011 regression gate close-out(Codex)",
+      "file_type": "document",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L289",
+      "_origin": "ast",
+      "id": "agents_worklog_2026_08_02_sl_011_regression_gate_close_out_codex",
+      "community": 19,
+      "community_name": "Work Log",
+      "norm_label": "2026-08-02 sl-011 regression gate close-out(codex)"
     },
     {
       "label": "AGENTS.md",
@@ -6474,7 +6892,7 @@
       "label": "VS Code Setup",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L251",
+      "source_location": "L269",
       "_origin": "ast",
       "id": "readme_vs_code_setup",
       "community": 10,
@@ -6485,7 +6903,7 @@
       "label": "Testing",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L262",
+      "source_location": "L280",
       "_origin": "ast",
       "id": "readme_testing",
       "community": 10,
@@ -6496,7 +6914,7 @@
       "label": "References",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L317",
+      "source_location": "L335",
       "_origin": "ast",
       "id": "readme_references",
       "community": 10,
@@ -6507,7 +6925,7 @@
       "label": "License",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L324",
+      "source_location": "L342",
       "_origin": "ast",
       "id": "readme_license",
       "community": 10,
@@ -8611,6 +9029,30 @@
     {
       "relation": "references",
       "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_newslgradpool",
+      "target": "mat_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
       "source_file": "mat/tensorops.go",
       "source_location": "L497",
       "weight": 1.0,
@@ -9805,6 +10247,42 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L144",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L209",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_context_newcontext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
       "target": "mat_context_newcontext"
     },
     {
@@ -12114,6 +12592,78 @@
     {
       "relation": "references",
       "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "mat_slgradpool_acquire",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L77",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_slgradpool_releasegrad",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L73",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_slgradpool_releasetemp",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L81",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_slgradpool_releasewith",
+      "target": "mat_matrix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
       "source_file": "mat/tensorops.go",
       "source_location": "L14",
       "weight": 1.0,
@@ -13069,6 +13619,30 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_mat_newmatrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "target": "mat_mat_newmatrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool_acquire",
       "target": "mat_mat_newmatrix"
     },
     {
@@ -19458,6 +20032,42 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_ops_matmul"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L240",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_ops_matmul"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "target": "mat_ops_matmul"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "mat/p4_contract_test.go",
       "source_location": "L177",
       "weight": 1.0,
@@ -19511,6 +20121,42 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_sl_contract_test_runslchainedround",
+      "target": "mat_ops_add"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_ops_add"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L243",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_ops_add"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
       "target": "mat_ops_add"
     },
     {
@@ -19643,6 +20289,42 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_p4_contract_test_testp4softwarekernels",
+      "target": "mat_ops_transp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L116",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_ops_transp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L239",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_ops_transp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
       "target": "mat_ops_transp"
     },
     {
@@ -19902,6 +20584,42 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_ops_broadcastto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L237",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_ops_broadcastto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "target": "mat_ops_broadcastto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "mat/ops.go",
       "source_location": "L574",
       "weight": 1.0,
@@ -19955,6 +20673,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_p4_examples_test_examplereshapeto",
+      "target": "mat_ops_reshapeto"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
       "target": "mat_ops_reshapeto"
     },
     {
@@ -21610,6 +22340,30 @@
       "target": "mat_p4_contract_test_newp4matrix"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L151",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_p4_contract_test_newp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L216",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_p4_contract_test_newp4matrix"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "mat/p4_contract_test.go",
@@ -21763,6 +22517,30 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "mat_sl_contract_test_testslsoftwarechainedcompute",
+      "target": "mat_p4_contract_test_readp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L164",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_p4_contract_test_readp4matrix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L246",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
       "target": "mat_p4_contract_test_readp4matrix"
     },
     {
@@ -23307,6 +24085,565 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_newslgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L137",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_runslgradaccumround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L204",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L178",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L186",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequencenoread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L194",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumgradsonlynoread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L182",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequencenoread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L190",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_sl_gradaccum_test_testslmetalgradaccumtempsonlynoread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test",
+      "target": "mat_slgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_newslgradpool",
+      "target": "mat_slgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_slgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_slgradpool_acquire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_slgradpool_releaseall",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_slgradpool_releasegrad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_slgradpool_releasetemp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool",
+      "target": "mat_slgradpool_releasewith",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L148",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_sl_gradaccum_test_newslgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L213",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_sl_gradaccum_test_newslgradpool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L155",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_slgradpool_acquire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_slgradpool_acquire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L220",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_slgradpool_acquire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "target": "mat_slgradpool_acquire"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_slgradpool_acquire",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L137",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L204",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L178",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequence",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L186",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequencenoread",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L194",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumgradsonlynoread",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L174",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequence",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L182",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequencenoread",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L190",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumtempsonlynoread",
+      "target": "mat_sl_gradaccum_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_slgradpool_releasetemp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool_releasetemp",
+      "target": "mat_slgradpool_releasewith",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccumround",
+      "target": "mat_slgradpool_releasegrad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_slgradpool_releasegrad",
+      "target": "mat_slgradpool_releasewith",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L160",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "target": "mat_sl_gradaccum_test_runslgradaccumround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L225",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testdiagnosticmetalgradaccumpooledforensics",
+      "target": "mat_sl_gradaccum_test_runslgradaccumround",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L179",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequence",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L187",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumfreshsequencenoread",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumgradsonlynoread",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L175",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequence",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L183",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumpooledsequencenoread",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_gradaccum_test.go",
+      "source_location": "L191",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_gradaccum_test_testslmetalgradaccumtempsonlynoread",
+      "target": "mat_sl_gradaccum_test_runslgradaccummetal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test",
+      "target": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "mat/sl_waitidle_test.go",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "mat_sl_waitidle_test_testslmetalgradaccumpooledwaitidle",
+      "target": "mat_sl_waitidle_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "mat/stats_contract_test.go",
       "source_location": "L128",
       "weight": 1.0,
@@ -24753,7 +26090,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/commands.md",
-      "source_location": "L46",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_commands",
@@ -24764,7 +26101,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/commands.md",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_commands",
@@ -24884,6 +26221,50 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_decisions_decisions",
+      "target": "agents_decisions_d_007_fail_fast_newest_upstream_during_investigation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_decisions_decisions",
+      "target": "agents_decisions_d_008_upstream_contribution_boundary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_decisions_decisions",
+      "target": "agents_decisions_d_009_fork_workflow_and_upstream_push_prohibition",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/decisions.md",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_decisions_decisions",
+      "target": "agents_decisions_d_010_upstream_pr_timing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -24896,7 +26277,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L38",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -24911,14 +26292,14 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
-      "target": "agents_findings_confirmed_facts",
+      "target": "agents_findings_confirmed_facts_\u73fe\u884c\u72b6\u614b",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L151",
+      "source_location": "L280",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24929,7 +26310,29 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L52",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
+      "target": "agents_findings_historical_baseline_v0_30_22_red_before_evidence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
+      "source_location": "L140",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
+      "target": "agents_findings_isolation_ladder_results_sl_004\u7d9a_2026_07_31_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24940,7 +26343,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L134",
+      "source_location": "L264",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24951,7 +26354,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L92",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
@@ -24962,22 +26365,33 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L17",
+      "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
-      "target": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli",
+      "target": "agents_findings_root_cause_identified_2026_08_01_coder_subagent_kimi_code_cli\u691c\u8a3c",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/findings.md",
-      "source_location": "L117",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_findings_findings",
-      "target": "agents_findings_working_hypothesis",
+      "target": "agents_findings_sl_001_inventory_2026_07_31_kimi_code_cli_v0_30_22\u5f53\u6642\u306ecode\u8abf\u67fb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/findings.md",
+      "source_location": "L247",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_findings_findings",
+      "target": "agents_findings_working_hypothesis_v0_30_22_baseline\u306b\u95a2\u3059\u308b\u4eee\u8aac",
       "confidence_score": 1.0
     },
     {
@@ -24995,7 +26409,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L49",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -25160,7 +26574,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L31",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status",
@@ -25380,7 +26794,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L16",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -25391,7 +26805,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L53",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -25402,7 +26816,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L29",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -25413,7 +26827,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L42",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -25435,7 +26849,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/status.md",
-      "source_location": "L62",
+      "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_status_current_status",
@@ -25457,7 +26871,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/tasks.md",
-      "source_location": "L36",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_tasks_tasks",
@@ -25501,11 +26915,55 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".agents/worklog.md",
+      "source_location": "L218",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_fail_fast\u3067v0_30_30\u3092\u63a1\u7528_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
       "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "agents_worklog_work_log",
       "target": "agents_worklog_2026_07_31_handover_initialization",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L138",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_independent_review_codex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_review_close_out_codex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_review_remediation_kimi_code_cli",
       "confidence_score": 1.0
     },
     {
@@ -25539,6 +26997,72 @@
       "_origin": "ast",
       "source": "agents_worklog_work_log",
       "target": "agents_worklog_2026_07_31_sl_009_review\u3068commit_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L198",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_sl_010_go_nn\u7d71\u5408\u518d\u958b\u3068upstream\u518d\u767a\u306e\u5207\u308a\u5206\u3051_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_07_31_v0_0_3_release\u3068sl_010\u958b\u59cb_maintainer_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L270",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_08_01_fork_branch_push\u3068versioned_replace\u78ba\u5b9a_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L249",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_08_01_keinos_wgpu_fork\u3067\u306e\u4fee\u6b63\u78ba\u5b9a\u3068\u4e21repo\u691c\u8a3c_maintainer_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L231",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_08_01_root_cause\u7279\u5b9a\u3068patch\u691c\u8a3c_coder_subagent_kimi_code_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/worklog.md",
+      "source_location": "L289",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "agents_worklog_work_log",
+      "target": "agents_worklog_2026_08_02_sl_011_regression_gate_close_out_codex",
       "confidence_score": 1.0
     },
     {
@@ -25633,7 +27157,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L324",
+      "source_location": "L342",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_go_wgpu_mat",
@@ -25655,7 +27179,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L317",
+      "source_location": "L335",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_go_wgpu_mat",
@@ -25677,7 +27201,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L262",
+      "source_location": "L280",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_go_wgpu_mat",
@@ -25688,7 +27212,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L251",
+      "source_location": "L269",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_development",
@@ -25697,5 +27221,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ba3ea83bfb854d13854819be7c761204eb256b87"
+  "built_at_commit": "313ac51b1f1f8059f98f81803617b0827ff0d665"
 }

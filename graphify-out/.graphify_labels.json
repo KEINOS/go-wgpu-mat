@@ -16,12 +16,16 @@
   "14": "Findings",
   "15": "Submission Lifetime 詳細計画(SL-002 成果物)",
   "16": "Current Status",
-  "17": "実行計画",
+  "17": "readBuffer",
   "18": "Repo Agent Notes",
   "19": "Work Log",
   "20": "Commands",
   "21": "Tasks",
+  "22": "add",
+  "23": "contextAdapterOptions",
   "24": "bench-isolated.sh",
   "25": "doc.go",
-  "26": "github.com/KEINOS/go-wgpu-mat"
+  "26": "github.com/KEINOS/go-wgpu-mat",
+  "27": "ContextMode",
+  "28": "Shape"
 }

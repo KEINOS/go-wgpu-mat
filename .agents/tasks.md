@@ -31,7 +31,9 @@
   test内のStats assertionで検証済み。
 - [x] `SL-009` Read-only review後にlocal commitし、session close-outする。
   copilot、hermes、codexの3 reviewerが最終状態でAGREED。
-- [ ] `SL-010` Maintainerのpush/tag後、`go-nn`統合へ戻る。
+- [x] `SL-010` Maintainerのpush/tag後、`go-nn`統合へ戻る。
+- [x] `SL-011` fork修正後のgrad-accum再現testを正式なMetal regression gateへ昇格し、
+  checkptr有効のrace、全software/Metal gate、文書、indexをclose-outする。
 
 ## Acceptance outline
 
@@ -39,4 +41,5 @@
 - 中間host read/write、operationごとの強制同期、暗黙CPU fallbackを導入しない。
 - Submission resourceが完了後およびContext close時にexactly onceで解放される。
 - 既存software/Metal contract、race、lint、coverage gateを維持する。
-- Push、tag、releaseを行わない。
+- Maintainerの許可に基づきKEINOS管理repositoryへcommit/pushできる。Tagとrelease、
+  本家`gogpu/wgpu`へのpush/PRは行わない。

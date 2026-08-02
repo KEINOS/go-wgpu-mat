@@ -285,3 +285,25 @@ v0.0.0-20260801164035-aa07c1da9a5b`が解決し、**fork側go.modのmodule path
 allow-listに`github.com/gogpu/wgpu`を正当性コメント付きで追加した
 (go-nn側はrootのみ。`_example`は既にdisabled)。本repoでは`make test`
 6/6、`make lint` 0 issues、`make fuzz` 2/2、Metal selectorを再確認した。
+
+## 2026-08-02 SL-011 regression gate close-out(Codex)
+
+Maintainerは`go-nn`と`go-wgpu-mat`の完成、およびKEINOS管理repositoryへのcommitと
+pushを許可した。本家`gogpu/wgpu`へのpushとPRは禁止を維持し、forkのupstream push
+URLが`DISABLED`であることと`aa07c1d`のremote到達性を再確認した。
+
+Fork baseに含まれる本家commit `f49c028`がMetal callbackのcheckptr問題を修正して
+いるため、Makefileのdarwin/arm64向け`checkptr=0` workaroundを削除した。旧
+`TestReproMetalGradAccum*`の6再現形状とWaitIdle形状を`TestSLMetalGradAccum*`へ
+昇格し、`make test-metal`でP4、submission lifetime、gradient accumulationをrace
+付き3反復する正式gateにした。Forensics専用testだけは`TestDiagnostic*`として
+通常gate外に維持する。
+
+検証は`make test`(CGO 0/1、checkptr有効race、mat 95.0%、pipelinecache 100.0%)、
+`make test-metal`、`make lint`、`make fuzz`、`go vet ./...`、`go mod tidy -diff`、
+`git diff --check`がすべてGREEN。公開README、commands、findings、status、tasksを
+現行fork replaceと正式gateへ同期した。
+
+最終再実行でも`make test-metal`、`make test`、`make lint`、`git diff --check`は
+GREEN。Hermesへsourceとnotesの差分をpacketで渡したread-only reviewも指摘なしの
+`AGREED`で、review前後の`git status --short`に不意な変更はなかった。

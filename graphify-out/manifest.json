@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "go.mod": {
-    "mtime": 1785475439.3950105,
-    "ast_hash": "a69a6ad6e7018866d1eb884954d1e63a",
+    "mtime": 1785603306.7507746,
+    "ast_hash": "b5cda46faef5f105c6464843a447b7b3",
     "semantic_hash": ""
   },
   "mat/add.go": {
@@ -165,23 +165,23 @@
     "semantic_hash": ""
   },
   ".agents/README.md": {
-    "mtime": 1785475119.735711,
-    "ast_hash": "5d39865622efb66d62f60812d087682d",
+    "mtime": 1785488399.9428828,
+    "ast_hash": "ace48bb3b3aee78287563a726e8b6ac3",
     "semantic_hash": ""
   },
   ".agents/commands.md": {
-    "mtime": 1785475823.8896632,
-    "ast_hash": "a2d473e6a27913a51b5b05784924c397",
+    "mtime": 1785639838.3951273,
+    "ast_hash": "a7e59220470dea82dd18eb2bade3757a",
     "semantic_hash": ""
   },
   ".agents/decisions.md": {
-    "mtime": 1785476577.1794329,
-    "ast_hash": "9d5e0f4a4d674e26d39edae33e692f51",
+    "mtime": 1785604002.1572478,
+    "ast_hash": "1f17e46fbc913d5869e76f0847dca906",
     "semantic_hash": ""
   },
   ".agents/findings.md": {
-    "mtime": 1785476210.3175702,
-    "ast_hash": "bfbc076b228dbd1858c9b91a880d094d",
+    "mtime": 1785639838.396024,
+    "ast_hash": "b5570d12c5892c163a0dd74a25d1c03c",
     "semantic_hash": ""
   },
   ".agents/plan.md": {
@@ -190,18 +190,18 @@
     "semantic_hash": ""
   },
   ".agents/status.md": {
-    "mtime": 1785476652.0121377,
-    "ast_hash": "6275c262d6245ef9cccb634a06357435",
+    "mtime": 1785639838.396697,
+    "ast_hash": "eba4ec3727431d2623707d97e038ca20",
     "semantic_hash": ""
   },
   ".agents/tasks.md": {
-    "mtime": 1785476585.830559,
-    "ast_hash": "4ad4a3226c3431fa8d4068ecda3a7f17",
+    "mtime": 1785639719.4401908,
+    "ast_hash": "7d3d684061beb58e1c4840524d49fb95",
     "semantic_hash": ""
   },
   ".agents/worklog.md": {
-    "mtime": 1785476614.3919737,
-    "ast_hash": "3632d6a77cbf8bf0d5be6bf8f0cc6fc6",
+    "mtime": 1785639855.1524084,
+    "ast_hash": "d018e3ab4ab0ae24192f1e57c1a0298c",
     "semantic_hash": ""
   },
   ".github/workflows/unit-test.yml": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   ".golangci.yml": {
-    "mtime": 1785196174.737209,
-    "ast_hash": "c5fcd0d92f4ccb64676b04dcab7093e0",
+    "mtime": 1785603676.0563457,
+    "ast_hash": "93d798405cbd6af81fc9d0e4da22d19e",
     "semantic_hash": ""
   },
   ".markdownlint-cli2.yaml": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785459299.864527,
-    "ast_hash": "05465a59ead9ccbfe948e2f12550e83c",
+    "mtime": 1785639838.3931777,
+    "ast_hash": "7899eada8842093271251f16bc706edd",
     "semantic_hash": ""
   },
   "mat/sl_contract_test.go": {
@@ -237,6 +237,16 @@
   ".agents/plan-submission-lifetime.md": {
     "mtime": 1785474965.070151,
     "ast_hash": "882a54ba5bcc8854f808bd5ff5a12949",
+    "semantic_hash": ""
+  },
+  "mat/sl_gradaccum_test.go": {
+    "mtime": 1785639739.4503772,
+    "ast_hash": "8e83ee7cdf0e31576b86bb8747f2869c",
+    "semantic_hash": ""
+  },
+  "mat/sl_waitidle_test.go": {
+    "mtime": 1785639739.4503284,
+    "ast_hash": "b6b5e4622d04351dc530d64639f9172f",
     "semantic_hash": ""
   }
 }

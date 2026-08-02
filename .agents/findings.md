@@ -105,12 +105,12 @@ CHANGELOGのpost-pin修正履歴に基づく。現行pinはv0.30.29であり、�
   lastSubmissionIndex→mu)、v0.30.24 Metal checkptr under `-race`修正。
 - 旧pin v0.30.22はgoffi v0.6.0を、現行pin(v0.30.23以降系統)はgoffi v0.6.2を
   pinする。
-- 現行pin v0.30.29でも`-race`をcheckptr有効で実行すると
+- Historical: v0.30.29では`-race`をcheckptr有効で実行すると
   `fatal error: checkptr: pointer arithmetic result points to invalid allocation`
   が`hal/metal.newGPUCompletionBlock`のblock callback trampolineで発生する
   (2026-07-31、Kimi Code CLIが確認)。Makefileのdarwin/arm64向け
-  `-gcflags=all=-d=checkptr=0`は引き続き必要であり、checkptr=0付きのraceでは
-  `TestSLMetal*`を含めGREENである。
+  `-gcflags=all=-d=checkptr=0`が必要だった。現行forkは本家`f49c028`を祖先に含み、
+  checkptr有効の`make test`と`make test-metal`がGREENになったためworkaroundは削除済み。
 
 ## Reproduction and isolation evidence(SL-003/004、2026-07-31、Kimi Code CLI)
 

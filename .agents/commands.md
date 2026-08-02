@@ -39,6 +39,7 @@ Fresh cloneでdatabaseがない場合は`codegraph init .`を再実行する。
 
 ```sh
 make test
+make test-metal
 make lint
 make fuzz
 ```
@@ -49,9 +50,9 @@ Submission lifetime作業のselectorは次のとおり(詳細は
 [`plan-submission-lifetime.md`](plan-submission-lifetime.md))。
 
 ```sh
-CGO_ENABLED=1 go test -race -gcflags=all=-d=checkptr=0 -cover -count=1 \
+CGO_ENABLED=1 go test -race -cover -count=1 \
   -run '^(TestP4Software|TestSLSoftware)' ./mat
-GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=1 -parallel=1 \
+GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -race -count=1 -parallel=1 \
   -run '^(TestP4Metal|TestSLMetal)' ./mat
 ```
 
@@ -62,11 +63,11 @@ GO_WGPU_MAT_SL_ROUNDS=1024 GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 \
   go test -count=3 -parallel=1 -run '^TestSLMetal' ./mat
 ```
 
-Quarantined upstream repro(既定gateから除外、upstream bugが残る間FAILが期待値):
+Gradient accumulation regressionの反復確認:
 
 ```sh
-GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -count=10 -parallel=1 \
-  -run '^TestReproMetal' ./mat
+GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -race -count=10 -parallel=1 \
+  -run '^TestSLMetalGradAccum' ./mat
 ```
 
 `TestSLSoftware*`は`UseCPU`のみを使い、hardware adapterを要求しない。

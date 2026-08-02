@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Diagnostic for the grad-accum pooled-sequence corruption (quarantined under
-// the TestRepro prefix; expected to fail while the upstream bug stands).
+// Regression for the grad-accum pooled-sequence corruption.
 // Runs the same pooled two-round shape but calls Device.WaitIdle() after every
 // operation in round 2. Full per-op synchronization does NOT remove the
 // corruption, which rules out completion/timing races and points at wrong
 // kernel outputs when writing into previously used buffers.
+//
 //nolint:funlen // The pooled two-round shape and per-op sync stay in one linear sequence.
-func TestReproMetalGradAccumPooledWaitIdle(t *testing.T) {
+func TestSLMetalGradAccumPooledWaitIdle(t *testing.T) {
 	if os.Getenv("GO_WGPU_MAT_GPU") != "1" {
 		t.Skip("set GO_WGPU_MAT_GPU=1 to require the local Metal gate")
 	}
