@@ -8,7 +8,7 @@ linters:
     gomoddirectives:
       # gogpu/wgpu is temporarily replaced by the KEINOS/wgpu fork branch
       # carrying the _mslBufferSizes Metal fix until upstream merges it
-      # (see .agents/decisions.md D-009).
+      # under the maintainer-approved fork policy.
       replace-allow-list:
         - github.com/gogpu/wgpu
   disable:
