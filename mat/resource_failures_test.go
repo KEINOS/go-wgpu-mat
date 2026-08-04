@@ -187,19 +187,19 @@ func TestTensorOperationPartialAndNilResources(t *testing.T) { //nolint:funlen /
 		deps.createBuffer = func(*wgpu.Device, *wgpu.BufferDescriptor) (*wgpu.Buffer, error) {
 			return new(wgpu.Buffer), io.EOF
 		}
-		_, err := createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, deps)
+		_, err := createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, nil, deps)
 		require.ErrorIs(t, err, io.EOF)
 		assert.Equal(t, 1, released)
 
 		deps.createBuffer = func(*wgpu.Device, *wgpu.BufferDescriptor) (*wgpu.Buffer, error) { return nil, nil }
-		_, err = createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, deps)
+		_, err = createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, nil, deps)
 		require.ErrorIs(t, err, ErrBackendUnavailable)
 
 		deps.createBuffer = func(*wgpu.Device, *wgpu.BufferDescriptor) (*wgpu.Buffer, error) {
 			return new(wgpu.Buffer), nil
 		}
 		deps.writeBuffer = func(*wgpu.Device, *wgpu.Buffer, uint64, []byte) error { return io.EOF }
-		_, err = createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, deps)
+		_, err = createTensorOpUniform(left.ctx, tensorOpMul, left, right, out, 0, nil, deps)
 		require.ErrorIs(t, err, io.EOF)
 		assert.Equal(t, 2, released)
 	})
@@ -211,13 +211,13 @@ func TestTensorOperationPartialAndNilResources(t *testing.T) { //nolint:funlen /
 		deps.createBindGroup = func(*wgpu.Device, *wgpu.BindGroupDescriptor) (*wgpu.BindGroup, error) {
 			return new(wgpu.BindGroup), io.EOF
 		}
-		_, err := createTensorOpBindGroup(nil, nil, nil, left, right, out, deps)
+		_, err := createTensorOpBindGroup(nil, nil, nil, left, right, nil, out, deps)
 		require.ErrorIs(t, err, io.EOF)
 		assert.Equal(t, 1, released)
 		deps.createBindGroup = func(*wgpu.Device, *wgpu.BindGroupDescriptor) (*wgpu.BindGroup, error) {
 			return nil, nil
 		}
-		_, err = createTensorOpBindGroup(nil, nil, nil, left, right, out, deps)
+		_, err = createTensorOpBindGroup(nil, nil, nil, left, right, nil, out, deps)
 		require.ErrorIs(t, err, ErrBackendUnavailable)
 	})
 

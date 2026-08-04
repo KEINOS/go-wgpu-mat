@@ -544,6 +544,38 @@ func Scale(input *Matrix, scalar float32, out *Matrix) error {
 	return scale(input, scalar, out)
 }
 
+// Dropout applies a deterministic counter-based mask without host readback on
+// hardware adapters. RandomState identifies the first word consumed.
+func Dropout(input *Matrix, probability float32, state RandomState, out *Matrix) error {
+	return dropout(input, probability, state, out)
+}
+
+// AllFiniteAccumulate leaves flag at one only when its previous value and all
+// input elements are finite. Hardware execution does not read back to host.
+func AllFiniteAccumulate(input, flag *Matrix) error {
+	return allFiniteAccumulate(input, flag)
+}
+
+// AdamFirstMoment computes beta*moment + (1-beta)*gradient.
+func AdamFirstMoment(moment, gradient *Matrix, beta float32, out *Matrix) error {
+	return adamFirstMoment(moment, gradient, beta, out)
+}
+
+// AdamSecondMoment computes beta*moment + (1-beta)*gradient squared.
+func AdamSecondMoment(moment, gradient *Matrix, beta float32, out *Matrix) error {
+	return adamSecondMoment(moment, gradient, beta, out)
+}
+
+// AdamDelta computes the negative bias-corrected update delta.
+func AdamDelta(first, second *Matrix, scale, epsilon float32, out *Matrix) error {
+	return adamDelta(first, second, scale, epsilon, out)
+}
+
+// SelectFinite copies candidate when flag is one, otherwise original.
+func SelectFinite(candidate, original, flag, out *Matrix) error {
+	return selectFinite(candidate, original, flag, out)
+}
+
 // Transp computes out = input^T.
 func Transp(input, out *Matrix) error {
 	return transp(input, out)

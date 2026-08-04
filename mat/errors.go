@@ -45,6 +45,8 @@ var (
 	ErrContextMismatch = errors.New("matrices must use the same context")
 	// ErrAliasedOutput indicates the output matrix aliases an input.
 	ErrAliasedOutput = errors.New("out must not alias an input")
+	// ErrInvalidProbability indicates a probability outside [0, 1).
+	ErrInvalidProbability = errors.New("probability must be in [0, 1)")
 
 	// ErrOverflow indicates a size computation overflowed.
 	ErrOverflow = errors.New("overflow")

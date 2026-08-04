@@ -23,7 +23,7 @@ test: clean
 test-metal: clean
 	@echo "* Testing Metal contracts with the race detector..."
 	@GO_WGPU_MAT_GPU=1 CGO_ENABLED=1 go test -race -count=3 -parallel=1 \
-		-run '^(TestP4Metal|TestSLMetal)' ./mat
+		-run '^(TestDropoutMetal|TestOptimizerPrimitivesMetal|TestP4Metal|TestSLMetal)' ./mat
 
 .PHONY: lint
 lint:
