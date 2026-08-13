@@ -2,9 +2,7 @@ package mat
 
 import (
 	"context"
-	"encoding/binary"
 	"fmt"
-	"math"
 	"math/bits"
 	"sync/atomic"
 
@@ -294,12 +292,7 @@ func (m *Matrix) Write(data []float32) error {
 		)
 	}
 
-	raw := make([]byte, len(data)*bytesPerFloat32Int)
-	for i, v := range data {
-		binary.LittleEndian.PutUint32(
-			raw[i*bytesPerFloat32Int:], math.Float32bits(v),
-		)
-	}
+	raw := encodeFloat32Slice(data)
 
 	err := m.ctx.withQueue(func() error {
 		return m.deps.writeBuffer(m.ctx, m.buf, raw)
@@ -330,7 +323,7 @@ func (m *Matrix) Read() ([]float32, error) {
 
 	elementCount := m.Len()
 
-	raw := make([]byte, elementCount*bytesPerFloat32Int)
+	raw, result := newFloat32ReadBuffer(elementCount)
 
 	err := m.ctx.withQueue(func() error {
 		return m.deps.readBuffer(m.ctx, m.buf, raw)
@@ -341,12 +334,7 @@ func (m *Matrix) Read() ([]float32, error) {
 
 	m.ctx.recordHostRead(uint64(len(raw)))
 
-	result := make([]float32, elementCount)
-	for i := range result {
-		result[i] = math.Float32frombits(
-			binary.LittleEndian.Uint32(raw[i*bytesPerFloat32Int:]),
-		)
-	}
+	decodeFloat32ReadBuffer(raw, result)
 
 	return result, nil
 }
