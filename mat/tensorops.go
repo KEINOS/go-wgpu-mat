@@ -383,8 +383,20 @@ func dropout(input *Matrix, probability float32, state RandomState, out *Matrix)
 	return dispatchTensorDropout(input, probability, state, out, defaultMatMulWGPUDeps())
 }
 
-//nolint:cyclop // Validation and host/device paths implement one operation contract.
 func allFiniteAccumulate(input, flag *Matrix) error {
+	err := validateAllFiniteAccumulate(input, flag)
+	if err != nil {
+		return err
+	}
+
+	if useHostCompatibility(input.ctx) {
+		return runAllFiniteCompatibility(input, flag)
+	}
+
+	return dispatchTensorOperation(tensorOpAllFinite, input, input, flag, 0)
+}
+
+func validateAllFiniteAccumulate(input, flag *Matrix) error {
 	err := validateMatrixInitialized("input", input)
 	if err != nil {
 		return err
@@ -408,30 +420,31 @@ func allFiniteAccumulate(input, flag *Matrix) error {
 		return sentinelError(ErrAliasedOutput, "all-finite flag aliases input")
 	}
 
-	if useHostCompatibility(input.ctx) {
-		data, readErr := input.Read()
-		if readErr != nil {
-			return wrapError(readErr, "failed to read all-finite input")
-		}
+	return nil
+}
 
-		flagData, readErr := flag.Read()
-		if readErr != nil {
-			return wrapError(readErr, "failed to read all-finite flag")
-		}
-
-		finite := flagData[0] != 0
-		for _, value := range data {
-			finite = finite && !float32NonFinite(value)
-		}
-
-		if finite {
-			return flag.Write([]float32{1})
-		}
-
-		return flag.Write([]float32{0})
+func runAllFiniteCompatibility(input, flag *Matrix) error {
+	data, err := input.Read()
+	if err != nil {
+		return wrapError(err, "failed to read all-finite input")
 	}
 
-	return dispatchTensorOperation(tensorOpAllFinite, input, input, flag, 0)
+	flagData, err := flag.Read()
+	if err != nil {
+		return wrapError(err, "failed to read all-finite flag")
+	}
+
+	finite := flagData[0] != 0
+	for _, value := range data {
+		finite = finite && !float32NonFinite(value)
+	}
+
+	value := float32(0)
+	if finite {
+		value = 1
+	}
+
+	return flag.Write([]float32{value})
 }
 
 func adamFirstMoment(moment, gradient *Matrix, beta float32, out *Matrix) error {
@@ -442,8 +455,20 @@ func adamSecondMoment(moment, gradient *Matrix, beta float32, out *Matrix) error
 	return adamMoment(moment, gradient, beta, out, tensorOpAdamSecond)
 }
 
-//nolint:cyclop // Validation and host/device paths implement one operation contract.
 func adamMoment(moment, gradient *Matrix, beta float32, out *Matrix, operation tensorOperation) error {
+	err := validateAdamMoment(moment, gradient, beta, out)
+	if err != nil {
+		return err
+	}
+
+	if useHostCompatibility(moment.ctx) {
+		return runAdamMomentCompatibility(moment, gradient, beta, out, operation)
+	}
+
+	return dispatchTensorOperation(operation, moment, gradient, out, beta)
+}
+
+func validateAdamMoment(moment, gradient *Matrix, beta float32, out *Matrix) error {
 	err := validateBinaryBroadcastOperation(moment, gradient, out)
 	if err != nil {
 		return err
@@ -457,34 +482,59 @@ func adamMoment(moment, gradient *Matrix, beta float32, out *Matrix, operation t
 		return sentinelError(ErrInvalidProbability, "invalid Adam beta %g", beta)
 	}
 
-	if useHostCompatibility(moment.ctx) {
-		momentData, readErr := moment.Read()
-		if readErr != nil {
-			return readErr
-		}
-
-		gradientData, readErr := gradient.Read()
-		if readErr != nil {
-			return readErr
-		}
-
-		result := make([]float32, len(momentData))
-		for index := range result {
-			if operation == tensorOpAdamFirst {
-				result[index] = beta*momentData[index] + (1-beta)*gradientData[index]
-			} else {
-				result[index] = beta*momentData[index] + (1-beta)*gradientData[index]*gradientData[index]
-			}
-		}
-
-		return out.Write(result)
-	}
-
-	return dispatchTensorOperation(operation, moment, gradient, out, beta)
+	return nil
 }
 
-//nolint:cyclop // Validation and host/device paths implement one operation contract.
+func runAdamMomentCompatibility(
+	moment, gradient *Matrix,
+	beta float32,
+	out *Matrix,
+	operation tensorOperation,
+) error {
+	momentData, err := moment.Read()
+	if err != nil {
+		return err
+	}
+
+	gradientData, err := gradient.Read()
+	if err != nil {
+		return err
+	}
+
+	result := make([]float32, len(momentData))
+	for index := range result {
+		result[index] = adamMomentValue(momentData[index], gradientData[index], beta, operation)
+	}
+
+	return out.Write(result)
+}
+
+func adamMomentValue(moment, gradient, beta float32, operation tensorOperation) float32 {
+	if operation == tensorOpAdamFirst {
+		return beta*moment + (1-beta)*gradient
+	}
+
+	return beta*moment + (1-beta)*gradient*gradient
+}
+
 func adamDelta(first, second *Matrix, scale, epsilon float32, out *Matrix) error {
+	err := validateAdamDelta(first, second, scale, epsilon, out)
+	if err != nil {
+		return err
+	}
+
+	if useHostCompatibility(first.ctx) {
+		return runAdamDeltaCompatibility(first, second, scale, epsilon, out)
+	}
+
+	override := RandomState{Seed: uint64(math.Float32bits(epsilon)), StreamID: 0, Counter: 0}
+
+	return dispatchTensorOperationWithRandom(
+		tensorOpAdamDelta, first, second, out, scale, &override, defaultMatMulWGPUDeps(),
+	)
+}
+
+func validateAdamDelta(first, second *Matrix, scale, epsilon float32, out *Matrix) error {
 	err := validateBinaryBroadcastOperation(first, second, out)
 	if err != nil {
 		return err
@@ -498,38 +548,52 @@ func adamDelta(first, second *Matrix, scale, epsilon float32, out *Matrix) error
 		return sentinelError(ErrInvalidState, "invalid Adam delta config")
 	}
 
-	if useHostCompatibility(first.ctx) {
-		firstData, readErr := first.Read()
-		if readErr != nil {
-			return readErr
-		}
+	return nil
+}
 
-		secondData, readErr := second.Read()
-		if readErr != nil {
-			return readErr
-		}
-
-		result := make([]float32, len(firstData))
-		for index := range result {
-			result[index] = -scale * firstData[index] / (float32(math.Sqrt(float64(secondData[index]))) + epsilon)
-		}
-
-		return out.Write(result)
+func runAdamDeltaCompatibility(first, second *Matrix, scale, epsilon float32, out *Matrix) error {
+	firstData, err := first.Read()
+	if err != nil {
+		return err
 	}
 
-	override := RandomState{Seed: uint64(math.Float32bits(epsilon)), StreamID: 0, Counter: 0}
+	secondData, err := second.Read()
+	if err != nil {
+		return err
+	}
 
-	return dispatchTensorOperationWithRandom(
-		tensorOpAdamDelta, first, second, out, scale, &override, defaultMatMulWGPUDeps(),
-	)
+	result := make([]float32, len(firstData))
+	for index := range result {
+		result[index] = adamDeltaValue(firstData[index], secondData[index], scale, epsilon)
+	}
+
+	return out.Write(result)
+}
+
+func adamDeltaValue(first, second, scale, epsilon float32) float32 {
+	return -scale * first / (float32(math.Sqrt(float64(second))) + epsilon)
 }
 
 func float32NonFinite(value float32) bool {
 	return math.IsNaN(float64(value)) || math.IsInf(float64(value), 0)
 }
 
-//nolint:cyclop // Validation and host/device paths implement one operation contract.
 func selectFinite(candidate, original, flag, out *Matrix) error {
+	err := validateSelectFinite(candidate, original, flag, out)
+	if err != nil {
+		return err
+	}
+
+	if useHostCompatibility(candidate.ctx) {
+		return runSelectFiniteCompatibility(candidate, original, flag, out)
+	}
+
+	return dispatchTensorOperationWithAux(
+		tensorOpSelectFinite, candidate, original, flag, out, 0, nil, defaultMatMulWGPUDeps(),
+	)
+}
+
+func validateSelectFinite(candidate, original, flag, out *Matrix) error {
 	err := validateBinaryBroadcastOperation(candidate, original, out)
 	if err != nil {
 		return err
@@ -553,32 +617,30 @@ func selectFinite(candidate, original, flag, out *Matrix) error {
 		return sentinelError(ErrDimensionMismatch, "select flag must have one element")
 	}
 
-	if useHostCompatibility(candidate.ctx) {
-		candidateData, readErr := candidate.Read()
-		if readErr != nil {
-			return readErr
-		}
+	return nil
+}
 
-		originalData, readErr := original.Read()
-		if readErr != nil {
-			return readErr
-		}
-
-		flagData, readErr := flag.Read()
-		if readErr != nil {
-			return readErr
-		}
-
-		if flagData[0] != 0 {
-			return out.Write(candidateData)
-		}
-
-		return out.Write(originalData)
+func runSelectFiniteCompatibility(candidate, original, flag, out *Matrix) error {
+	candidateData, err := candidate.Read()
+	if err != nil {
+		return err
 	}
 
-	return dispatchTensorOperationWithAux(
-		tensorOpSelectFinite, candidate, original, flag, out, 0, nil, defaultMatMulWGPUDeps(),
-	)
+	originalData, err := original.Read()
+	if err != nil {
+		return err
+	}
+
+	flagData, err := flag.Read()
+	if err != nil {
+		return err
+	}
+
+	if flagData[0] != 0 {
+		return out.Write(candidateData)
+	}
+
+	return out.Write(originalData)
 }
 
 //nolint:mnd // The 32-bit word space is the CPU/WGSL parity contract.
