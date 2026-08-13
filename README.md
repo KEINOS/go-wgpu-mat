@@ -260,11 +260,10 @@ make lint
 make fuzz
 ```
 
-The module currently replaces `github.com/gogpu/wgpu` with the
-`github.com/KEINOS/wgpu` fork commit that binds Naga's Metal
-`_mslBufferSizes` argument. Removing that replacement before the corresponding
-upstream fix is available reintroduces out-of-bounds writes for runtime-sized
-storage arrays.
+The module requires `github.com/gogpu/wgpu` v0.31.4 or later. That release
+includes the Metal `_mslBufferSizes` fix from
+[gogpu/wgpu#306](https://github.com/gogpu/wgpu/pull/306), which prevents
+out-of-bounds writes for runtime-sized storage arrays.
 
 ### VS Code Setup
 
