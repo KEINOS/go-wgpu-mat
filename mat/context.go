@@ -3,6 +3,7 @@ package mat
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -21,17 +22,19 @@ var (
 // Context holds a live WGPU Instance, Adapter, and Device.
 // Create one via NewContext; release it with Release when done.
 type Context struct {
-	instance *wgpu.Instance
-	adapter  *wgpu.Adapter
-	device   *wgpu.Device
-	pipes    *pipelineCache
-	limits   gputypes.Limits
-	mode     ContextMode
-	isCPU    bool
-	infoSet  bool
-	released atomic.Uint32
-	queueMu  sync.Mutex
-	stats    contextStats
+	instance   *wgpu.Instance
+	adapter    *wgpu.Adapter
+	device     *wgpu.Device
+	pipes      *pipelineCache
+	limits     gputypes.Limits
+	mode       ContextMode
+	isCPU      bool
+	infoSet    bool
+	released   atomic.Uint32
+	queueMu    sync.Mutex
+	hostPoolMu sync.Mutex
+	hostPool   *hostWorkerPool
+	stats      contextStats
 }
 
 type contextStats struct {
@@ -223,17 +226,19 @@ func newContext(deps contextDeps, mode ContextMode) (*Context, error) {
 	}
 
 	return &Context{
-		instance: inst,
-		adapter:  adapter,
-		device:   dev,
-		pipes:    newPipelineCache(defaultReleaseComputePipeline),
-		limits:   deps.deviceLimits(dev),
-		mode:     mode,
-		isCPU:    adapterInfo.DeviceType == gputypes.DeviceTypeCPU,
-		infoSet:  true,
-		released: atomic.Uint32{},
-		queueMu:  sync.Mutex{},
-		stats:    newContextStats(),
+		instance:   inst,
+		adapter:    adapter,
+		device:     dev,
+		pipes:      newPipelineCache(defaultReleaseComputePipeline),
+		limits:     deps.deviceLimits(dev),
+		mode:       mode,
+		isCPU:      adapterInfo.DeviceType == gputypes.DeviceTypeCPU,
+		infoSet:    true,
+		released:   atomic.Uint32{},
+		queueMu:    sync.Mutex{},
+		hostPoolMu: sync.Mutex{},
+		hostPool:   nil,
+		stats:      newContextStats(),
 	}, nil
 }
 
@@ -407,6 +412,8 @@ func (c *Context) Release() {
 		c.pipes = nil
 	}
 
+	c.releaseHostWorkerPool()
+
 	if c.device != nil {
 		c.device.Release()
 		c.device = nil
@@ -429,6 +436,35 @@ func (c *Context) Close() error {
 	c.Release()
 
 	return nil
+}
+
+func (c *Context) runHostWorkRanges(total, workPerItem int, operation workRangeFunc) {
+	if rangeWorkerCount(total, workPerItem, hostParallelMinWork, runtime.GOMAXPROCS(0)) == 1 {
+		if total > 0 {
+			operation(0, total)
+		}
+
+		return
+	}
+
+	c.hostPoolMu.Lock()
+	if c.hostPool == nil {
+		c.hostPool = newHostWorkerPool(runtime.GOMAXPROCS(0))
+	}
+
+	pool := c.hostPool
+	c.hostPoolMu.Unlock()
+
+	pool.runWorkRanges(total, workPerItem, operation)
+}
+
+func (c *Context) releaseHostWorkerPool() {
+	c.hostPoolMu.Lock()
+	pool := c.hostPool
+	c.hostPool = nil
+	c.hostPoolMu.Unlock()
+
+	pool.close()
 }
 
 func (c *Context) recordMatrixAllocation(size uint64) {

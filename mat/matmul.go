@@ -242,6 +242,10 @@ func matMul(left, right, out *Matrix, deps matMulDeps) error {
 }
 
 func matMulCPU(left, right, out *Matrix) error {
+	return matMulCPUWithRunner(left, right, out, left.ctx.runHostWorkRanges)
+}
+
+func matMulCPUWithRunner(left, right, out *Matrix, runner workRangeRunner) error {
 	leftData, err := left.Read()
 	if err != nil {
 		return wrapError(err, "failed to read left")
@@ -253,18 +257,27 @@ func matMulCPU(left, right, out *Matrix) error {
 	}
 
 	result := make([]float32, out.rows*out.cols)
-	for row := range left.rows {
-		for col := range right.cols {
-			var sum float32
-			for k := range left.cols {
-				sum += leftData[row*left.cols+k] * rightData[k*right.cols+col]
-			}
-
-			result[row*right.cols+col] = sum
-		}
-	}
+	runner(left.rows, left.cols*right.cols, func(start, end int) {
+		multiplyMatMulRows(leftData, rightData, result, left.cols, right.cols, start, end)
+	})
 
 	return out.Write(result)
+}
+
+func multiplyMatMulRows(
+	leftData, rightData, result []float32,
+	sharedDim, rightCols, start, end int,
+) {
+	for row := start; row < end; row++ {
+		for col := range rightCols {
+			var sum float32
+			for shared := range sharedDim {
+				sum += leftData[row*sharedDim+shared] * rightData[shared*rightCols+col]
+			}
+
+			result[row*rightCols+col] = sum
+		}
+	}
 }
 
 func validateMatMul(left, right, out *Matrix) error {
