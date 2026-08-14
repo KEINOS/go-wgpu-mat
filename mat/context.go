@@ -455,6 +455,10 @@ func (c *Context) hostWorkerPool() *hostWorkerPool {
 	c.hostPoolMu.Lock()
 	defer c.hostPoolMu.Unlock()
 
+	if c.released.Load() != 0 {
+		return nil
+	}
+
 	if c.hostPool == nil {
 		c.hostPool = newHostWorkerPool(runtime.GOMAXPROCS(0))
 	}

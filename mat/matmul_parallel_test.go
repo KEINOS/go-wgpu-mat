@@ -2,6 +2,7 @@ package mat
 
 import (
 	"io"
+	"runtime"
 	"sync"
 	"testing"
 
@@ -119,6 +120,10 @@ func TestHostWorkerPoolMatMulConcurrentJobsMatchSerial(t *testing.T) {
 
 func TestMatMulCPUParallelPathMatchesSerial(t *testing.T) {
 	t.Parallel()
+
+	if runtime.GOMAXPROCS(0) < 2 {
+		t.Skip("parallel MatMul path requires at least two logical processors")
+	}
 
 	const size = 128
 

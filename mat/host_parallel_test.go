@@ -1,6 +1,7 @@
 package mat
 
 import (
+	"runtime"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -155,6 +156,10 @@ func TestRunWorkRangesRunsWorkersConcurrently(t *testing.T) {
 func TestContextReusesAndReleasesHostWorkerPool(t *testing.T) {
 	t.Parallel()
 
+	if runtime.GOMAXPROCS(0) < 2 {
+		t.Skip("worker-pool lifecycle requires at least two logical processors")
+	}
+
 	ctx := new(Context)
 	assert.Nil(t, ctx.hostPool)
 
@@ -168,6 +173,35 @@ func TestContextReusesAndReleasesHostWorkerPool(t *testing.T) {
 	ctx.Release()
 	assert.Nil(t, ctx.hostPool)
 	require.NotPanics(t, first.close)
+}
+
+func TestReleasedContextDoesNotCreateHostWorkerPool(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	ctx.released.Store(1)
+
+	assert.Nil(t, ctx.hostWorkerPool())
+	assert.Nil(t, ctx.hostPool)
+}
+
+func TestHostWorkerPoolJobCacheFallbackAndCapacity(t *testing.T) {
+	t.Parallel()
+
+	pool := newHostWorkerPool(2)
+	defer pool.close()
+
+	cached := <-pool.jobs
+	fallback := pool.acquireJob()
+	require.NotSame(t, cached, fallback)
+
+	pool.jobs <- cached
+
+	pool.jobs <- new(sync.WaitGroup)
+
+	pool.releaseJob(fallback)
+
+	assert.Len(t, pool.jobs, cap(pool.jobs))
 }
 
 func TestHostWorkerPoolKeepsConcurrentJobsIndependent(t *testing.T) {
