@@ -58,7 +58,7 @@ func BenchmarkSoftmaxHostRows(b *testing.B) {
 		b.Run(fmt.Sprintf("%dx%d/original", rows, cols), func(b *testing.B) {
 			b.ReportAllocs()
 
-			for range b.N {
+			for b.Loop() {
 				for row := range rows {
 					applySoftmaxRow(input, result, row*cols, cols)
 				}
@@ -79,9 +79,8 @@ func BenchmarkSoftmaxHostRows(b *testing.B) {
 			defer ctx.releaseHostWorkerPool()
 
 			b.ReportAllocs()
-			b.ResetTimer()
 
-			for range b.N {
+			for b.Loop() {
 				ctx.runHostRows(
 					applySoftmaxRow,
 					input,
@@ -103,9 +102,8 @@ func benchmarkMatMulCPUKernel(b *testing.B, size int, runner workRangeRunner) {
 	result := make([]float32, size*size)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		runner(size, size*size, func(start, end int) {
 			multiplyMatMulRows(left, right, result, size, size, start, end)
 		})
@@ -164,9 +162,8 @@ func benchmarkMatMulCPUExecution( //nolint:cyclop // Benchmark setup and errors 
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err = execute(left, right, out)
 		if err != nil {
 			b.Fatal(err)

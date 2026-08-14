@@ -62,9 +62,8 @@ func benchmarkBinaryOperation( //nolint:cyclop,funlen // Benchmark setup and err
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err = operation(leftMatrix, rightMatrix, outMatrix)
 		if err != nil {
 			b.Fatal(err)
@@ -130,9 +129,8 @@ func benchmarkMatMulOperation( //nolint:cyclop,funlen // Benchmark setup and err
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err = mat.MatMul(leftMatrix, rightMatrix, outMatrix)
 		if err != nil {
 			b.Fatal(err)
@@ -187,9 +185,8 @@ func benchmarkUnaryOperation( //nolint:cyclop // Benchmark setup and synchroniza
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err = operation(inputMatrix, outMatrix)
 		if err != nil {
 			b.Fatal(err)
@@ -286,9 +283,8 @@ func BenchmarkP4DeviceResidentChain(b *testing.B) { //nolint:cyclop,funlen // Se
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err = mat.Add(input, row, added)
 		if err != nil {
 			b.Fatal(err)
