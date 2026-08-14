@@ -652,10 +652,14 @@ func Softmax(input, out *Matrix) error {
 
 	result := make([]float32, len(inputData))
 
-	for row := range input.rows {
-		rowOffset := row * input.cols
-		applySoftmaxRow(inputData, result, rowOffset, input.cols)
-	}
+	input.ctx.runHostRows(
+		applySoftmaxRow,
+		inputData,
+		result,
+		input.rows,
+		input.cols,
+		softmaxMinWork,
+	)
 
 	err = out.Write(result)
 	if err != nil {

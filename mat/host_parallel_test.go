@@ -1,0 +1,304 @@
+package mat
+
+import (
+	"runtime"
+	"sort"
+	"sync"
+	"sync/atomic"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestRunWorkRangesUsesSerialPath(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		total       int
+		workPerItem int
+		minWork     int
+		maxWorkers  int
+		wantCalls   int
+	}{
+		{name: "empty", total: 0, workPerItem: 10, minWork: 10, maxWorkers: 4, wantCalls: 0},
+		{name: "one item", total: 1, workPerItem: 10, minWork: 10, maxWorkers: 4, wantCalls: 1},
+		{name: "one worker", total: 8, workPerItem: 10, minWork: 10, maxWorkers: 1, wantCalls: 1},
+		{name: "below threshold", total: 8, workPerItem: 10, minWork: 100, maxWorkers: 4, wantCalls: 1},
+		{name: "zero work estimate", total: 8, workPerItem: 0, minWork: 1, maxWorkers: 4, wantCalls: 1},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			pool := newHostWorkerPool(testCase.maxWorkers)
+			defer pool.close()
+
+			calls := 0
+
+			pool.runWorkRangesWithConfig(
+				testCase.total,
+				testCase.workPerItem,
+				testCase.minWork,
+				func(start, end int) {
+					calls++
+
+					assert.Equal(t, 0, start)
+					assert.Equal(t, testCase.total, end)
+				},
+			)
+
+			assert.Equal(t, testCase.wantCalls, calls)
+		})
+	}
+}
+
+func TestContextRunHostWorkRangesUsesSerialPath(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	called := false
+
+	ctx.runHostWorkRanges(1, 1, func(start, end int) {
+		called = true
+
+		assert.Equal(t, 0, start)
+		assert.Equal(t, 1, end)
+	})
+
+	assert.True(t, called)
+	assert.Nil(t, ctx.hostPool)
+}
+
+func TestRunWorkRangesPartitionsWorkAcrossBoundedWorkers(t *testing.T) {
+	t.Parallel()
+
+	type indexRange struct {
+		start int
+		end   int
+	}
+
+	var mutex sync.Mutex
+
+	ranges := make([]indexRange, 0, 4)
+
+	pool := newHostWorkerPool(4)
+	defer pool.close()
+
+	pool.runWorkRangesWithConfig(17, 16, 32, func(start, end int) {
+		mutex.Lock()
+
+		ranges = append(ranges, indexRange{start: start, end: end})
+		mutex.Unlock()
+	})
+
+	sort.Slice(ranges, func(first, second int) bool {
+		return ranges[first].start < ranges[second].start
+	})
+
+	require.Len(t, ranges, 4)
+	assert.Equal(t, 0, ranges[0].start)
+	assert.Equal(t, 17, ranges[len(ranges)-1].end)
+
+	for index := 1; index < len(ranges); index++ {
+		assert.Equal(t, ranges[index-1].end, ranges[index].start)
+	}
+}
+
+func TestRunWorkRangesRunsWorkersConcurrently(t *testing.T) {
+	t.Parallel()
+
+	const workers = 4
+
+	started := make(chan struct{}, workers)
+	release := make(chan struct{})
+	done := make(chan struct{})
+
+	var (
+		active atomic.Int32
+		peak   atomic.Int32
+	)
+
+	pool := newHostWorkerPool(workers)
+	defer pool.close()
+
+	go func() {
+		pool.runWorkRangesWithConfig(workers, 1, 1, func(_, _ int) {
+			current := active.Add(1)
+
+			for {
+				observed := peak.Load()
+				if current <= observed || peak.CompareAndSwap(observed, current) {
+					break
+				}
+			}
+
+			started <- struct{}{}
+
+			<-release
+			active.Add(-1)
+		})
+		close(done)
+	}()
+
+	for range workers {
+		<-started
+	}
+
+	close(release)
+	<-done
+
+	assert.Equal(t, int32(workers), peak.Load())
+}
+
+func TestContextReusesAndReleasesHostWorkerPool(t *testing.T) {
+	t.Parallel()
+
+	if runtime.GOMAXPROCS(0) < 2 {
+		t.Skip("worker-pool lifecycle requires at least two logical processors")
+	}
+
+	ctx := new(Context)
+	assert.Nil(t, ctx.hostPool)
+
+	ctx.runHostWorkRanges(4, hostParallelMinWork, func(_, _ int) {})
+	first := ctx.hostPool
+	require.NotNil(t, first)
+
+	ctx.runHostWorkRanges(4, hostParallelMinWork, func(_, _ int) {})
+	assert.Same(t, first, ctx.hostPool)
+
+	ctx.Release()
+	assert.Nil(t, ctx.hostPool)
+	require.NotPanics(t, first.close)
+}
+
+func TestReleasedContextDoesNotCreateHostWorkerPool(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	ctx.released.Store(1)
+
+	assert.Nil(t, ctx.hostWorkerPool())
+	assert.Nil(t, ctx.hostPool)
+}
+
+func TestHostWorkerPoolJobCacheFallbackAndCapacity(t *testing.T) {
+	t.Parallel()
+
+	pool := newHostWorkerPool(2)
+	defer pool.close()
+
+	cached := <-pool.jobs
+	fallback := pool.acquireJob()
+	require.NotSame(t, cached, fallback)
+
+	pool.jobs <- cached
+
+	pool.jobs <- new(sync.WaitGroup)
+
+	pool.releaseJob(fallback)
+
+	assert.Len(t, pool.jobs, cap(pool.jobs))
+}
+
+func TestHostWorkerPoolKeepsConcurrentJobsIndependent(t *testing.T) {
+	t.Parallel()
+
+	const (
+		jobs  = 8
+		items = 32
+	)
+
+	pool := newHostWorkerPool(4)
+	defer pool.close()
+
+	results := make([][]int, jobs)
+
+	var callers sync.WaitGroup
+	callers.Add(jobs)
+
+	for job := range jobs {
+		results[job] = make([]int, items)
+
+		go func() {
+			defer callers.Done()
+
+			pool.runWorkRangesWithConfig(items, 1, 1, func(start, end int) {
+				for index := start; index < end; index++ {
+					results[job][index] = job + 1
+				}
+			})
+		}()
+	}
+
+	callers.Wait()
+
+	for job, result := range results {
+		assert.Equal(t, makeFilledInts(items, job+1), result)
+	}
+}
+
+func makeFilledInts(length, value int) []int {
+	result := make([]int, length)
+	for index := range result {
+		result[index] = value
+	}
+
+	return result
+}
+
+func TestRangeWorkerCountThresholdBoundaries(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		total       int
+		workPerItem int
+		minWork     int
+		maxWorkers  int
+		want        int
+	}{
+		{name: "exactly one chunk", total: 4, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 1},
+		{name: "one over one chunk", total: 5, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 1},
+		{name: "exactly two chunks", total: 8, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 2},
+		{name: "bounded by items", total: 3, workPerItem: 256, minWork: 256, maxWorkers: 8, want: 3},
+		{name: "bounded by workers", total: 16, workPerItem: 256, minWork: 256, maxWorkers: 4, want: 4},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := rangeWorkerCount(
+				testCase.total,
+				testCase.workPerItem,
+				testCase.minWork,
+				testCase.maxWorkers,
+			)
+
+			assert.Equal(t, testCase.want, got)
+		})
+	}
+}
+
+//nolint:paralleltest // AllocsPerRun is process-wide.
+func TestHostWorkerPoolMatMulSteadyStateAllocations(t *testing.T) {
+	const size = 128
+
+	pool := newHostWorkerPool(4)
+	defer pool.close()
+
+	left := make([]float32, size*size)
+	right := make([]float32, size*size)
+	result := make([]float32, size*size)
+	pool.runMatMul(left, right, result, size, size, size)
+
+	allocations := testing.AllocsPerRun(10, func() {
+		pool.runMatMul(left, right, result, size, size, size)
+	})
+
+	assert.Zero(t, allocations)
+}

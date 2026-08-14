@@ -11,6 +11,42 @@ Designed to accelerate
 (a Go port of Andrej Karpathy's microGPT), where matrix
 multiply is the kernel hot path.
 
+## A neural network layer in matrices
+
+For a dense layer, individual neuron objects do not need to own their weights. Put a batch of inputs in the rows of one matrix and the layer parameters in two other matrices:
+
+| Matrix | Shape | Meaning |
+| --- | --- | --- |
+| `inputs` | batch × input features | One sample per row |
+| `weights` | input features × output features | Parameters shared by every sample |
+| `bias` | 1 × output features | Parameters broadcast across the batch |
+
+The forward pass and its backward pass are ordinary matrix operations. The `must` helper below only abbreviates error handling; the [complete executable forward and backward examples](mat/mat_examples_test.go) include setup, cleanup, data, and checked output.
+
+```go
+// Forward: predictions = inputs × weights + bias.
+must(mat.MatMul(inputs, weights, logits)) // batch × outputs
+must(mat.Add(logits, bias, predictions))  // batch × outputs; out cannot alias logits
+
+// Backward: the loss function supplies dPredictions.
+must(mat.Transp(inputs, inputsT))                    // features × batch
+must(mat.MatMul(inputsT, dPredictions, dWeights))    // same shape as weights
+must(mat.ReduceSumTo(dPredictions, dBias))           // 1 × outputs; sum over batch
+must(mat.Transp(weights, weightsT))                  // outputs × features
+must(mat.MatMul(dPredictions, weightsT, dInputs))    // same shape as inputs
+
+// SGD uses a separate output buffer because outputs cannot alias inputs.
+learningRate := float32(0.01)
+must(mat.Scale(dWeights, -learningRate, weightStep))
+must(mat.Add(weights, weightStep, nextWeights))
+weights, nextWeights = nextWeights, weights // Reuse the old buffer next time.
+must(mat.Scale(dBias, -learningRate, biasStep))
+must(mat.Add(bias, biasStep, nextBias))
+bias, nextBias = nextBias, bias
+```
+
+This package supplies the matrix storage and operations. It intentionally does not build a computation graph or run automatic differentiation; a caller such as a neural-network package decides which gradients to compute and how to update the parameter matrices.
+
 ## Scope
 
 In scope:

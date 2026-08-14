@@ -3,6 +3,7 @@ package mat
 import (
 	"encoding/binary"
 	"math"
+	"runtime"
 
 	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
@@ -242,29 +243,71 @@ func matMul(left, right, out *Matrix, deps matMulDeps) error {
 }
 
 func matMulCPU(left, right, out *Matrix) error {
+	leftData, rightData, result, err := prepareMatMulCPU(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	workPerRow := left.cols * right.cols
+	if rangeWorkerCount(left.rows, workPerRow, hostParallelMinWork, runtime.GOMAXPROCS(0)) == 1 {
+		multiplyMatMulRows(leftData, rightData, result, left.cols, right.cols, 0, left.rows)
+	} else {
+		left.ctx.hostWorkerPool().runMatMul(
+			leftData,
+			rightData,
+			result,
+			left.rows,
+			left.cols,
+			right.cols,
+		)
+	}
+
+	return out.Write(result)
+}
+
+func matMulCPUWithRunner(left, right, out *Matrix, runner workRangeRunner) error {
+	leftData, rightData, result, err := prepareMatMulCPU(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	runner(left.rows, left.cols*right.cols, func(start, end int) {
+		multiplyMatMulRows(leftData, rightData, result, left.cols, right.cols, start, end)
+	})
+
+	return out.Write(result)
+}
+
+func prepareMatMulCPU(left, right, out *Matrix) ([]float32, []float32, []float32, error) {
 	leftData, err := left.Read()
 	if err != nil {
-		return wrapError(err, "failed to read left")
+		return nil, nil, nil, wrapError(err, "failed to read left")
 	}
 
 	rightData, err := right.Read()
 	if err != nil {
-		return wrapError(err, "failed to read right")
+		return nil, nil, nil, wrapError(err, "failed to read right")
 	}
 
 	result := make([]float32, out.rows*out.cols)
-	for row := range left.rows {
-		for col := range right.cols {
+
+	return leftData, rightData, result, nil
+}
+
+func multiplyMatMulRows(
+	leftData, rightData, result []float32,
+	sharedDim, rightCols, start, end int,
+) {
+	for row := start; row < end; row++ {
+		for col := range rightCols {
 			var sum float32
-			for k := range left.cols {
-				sum += leftData[row*left.cols+k] * rightData[k*right.cols+col]
+			for shared := range sharedDim {
+				sum += leftData[row*sharedDim+shared] * rightData[shared*rightCols+col]
 			}
 
-			result[row*right.cols+col] = sum
+			result[row*rightCols+col] = sum
 		}
 	}
-
-	return out.Write(result)
 }
 
 func validateMatMul(left, right, out *Matrix) error {
