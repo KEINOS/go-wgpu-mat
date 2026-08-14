@@ -178,9 +178,9 @@ func Example_linearLayerBackwardPropagation() {
 
 	// These sample values stand in for gradients calculated by a loss function.
 	outputGradient := newMatrix(3, 2, []float32{
-		-0.1, 0.2,
-		0.3, -0.4,
-		0.5, 0.6,
+		-0.25, 0.5,
+		0.5, -0.5,
+		0.75, 0.25,
 	})
 	inputsTransposed := newMatrix(2, 3, nil)
 	weightsTransposed := newMatrix(2, 2, nil)
@@ -221,9 +221,9 @@ func Example_linearLayerBackwardPropagation() {
 		inputValues[5],
 	)
 	// Output:
-	// dW: [3.30 2.00; 4.00 2.40]
-	// db: [0.70 0.40]
-	// dX: [-0.10 0.12; 0.25 -0.22; 0.10 0.58]
+	// dW: [5.00 0.25; 6.00 0.50]
+	// db: [1.00 0.25]
+	// dX: [-0.25 0.31; 0.38 -0.25; 0.31 0.38]
 }
 
 func ExampleAdd() {
