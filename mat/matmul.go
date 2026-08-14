@@ -3,6 +3,7 @@ package mat
 import (
 	"encoding/binary"
 	"math"
+	"runtime"
 
 	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
@@ -242,26 +243,55 @@ func matMul(left, right, out *Matrix, deps matMulDeps) error {
 }
 
 func matMulCPU(left, right, out *Matrix) error {
-	return matMulCPUWithRunner(left, right, out, left.ctx.runHostWorkRanges)
+	leftData, rightData, result, err := prepareMatMulCPU(left, right, out)
+	if err != nil {
+		return err
+	}
+
+	workPerRow := left.cols * right.cols
+	if rangeWorkerCount(left.rows, workPerRow, hostParallelMinWork, runtime.GOMAXPROCS(0)) == 1 {
+		multiplyMatMulRows(leftData, rightData, result, left.cols, right.cols, 0, left.rows)
+	} else {
+		left.ctx.hostWorkerPool().runMatMul(
+			leftData,
+			rightData,
+			result,
+			left.rows,
+			left.cols,
+			right.cols,
+		)
+	}
+
+	return out.Write(result)
 }
 
 func matMulCPUWithRunner(left, right, out *Matrix, runner workRangeRunner) error {
-	leftData, err := left.Read()
+	leftData, rightData, result, err := prepareMatMulCPU(left, right, out)
 	if err != nil {
-		return wrapError(err, "failed to read left")
+		return err
 	}
 
-	rightData, err := right.Read()
-	if err != nil {
-		return wrapError(err, "failed to read right")
-	}
-
-	result := make([]float32, out.rows*out.cols)
 	runner(left.rows, left.cols*right.cols, func(start, end int) {
 		multiplyMatMulRows(leftData, rightData, result, left.cols, right.cols, start, end)
 	})
 
 	return out.Write(result)
+}
+
+func prepareMatMulCPU(left, right, out *Matrix) ([]float32, []float32, []float32, error) {
+	leftData, err := left.Read()
+	if err != nil {
+		return nil, nil, nil, wrapError(err, "failed to read left")
+	}
+
+	rightData, err := right.Read()
+	if err != nil {
+		return nil, nil, nil, wrapError(err, "failed to read right")
+	}
+
+	result := make([]float32, out.rows*out.cols)
+
+	return leftData, rightData, result, nil
 }
 
 func multiplyMatMulRows(

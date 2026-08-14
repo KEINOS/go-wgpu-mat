@@ -54,6 +54,23 @@ func TestRunWorkRangesUsesSerialPath(t *testing.T) {
 	}
 }
 
+func TestContextRunHostWorkRangesUsesSerialPath(t *testing.T) {
+	t.Parallel()
+
+	ctx := new(Context)
+	called := false
+
+	ctx.runHostWorkRanges(1, 1, func(start, end int) {
+		called = true
+
+		assert.Equal(t, 0, start)
+		assert.Equal(t, 1, end)
+	})
+
+	assert.True(t, called)
+	assert.Nil(t, ctx.hostPool)
+}
+
 func TestRunWorkRangesPartitionsWorkAcrossBoundedWorkers(t *testing.T) {
 	t.Parallel()
 
@@ -197,4 +214,57 @@ func makeFilledInts(length, value int) []int {
 	}
 
 	return result
+}
+
+func TestRangeWorkerCountThresholdBoundaries(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		total       int
+		workPerItem int
+		minWork     int
+		maxWorkers  int
+		want        int
+	}{
+		{name: "exactly one chunk", total: 4, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 1},
+		{name: "one over one chunk", total: 5, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 1},
+		{name: "exactly two chunks", total: 8, workPerItem: 64, minWork: 256, maxWorkers: 4, want: 2},
+		{name: "bounded by items", total: 3, workPerItem: 256, minWork: 256, maxWorkers: 8, want: 3},
+		{name: "bounded by workers", total: 16, workPerItem: 256, minWork: 256, maxWorkers: 4, want: 4},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := rangeWorkerCount(
+				testCase.total,
+				testCase.workPerItem,
+				testCase.minWork,
+				testCase.maxWorkers,
+			)
+
+			assert.Equal(t, testCase.want, got)
+		})
+	}
+}
+
+//nolint:paralleltest // AllocsPerRun is process-wide.
+func TestHostWorkerPoolMatMulSteadyStateAllocations(t *testing.T) {
+	const size = 128
+
+	pool := newHostWorkerPool(4)
+	defer pool.close()
+
+	left := make([]float32, size*size)
+	right := make([]float32, size*size)
+	result := make([]float32, size*size)
+	pool.runMatMul(left, right, result, size, size, size)
+
+	allocations := testing.AllocsPerRun(10, func() {
+		pool.runMatMul(left, right, result, size, size, size)
+	})
+
+	assert.Zero(t, allocations)
 }

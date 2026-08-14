@@ -18,13 +18,14 @@ func BenchmarkMatMulCPUExecution(b *testing.B) {
 
 	for _, benchmark := range benchmarks {
 		b.Run(benchmark.name+"/original", func(b *testing.B) {
-			benchmarkMatMulCPUExecution(b, benchmark.size, runWorkRangesSerial)
+			benchmarkMatMulCPUExecution(b, benchmark.size, func(left, right, out *Matrix) error {
+				return matMulCPUWithRunner(left, right, out, runWorkRangesSerial)
+			}, nil)
 		})
 		b.Run(benchmark.name+"/enhanced", func(b *testing.B) {
-			pool := newHostWorkerPool(runtime.GOMAXPROCS(0))
-			defer pool.close()
-
-			benchmarkMatMulCPUExecution(b, benchmark.size, pool.runWorkRanges)
+			benchmarkMatMulCPUExecution(b, benchmark.size, matMulCPU, func(ctx *Context) {
+				ctx.hostWorkerPool()
+			})
 		})
 	}
 }
@@ -60,7 +61,12 @@ func benchmarkMatMulCPUKernel(b *testing.B, size int, runner workRangeRunner) {
 	}
 }
 
-func benchmarkMatMulCPUExecution(b *testing.B, size int, runner workRangeRunner) {
+func benchmarkMatMulCPUExecution( //nolint:cyclop // Benchmark setup and errors remain readable together.
+	b *testing.B,
+	size int,
+	execute func(left, right, out *Matrix) error,
+	prepare func(ctx *Context),
+) {
 	b.Helper()
 
 	ctx, err := NewContext(UseCPU)
@@ -87,6 +93,10 @@ func benchmarkMatMulCPUExecution(b *testing.B, size int, runner workRangeRunner)
 	}
 	defer out.Release()
 
+	if prepare != nil {
+		prepare(ctx)
+	}
+
 	data := make([]float32, size*size)
 	for index := range data {
 		data[index] = float32((index%17)-8) * 0.25
@@ -106,7 +116,7 @@ func benchmarkMatMulCPUExecution(b *testing.B, size int, runner workRangeRunner)
 	b.ResetTimer()
 
 	for range b.N {
-		err = matMulCPUWithRunner(left, right, out, runner)
+		err = execute(left, right, out)
 		if err != nil {
 			b.Fatal(err)
 		}

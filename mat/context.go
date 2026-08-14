@@ -447,15 +447,19 @@ func (c *Context) runHostWorkRanges(total, workPerItem int, operation workRangeF
 		return
 	}
 
+	pool := c.hostWorkerPool()
+	pool.runWorkRanges(total, workPerItem, operation)
+}
+
+func (c *Context) hostWorkerPool() *hostWorkerPool {
 	c.hostPoolMu.Lock()
+	defer c.hostPoolMu.Unlock()
+
 	if c.hostPool == nil {
 		c.hostPool = newHostWorkerPool(runtime.GOMAXPROCS(0))
 	}
 
-	pool := c.hostPool
-	c.hostPoolMu.Unlock()
-
-	pool.runWorkRanges(total, workPerItem, operation)
+	return c.hostPool
 }
 
 func (c *Context) releaseHostWorkerPool() {

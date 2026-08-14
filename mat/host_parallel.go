@@ -9,11 +9,39 @@ const hostParallelMinWork = 1 << 18
 type workRangeFunc func(start, end int)
 type workRangeRunner func(total, workPerItem int, operation workRangeFunc)
 
+type workRangeOperation interface {
+	runWorkRange(start, end int)
+}
+
+func (operation workRangeFunc) runWorkRange(start, end int) {
+	operation(start, end)
+}
+
 type hostWork struct {
 	start     int
 	end       int
-	operation workRangeFunc
+	operation workRangeOperation
 	done      *sync.WaitGroup
+}
+
+type matMulHostOperation struct {
+	leftData  []float32
+	rightData []float32
+	result    []float32
+	sharedDim int
+	rightCols int
+}
+
+func (operation *matMulHostOperation) runWorkRange(start, end int) {
+	multiplyMatMulRows(
+		operation.leftData,
+		operation.rightData,
+		operation.result,
+		operation.sharedDim,
+		operation.rightCols,
+		start,
+		end,
+	)
 }
 
 type hostWorkerPool struct {
@@ -21,6 +49,7 @@ type hostWorkerPool struct {
 	tasks      chan hostWork
 	workers    sync.WaitGroup
 	jobs       chan *sync.WaitGroup
+	matMulJobs chan *matMulHostOperation
 	closeOnce  sync.Once
 }
 
@@ -31,6 +60,11 @@ func newHostWorkerPool(maxWorkers int) *hostWorkerPool {
 
 	pool.jobs = make(chan *sync.WaitGroup, pool.maxWorkers)
 	pool.jobs <- new(sync.WaitGroup)
+
+	pool.matMulJobs = make(chan *matMulHostOperation, pool.maxWorkers)
+	for range pool.maxWorkers {
+		pool.matMulJobs <- new(matMulHostOperation)
+	}
 
 	pool.workers.Add(pool.maxWorkers)
 
@@ -52,13 +86,20 @@ func (p *hostWorkerPool) runWorkRangesWithConfig(
 	total, workPerItem, minWork int,
 	operation workRangeFunc,
 ) {
+	p.runOperationWithConfig(total, workPerItem, minWork, operation)
+}
+
+func (p *hostWorkerPool) runOperationWithConfig(
+	total, workPerItem, minWork int,
+	operation workRangeOperation,
+) {
 	if total <= 0 {
 		return
 	}
 
 	workerCount := rangeWorkerCount(total, workPerItem, minWork, p.maxWorkers)
 	if workerCount == 1 {
-		operation(0, total)
+		operation.runWorkRange(0, total)
 
 		return
 	}
@@ -89,6 +130,26 @@ func (p *hostWorkerPool) runWorkRangesWithConfig(
 	p.releaseJob(done)
 }
 
+func (p *hostWorkerPool) runMatMul(
+	leftData, rightData, result []float32,
+	rows, sharedDim, rightCols int,
+) {
+	operation := <-p.matMulJobs
+	operation.leftData = leftData
+	operation.rightData = rightData
+	operation.result = result
+	operation.sharedDim = sharedDim
+	operation.rightCols = rightCols
+
+	p.runOperationWithConfig(rows, sharedDim*rightCols, hostParallelMinWork, operation)
+
+	operation.leftData = nil
+	operation.rightData = nil
+
+	operation.result = nil
+	p.matMulJobs <- operation
+}
+
 func (p *hostWorkerPool) acquireJob() *sync.WaitGroup {
 	select {
 	case job := <-p.jobs:
@@ -109,7 +170,7 @@ func (p *hostWorkerPool) worker() {
 	defer p.workers.Done()
 
 	for work := range p.tasks {
-		work.operation(work.start, work.end)
+		work.operation.runWorkRange(work.start, work.end)
 		work.done.Done()
 	}
 }
