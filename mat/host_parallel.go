@@ -1,10 +1,14 @@
 package mat
 
 import (
+	"runtime"
 	"sync"
 )
 
-const hostParallelMinWork = 1 << 18
+const (
+	hostParallelMinWork = 1 << 18
+	softmaxMinWork      = 1 << 12
+)
 
 type workRangeFunc func(start, end int)
 type workRangeRunner func(total, workPerItem int, operation workRangeFunc)
@@ -12,6 +16,8 @@ type workRangeRunner func(total, workPerItem int, operation workRangeFunc)
 type workRangeOperation interface {
 	runWorkRange(start, end int)
 }
+
+type rowOperationFunc func(inputData, outputData []float32, offset, cols int)
 
 func (operation workRangeFunc) runWorkRange(start, end int) {
 	operation(start, end)
@@ -32,6 +38,24 @@ type matMulHostOperation struct {
 	rightCols int
 }
 
+type rowHostOperation struct {
+	apply      rowOperationFunc
+	inputData  []float32
+	outputData []float32
+	cols       int
+}
+
+func (operation *rowHostOperation) runWorkRange(start, end int) {
+	for row := start; row < end; row++ {
+		operation.apply(
+			operation.inputData,
+			operation.outputData,
+			row*operation.cols,
+			operation.cols,
+		)
+	}
+}
+
 func (operation *matMulHostOperation) runWorkRange(start, end int) {
 	multiplyMatMulRows(
 		operation.leftData,
@@ -50,6 +74,7 @@ type hostWorkerPool struct {
 	workers    sync.WaitGroup
 	jobs       chan *sync.WaitGroup
 	matMulJobs chan *matMulHostOperation
+	rowJobs    chan *rowHostOperation
 	closeOnce  sync.Once
 }
 
@@ -65,6 +90,8 @@ func newHostWorkerPool(maxWorkers int) *hostWorkerPool {
 	for range pool.maxWorkers {
 		pool.matMulJobs <- new(matMulHostOperation)
 	}
+
+	pool.rowJobs = make(chan *rowHostOperation, pool.maxWorkers)
 
 	pool.workers.Add(pool.maxWorkers)
 
@@ -148,6 +175,73 @@ func (p *hostWorkerPool) runMatMul(
 
 	operation.result = nil
 	p.matMulJobs <- operation
+}
+
+func (p *hostWorkerPool) runRows(
+	apply rowOperationFunc,
+	inputData, outputData []float32,
+	rows, cols, minWork int,
+) {
+	operation := p.acquireRowJob()
+	operation.apply = apply
+	operation.inputData = inputData
+	operation.outputData = outputData
+	operation.cols = cols
+
+	p.runOperationWithConfig(rows, cols, minWork, operation)
+
+	operation.apply = nil
+	operation.inputData = nil
+	operation.outputData = nil
+	p.releaseRowJob(operation)
+}
+
+func (p *hostWorkerPool) acquireRowJob() *rowHostOperation {
+	select {
+	case job := <-p.rowJobs:
+		return job
+	default:
+		return new(rowHostOperation)
+	}
+}
+
+func (p *hostWorkerPool) releaseRowJob(job *rowHostOperation) {
+	select {
+	case p.rowJobs <- job:
+	default:
+	}
+}
+
+func (c *Context) runHostRows(
+	apply rowOperationFunc,
+	inputData, outputData []float32,
+	rows, cols, minWork int,
+) {
+	if rangeWorkerCount(
+		rows,
+		cols,
+		minWork,
+		runtime.GOMAXPROCS(0),
+	) == 1 {
+		operation := rowHostOperation{
+			apply:      apply,
+			inputData:  inputData,
+			outputData: outputData,
+			cols:       cols,
+		}
+		operation.runWorkRange(0, rows)
+
+		return
+	}
+
+	c.hostWorkerPool().runRows(
+		apply,
+		inputData,
+		outputData,
+		rows,
+		cols,
+		minWork,
+	)
 }
 
 func (p *hostWorkerPool) acquireJob() *sync.WaitGroup {

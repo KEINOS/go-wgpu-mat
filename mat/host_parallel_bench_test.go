@@ -44,6 +44,57 @@ func BenchmarkMatMulCPUKernel(b *testing.B) {
 	}
 }
 
+func BenchmarkSoftmaxHostRows(b *testing.B) {
+	const cols = 128
+
+	for _, rows := range []int{32, 64, 128} {
+		input := make([]float32, rows*cols)
+		result := make([]float32, len(input))
+
+		for index := range input {
+			input[index] = float32((index%19)-9) * 0.125
+		}
+
+		b.Run(fmt.Sprintf("%dx%d/original", rows, cols), func(b *testing.B) {
+			b.ReportAllocs()
+
+			for range b.N {
+				for row := range rows {
+					applySoftmaxRow(input, result, row*cols, cols)
+				}
+			}
+		})
+
+		b.Run(fmt.Sprintf("%dx%d/enhanced", rows, cols), func(b *testing.B) {
+			ctx := new(Context)
+
+			ctx.runHostRows(
+				applySoftmaxRow,
+				input,
+				result,
+				rows,
+				cols,
+				softmaxMinWork,
+			)
+			defer ctx.releaseHostWorkerPool()
+
+			b.ReportAllocs()
+			b.ResetTimer()
+
+			for range b.N {
+				ctx.runHostRows(
+					applySoftmaxRow,
+					input,
+					result,
+					rows,
+					cols,
+					softmaxMinWork,
+				)
+			}
+		})
+	}
+}
+
 func benchmarkMatMulCPUKernel(b *testing.B, size int, runner workRangeRunner) {
 	b.Helper()
 
